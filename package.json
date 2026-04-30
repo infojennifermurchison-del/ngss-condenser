@@ -1,0 +1,9 @@
+{
+  "name": "ngss-condenser",
+  "version": "1.0.0",
+  "description": "Public-facing tool for Connecticut science teachers to condense NGSS units into 2-3 sessions per week with auto-generated standards analysis, pacing calendars, and 5E lesson plans.",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}

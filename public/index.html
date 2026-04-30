@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NGSS Curriculum Condenser</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --accent: #0F4C5C;
+    --accent-soft: #E8F1F2;
+    --gold: #C99700;
+    --gold-soft: #FFF8E7;
+    --paper: #FAF7F2;
+    --ink: #1A1A1A;
+    --rule: #D9D2C5;
+  }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .ui-font { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+  .field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    color: var(--accent);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  .field-input {
+    width: 100%;
+    padding: 10px 12px;
+    background: white;
+    border: 1px solid #D6D3D1;
+    border-radius: 2px;
+    color: #1C1917;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .field-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  textarea.field-input { resize: vertical; line-height: 1.5; }
+  .mono { font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace; font-size: 12px; }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 2px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 28px;
+  }
+  .doc-card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .icon-square {
+    width: 36px;
+    height: 36px;
+    border-radius: 2px;
+    background: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  .doc-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: Georgia, serif;
+    margin: 4px 0 8px;
+  }
+  .badge {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 6px;
+    border-radius: 2px;
+    background: var(--gold-soft);
+    color: var(--gold);
+  }
+  .download-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 2px;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .download-btn:hover { opacity: 0.9; }
+  .download-btn.downloaded { background: white; color: var(--accent); }
+  .spinner {
+    border: 3px solid #E7E5E4;
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 0.9s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .progress-bar {
+    height: 4px;
+    background: #E7E5E4;
+    border-radius: 999px;
+    overflow: hidden;
+    max-width: 320px;
+    margin: 24px auto 0;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 30%;
+    border-radius: 999px;
+    animation: progress 1.6s ease-in-out infinite;
+  }
+  @keyframes progress {
+    0% { width: 10%; }
+    50% { width: 75%; }
+    100% { width: 10%; }
+  }
+  .alert-warn {
+    margin-top: 20px;
+    padding: 12px 14px;
+    border: 1px solid var(--gold);
+    background: var(--gold-soft);
+    border-radius: 2px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    color: #292524;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  .upload-zone {
+    border: 2px dashed var(--rule);
+    background: #FDFCF9;
+    border-radius: 2px;
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  .upload-zone:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .upload-zone.has-file { border-style: solid; border-color: var(--accent); background: var(--accent-soft); }
+  .start-over-btn {
+    color: var(--accent);
+    border-bottom: 1px solid var(--accent);
+    padding-bottom: 2px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  .start-over-btn:hover { opacity: 0.7; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header style="border-bottom: 1px solid var(--rule); background: white;">
+  <div class="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="icon-square">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l-1 4 5 11a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3L10 7Z"/><path d="M8.5 14h7"/></svg>
+      </div>
+      <div>
+        <div class="eyebrow">NGSS Curriculum Tool</div>
+        <div style="font-size: 20px; font-weight: 700; color: var(--accent);">The Condenser</div>
+      </div>
+    </div>
+    <div class="hidden md:block" style="font-size: 12px; font-style: italic; color: #78716C;">
+      For Connecticut science teachers on tight schedules
+    </div>
+  </div>
+</header>
+
+<section id="hero" class="max-w-5xl mx-auto px-6 pt-12 pb-8">
+  <div class="eyebrow" style="margin-bottom: 12px;">Built for 2–3 sessions per week</div>
+  <h1 style="font-size: 44px; font-weight: 700; line-height: 1.1; margin-bottom: 16px; color: var(--accent);">
+    Condense any NGSS unit into a tight, defensible plan.
+  </h1>
+  <p style="font-size: 18px; color: #44403C; max-width: 640px; line-height: 1.5;">
+    Paste your unit's standards or upload an existing unit document. Get back three Word documents: a high-leverage standards analysis, a session-by-session pacing calendar, and complete 5E lesson plans built around Discovery Education.
+  </p>
+  <div class="ui-font flex flex-wrap items-center gap-2 mt-6" style="font-size: 13px; color: #57534E;">
+    <span style="color: var(--accent);">✓</span><span>Works for any grade band, any district</span>
+    <span style="color: #D6D3D1; margin: 0 8px;">|</span>
+    <span style="color: var(--accent);">✓</span><span>Three editable .docx files</span>
+    <span style="color: #D6D3D1; margin: 0 8px;">|</span>
+    <span style="color: var(--accent);">✓</span><span>Upload or paste your standards</span>
+  </div>
+</section>
+
+<main class="max-w-5xl mx-auto px-6 pb-16">
+
+  <div id="form-view" class="card">
+
+    <div style="margin-bottom: 24px;">
+      <label class="field-label">Upload an Existing Unit Document (Optional)</label>
+      <div id="upload-zone" class="upload-zone" onclick="document.getElementById('file-input').click()">
+        <div id="upload-empty">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent); margin: 0 auto 6px; display: block;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div style="font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 2px;">Click to upload .docx or .txt</div>
+          <div style="font-size: 11px; color: #78716C;">We'll auto-fill the standards and unit context below</div>
+        </div>
+        <div id="upload-filled" class="hidden" style="text-align: left; display: flex; align-items: center; gap: 10px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent); flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <div style="flex: 1;">
+            <div id="filename" style="font-size: 13px; font-weight: 600; color: var(--accent);"></div>
+            <div id="filemeta" style="font-size: 11px; color: #78716C;"></div>
+          </div>
+          <button type="button" onclick="event.stopPropagation(); clearFile();" style="background: none; border: none; cursor: pointer; color: #78716C; font-size: 11px; text-decoration: underline;">Remove</button>
+        </div>
+      </div>
+      <input type="file" id="file-input" accept=".docx,.txt" class="hidden" onchange="handleFileUpload(event)" />
+    </div>
+
+    <div style="border-top: 1px solid var(--rule); padding-top: 24px;">
+
+      <div class="grid md:grid-cols-2 gap-5">
+        <div>
+          <label class="field-label">Grade Level *</label>
+          <input type="text" id="gradeLevel" class="field-input" placeholder="e.g., 5th grade, Grade 8, MS Biology" />
+        </div>
+        <div>
+          <label class="field-label">Unit Title *</label>
+          <input type="text" id="unitTitle" class="field-input" placeholder="e.g., Ecosystems & Interdependence" />
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <label class="field-label">Unit Topic / Driving Question</label>
+        <input type="text" id="unitTopic" class="field-input" placeholder="e.g., How do organisms in an ecosystem depend on each other?" />
+      </div>
+
+      <div style="margin-top: 20px;">
+        <label class="field-label">NGSS Standards in This Unit *</label>
+        <textarea id="standards" rows="6" class="field-input mono" placeholder="Paste the standards for the unit, e.g.:
+MS-LS2-1: Analyze and interpret data to provide evidence for the effects of resource availability on organisms and populations of organisms in an ecosystem.
+MS-LS2-2: Construct an explanation that predicts patterns of interactions among organisms across multiple ecosystems."></textarea>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-5" style="margin-top: 20px;">
+        <div>
+          <label class="field-label">Sessions / Week</label>
+          <select id="daysPerWeek" class="field-input">
+            <option value="2">2 sessions</option>
+            <option value="3" selected>3 sessions</option>
+            <option value="4">4 sessions</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Total Weeks</label>
+          <select id="totalWeeks" class="field-input">
+            <option value="3">3 weeks</option>
+            <option value="4">4 weeks</option>
+            <option value="5">5 weeks</option>
+            <option value="6" selected>6 weeks</option>
+            <option value="7">7 weeks</option>
+            <option value="8">8 weeks</option>
+            <option value="9">9 weeks</option>
+            <option value="10">10 weeks</option>
+            <option value="12">12 weeks</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Minutes / Session</label>
+          <select id="minutesPerSession" class="field-input">
+            <option value="30">30 min</option>
+            <option value="40">40 min</option>
+            <option value="45" selected>45 min</option>
+            <option value="50">50 min</option>
+            <option value="60">60 min</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <label class="field-label">Discovery Education Tools Available</label>
+        <input type="text" id="discoveryTools" class="field-input" value="Videos, Virtual Labs, Techbook, SOS strategies" />
+        <p style="font-size: 11px; color: #78716C; margin-top: 6px; font-style: italic; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">e.g., Videos, Virtual Labs, Techbook, SOS strategies, Daily DE</p>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <label class="field-label">Additional Context (optional)</label>
+        <textarea id="additionalContext" rows="2" class="field-input" placeholder="Any constraints, student population notes, or unit goals to keep in mind."></textarea>
+      </div>
+
+      <div id="error-box" class="alert-warn hidden">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold); flex-shrink: 0; margin-top: 2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="error-message"></span>
+      </div>
+
+      <button onclick="handleGenerate()" class="btn-primary" style="width: 100%; margin-top: 28px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.88 5.78L20 9.5l-4.5 4.13L17 20l-5-3-5 3 1.5-6.37L4 9.5l6.12-1.72L12 2z"/></svg>
+        Generate Unit Documents
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+      <p style="font-size: 11px; color: #78716C; margin-top: 12px; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">
+        Takes about 30–60 seconds. Three .docx files will be ready to download.
+      </p>
+    </div>
+  </div>
+
+  <div id="generating-view" class="card hidden" style="text-align: center; padding: 56px 24px;">
+    <div class="spinner"></div>
+    <h2 style="font-size: 22px; font-weight: 700; margin: 24px 0 8px; color: var(--accent);">Building your unit</h2>
+    <p id="progress-text" class="ui-font" style="font-size: 14px; color: #57534E; max-width: 420px; margin: 0 auto;"></p>
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+  </div>
+
+  <div id="ready-view" class="hidden">
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="ui-font flex items-start gap-3">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent); flex-shrink: 0; margin-top: 2px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div>
+          <h2 style="font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 4px; font-family: Georgia, serif;">Your unit is ready</h2>
+          <p style="font-size: 14px; color: #57534E;">Three documents are ready to download. Each opens directly in Word, Google Docs, or Pages — fully editable.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4 ui-font">
+      <div class="doc-card">
+        <div class="flex items-center justify-between mb-3">
+          <div class="icon-square"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-4"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></div>
+        </div>
+        <div class="eyebrow">Document 01</div>
+        <h3 class="doc-card-title">Standards Analysis</h3>
+        <p style="font-size: 12px; color: #57534E; line-height: 1.5; margin-bottom: 16px; flex: 1;" id="card-1-desc"></p>
+        <button id="dl-analysis" class="download-btn" onclick="downloadAnalysis()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Download .docx</span>
+        </button>
+      </div>
+
+      <div class="doc-card">
+        <div class="flex items-center justify-between mb-3">
+          <div class="icon-square"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <span class="badge">Landscape</span>
+        </div>
+        <div class="eyebrow">Document 02</div>
+        <h3 class="doc-card-title">Pacing Calendar</h3>
+        <p style="font-size: 12px; color: #57534E; line-height: 1.5; margin-bottom: 16px; flex: 1;" id="card-2-desc"></p>
+        <button id="dl-pacing" class="download-btn" onclick="downloadPacing()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Download .docx</span>
+        </button>
+      </div>
+
+      <div class="doc-card">
+        <div class="flex items-center justify-between mb-3">
+          <div class="icon-square"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+        </div>
+        <div class="eyebrow">Document 03</div>
+        <h3 class="doc-card-title">5E Lesson Plans</h3>
+        <p style="font-size: 12px; color: #57534E; line-height: 1.5; margin-bottom: 16px; flex: 1;" id="card-3-desc"></p>
+        <button id="dl-lessons" class="download-btn" onclick="downloadLessons()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Download .docx</span>
+        </button>
+      </div>
+    </div>
+
+    <button onclick="startOver()" class="start-over-btn" style="margin-top: 32px;">Build another unit</button>
+  </div>
+
+</main>
+
+<footer style="border-top: 1px solid var(--rule); margin-top: 32px;">
+  <div class="ui-font max-w-5xl mx-auto px-6 py-5 flex flex-wrap items-center justify-between gap-2" style="font-size: 12px; color: #78716C;">
+    <span>NGSS Curriculum Condenser — for Connecticut science teachers</span>
+    <span style="font-style: italic;">Outputs are starting points. Always review and adapt for your students.</span>
+  </div>
+</footer>
+
+<script>
+  let generatedData = null;
+  let downloadedFiles = { analysis: false, pacing: false, lessons: false };
+
+  // ============ FILE UPLOAD ============
+  async function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const zone = document.getElementById('upload-zone');
+    const empty = document.getElementById('upload-empty');
+    const filled = document.getElementById('upload-filled');
+    const filename = document.getElementById('filename');
+    const filemeta = document.getElementById('filemeta');
+    filename.textContent = file.name;
+    filemeta.textContent = 'Reading...';
+    empty.classList.add('hidden');
+    filled.classList.remove('hidden');
+    zone.classList.add('has-file');
+
+    try {
+      let text = '';
+      if (file.name.toLowerCase().endsWith('.docx')) {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        text = result.value;
+      } else {
+        text = await file.text();
+      }
+      filemeta.textContent = `Extracted ${text.length.toLocaleString()} characters — auto-filling fields…`;
+      await autoFillFromDocument(text);
+      filemeta.textContent = `${file.name.split('.').pop().toUpperCase()} parsed — review and edit fields below`;
+    } catch (err) {
+      console.error(err);
+      filemeta.textContent = 'Could not read file. You can still fill fields manually.';
+    }
+  }
+
+  function clearFile() {
+    document.getElementById('file-input').value = '';
+    document.getElementById('upload-zone').classList.remove('has-file');
+    document.getElementById('upload-empty').classList.remove('hidden');
+    document.getElementById('upload-filled').classList.add('hidden');
+  }
+
+  async function autoFillFromDocument(documentText) {
+    const truncated = documentText.length > 12000 ? documentText.slice(0, 12000) + '...[truncated]' : documentText;
+    const prompt = `A teacher uploaded the following unit document. Extract the unit information and return ONLY valid JSON in this shape:
+
+{
+  "gradeLevel": "Grade level. Empty string if not clear.",
+  "unitTitle": "Unit title. Empty string if not clear.",
+  "unitTopic": "Driving question or core topic. Empty string if not clear.",
+  "standards": "All NGSS standards found in the document, with codes and descriptions, formatted as a clean newline-separated list.",
+  "additionalContext": "Any other unit-specific context that would be useful. Empty string if nothing relevant."
+}
+
+DOCUMENT:
+${truncated}
+
+Return ONLY the JSON. No prose. No code fences.`;
+    try {
+      const data = await callBackend(prompt, "You extract structured unit information from teacher documents and return only valid JSON.", 4000);
+      const raw = data.content.map(b => b.type === 'text' ? b.text : '').join('').trim();
+      const cleaned = raw.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
+      const parsed = JSON.parse(cleaned);
+      if (parsed.gradeLevel) document.getElementById('gradeLevel').value = parsed.gradeLevel;
+      if (parsed.unitTitle) document.getElementById('unitTitle').value = parsed.unitTitle;
+      if (parsed.unitTopic) document.getElementById('unitTopic').value = parsed.unitTopic;
+      if (parsed.standards) document.getElementById('standards').value = parsed.standards;
+      if (parsed.additionalContext) document.getElementById('additionalContext').value = parsed.additionalContext;
+    } catch (err) {
+      console.error('Auto-fill failed:', err);
+      document.getElementById('standards').value = documentText.slice(0, 5000);
+    }
+  }
+
+  // ============ FORM HELPERS ============
+  function getFormData() {
+    return {
+      gradeLevel: document.getElementById('gradeLevel').value.trim(),
+      unitTitle: document.getElementById('unitTitle').value.trim(),
+      unitTopic: document.getElementById('unitTopic').value.trim(),
+      standards: document.getElementById('standards').value.trim(),
+      daysPerWeek: document.getElementById('daysPerWeek').value,
+      totalWeeks: document.getElementById('totalWeeks').value,
+      minutesPerSession: document.getElementById('minutesPerSession').value,
+      discoveryTools: document.getElementById('discoveryTools').value.trim(),
+      additionalContext: document.getElementById('additionalContext').value.trim()
+    };
+  }
+  function showError(msg) {
+    document.getElementById('error-message').textContent = msg;
+    document.getElementById('error-box').classList.remove('hidden');
+  }
+  function clearError() { document.getElementById('error-box').classList.add('hidden'); }
+  function showView(name) {
+    document.getElementById('hero').classList.toggle('hidden', name !== 'form');
+    document.getElementById('form-view').classList.toggle('hidden', name !== 'form');
+    document.getElementById('generating-view').classList.toggle('hidden', name !== 'generating');
+    document.getElementById('ready-view').classList.toggle('hidden', name !== 'ready');
+  }
+
+  // ============ BACKEND PROXY CALL ============
+  async function callBackend(prompt, systemPrompt, maxTokens) {
+    const response = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: systemPrompt,
+        max_tokens: maxTokens || 8000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || `Server error: ${response.status}`);
+    }
+    return response.json();
+  }
+
+  async function callClaudeJSON(prompt, systemPrompt) {
+    const data = await callBackend(prompt, systemPrompt, 8000);
+    const text = data.content.map(b => b.type === 'text' ? b.text : '').join('').trim();
+    const cleaned = text.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
+    return JSON.parse(cleaned);
+  }
+
+  // ============ GENERATE ============
+  async function handleGenerate() {
+    clearError();
+    const formData = getFormData();
+    if (!formData.gradeLevel) return showError('Grade level is required.');
+    if (!formData.unitTitle) return showError('Unit title is required.');
+    if (!formData.standards || formData.standards.length < 20) return showError('Please paste the NGSS standards for this unit.');
+
+    showView('generating');
+    downloadedFiles = { analysis: false, pacing: false, lessons: false };
+
+    const baseContext = `GRADE LEVEL: ${formData.gradeLevel}
+UNIT TITLE: ${formData.unitTitle}
+UNIT TOPIC / DRIVING QUESTION: ${formData.unitTopic || '(not specified)'}
+NGSS STANDARDS PROVIDED:
+${formData.standards}
+
+SCHEDULE CONSTRAINTS:
+- ${formData.daysPerWeek} science sessions per week
+- ${formData.totalWeeks} total weeks for the unit
+- ~${formData.minutesPerSession} minutes per session
+
+AVAILABLE DISCOVERY EDUCATION TOOLS: ${formData.discoveryTools}
+ADDITIONAL CONTEXT: ${formData.additionalContext || '(none)'}`;
+
+    try {
+      document.getElementById('progress-text').textContent = 'Analyzing standards and identifying high-leverage priorities...';
+      const analysis = await callClaudeJSON(
+        `${baseContext}
+
+Analyze these NGSS standards and identify which are highest-leverage for the condensed unit. Return ONLY valid JSON in this exact shape:
+
+{
+  "executiveSummary": "2-3 sentence overview.",
+  "highLeverageStandards": [
+    { "code": "MS-LS1-1", "title": "Short title", "rationale": "Rationale citing conceptual weight, foundation for future units, assessment frequency, or richness of SEPs/CCCs.", "sep": "SEP this engages.", "ccc": "CCC this engages." }
+  ],
+  "streamlinedStandards": [
+    { "code": "...", "title": "...", "approach": "How to teach in a streamlined way." }
+  ],
+  "embeddedOrDeprioritized": [
+    { "code": "...", "title": "...", "recommendation": "Where/how to embed in another content area, or why deprioritize." }
+  ],
+  "ctAlignmentNote": "1-2 sentences on alignment with CT's NGSS-based science assessment expectations."
+}
+
+Provide 2-4 high-leverage, 1-3 streamlined, 0-3 embedded/deprioritized. Return ONLY the JSON.`,
+        "You are a curriculum writer specializing in NGSS implementation for Connecticut science teachers. You return only valid JSON."
+      );
+
+      document.getElementById('progress-text').textContent = 'Building the revised pacing calendar...';
+      const totalSessions = parseInt(formData.daysPerWeek) * parseInt(formData.totalWeeks);
+      const pacing = await callClaudeJSON(
+        `${baseContext}
+
+HIGH-LEVERAGE STANDARDS IDENTIFIED:
+${analysis.highLeverageStandards.map(s => `- ${s.code}: ${s.title}`).join('\n')}
+
+Build a session-by-session pacing calendar. Total sessions: approximately ${totalSessions}. Return ONLY valid JSON in this exact shape:
+
+{
+  "overview": "2-3 sentence description of the unit arc.",
+  "weeks": [
+    { "weekNumber": 1, "weekFocus": "...", "sessions": [
+      { "sessionNumber": 1, "title": "Lesson title", "standardCodes": ["MS-LS1-1"], "fivePhase": "Engage / Explore / Explain / Elaborate / Evaluate", "discoveryAsset": "Specific Discovery Education asset", "assessmentNote": "Formative or summative checkpoint" }
+    ]}
+  ],
+  "assessmentPlan": "How formative and summative assessments are distributed.",
+  "differentiationNote": "How the calendar accommodates diverse learners."
+}
+
+Build exactly ${formData.totalWeeks} weeks with ${formData.daysPerWeek} sessions each. Return ONLY the JSON.`,
+        "You are a curriculum writer specializing in NGSS pacing for time-constrained schedules. You return only valid JSON."
+      );
+
+      document.getElementById('progress-text').textContent = 'Writing detailed 5E lesson plans (this is the longest step)...';
+      const lessons = await callClaudeJSON(
+        `${baseContext}
+
+HIGH-LEVERAGE STANDARDS:
+${analysis.highLeverageStandards.map(s => `- ${s.code}: ${s.title} | SEP: ${s.sep} | CCC: ${s.ccc}`).join('\n')}
+
+PACING CALENDAR (week focuses):
+${pacing.weeks.map(w => `Week ${w.weekNumber}: ${w.weekFocus}`).join('\n')}
+
+Produce 3-5 complete 5E lesson plans covering the highest-leverage moments of the unit. Each lesson should integrate Discovery Education resources and span 1-3 sessions of ~${formData.minutesPerSession} minutes. Return ONLY valid JSON in this exact shape:
+
+{
+  "lessons": [
+    {
+      "lessonNumber": 1,
+      "title": "Lesson title",
+      "standardCodes": ["MS-LS1-1"],
+      "performanceExpectation": "The full performance expectation in plain language.",
+      "sep": "SEP.",
+      "ccc": "CCC.",
+      "sessions": "Spans X session(s) of ~${formData.minutesPerSession} min",
+      "materials": ["item 1", "item 2"],
+      "prepNotes": "What the teacher needs to prep.",
+      "phases": {
+        "engage": { "duration": "10 min", "teacherMoves": "...", "studentTask": "...", "discoveryAsset": "..." },
+        "explore": { "duration": "15 min", "teacherMoves": "...", "studentTask": "...", "discoveryAsset": "..." },
+        "explain": { "duration": "10 min", "teacherMoves": "...", "studentTask": "...", "discoveryAsset": "..." },
+        "elaborate": { "duration": "10 min", "teacherMoves": "...", "studentTask": "...", "discoveryAsset": "..." },
+        "evaluate": { "duration": "5 min", "teacherMoves": "...", "studentTask": "...", "discoveryAsset": "..." }
+      },
+      "discussionQuestions": ["Q1", "Q2", "Q3"],
+      "differentiation": { "support": "...", "extension": "...", "ell": "..." },
+      "exitTicket": "Exit ticket or formative check."
+    }
+  ]
+}
+
+Return ONLY the JSON.`,
+        "You are a curriculum writer building 5E lesson plans aligned to NGSS and Discovery Education. You return only valid JSON."
+      );
+
+      generatedData = { analysis, pacing, lessons, formData };
+      document.getElementById('card-1-desc').textContent = `${analysis.highLeverageStandards.length} high-leverage standards prioritized with rationale, SEPs, and CCCs.`;
+      document.getElementById('card-2-desc').textContent = `${pacing.weeks.length}-week, session-by-session calendar with assessments and Discovery Ed assets.`;
+      document.getElementById('card-3-desc').textContent = `${(lessons.lessons || []).length} complete 5E lesson plans ready to deliver.`;
+      showView('ready');
+    } catch (e) {
+      console.error(e);
+      showView('form');
+      showError(`Generation failed: ${e.message}. Please try again.`);
+    }
+  }
+
+  function startOver() {
+    generatedData = null;
+    downloadedFiles = { analysis: false, pacing: false, lessons: false };
+    ['dl-analysis', 'dl-pacing', 'dl-lessons'].forEach(id => {
+      const btn = document.getElementById(id);
+      btn.classList.remove('downloaded');
+      btn.querySelector('span').textContent = 'Download .docx';
+    });
+    showView('form');
+  }
+
+  // ============ DOCX BUILDERS ============
+  function getDocxLib() { return window.docx; }
+  function slug(s) { return (s || 'unit').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase(); }
+
+  function sharedStyles() {
+    return {
+      default: { document: { run: { font: "Calibri", size: 22 } } },
+      paragraphStyles: [
+        { id: "Heading1", name: "Heading 1", basedOn: "Normal", next: "Normal", quickFormat: true,
+          run: { size: 32, bold: true, font: "Calibri", color: "0F4C5C" },
+          paragraph: { spacing: { before: 360, after: 200 }, outlineLevel: 0 } },
+        { id: "Heading2", name: "Heading 2", basedOn: "Normal", next: "Normal", quickFormat: true,
+          run: { size: 26, bold: true, font: "Calibri", color: "0F4C5C" },
+          paragraph: { spacing: { before: 280, after: 140 }, outlineLevel: 1 } },
+        { id: "Heading3", name: "Heading 3", basedOn: "Normal", next: "Normal", quickFormat: true,
+          run: { size: 22, bold: true, font: "Calibri", color: "C99700" },
+          paragraph: { spacing: { before: 200, after: 100 }, outlineLevel: 2 } },
+      ]
+    };
+  }
+  function numberingConfig() {
+    const { LevelFormat, AlignmentType } = getDocxLib();
+    return {
+      config: [
+        { reference: "bullets", levels: [
+          { level: 0, format: LevelFormat.BULLET, text: "•", alignment: AlignmentType.LEFT,
+            style: { paragraph: { indent: { left: 720, hanging: 360 } } } }
+        ]},
+        { reference: "numbers", levels: [
+          { level: 0, format: LevelFormat.DECIMAL, text: "%1.", alignment: AlignmentType.LEFT,
+            style: { paragraph: { indent: { left: 720, hanging: 360 } } } }
+        ]}
+      ]
+    };
+  }
+  function titleBlock(title, subtitle) {
+    const { Paragraph, TextRun, AlignmentType, BorderStyle } = getDocxLib();
+    return [
+      new Paragraph({ alignment: AlignmentType.LEFT, spacing: { after: 60 },
+        children: [new TextRun({ text: "NGSS CURRICULUM CONDENSER", size: 18, bold: true, color: "C99700", font: "Calibri" })] }),
+      new Paragraph({ alignment: AlignmentType.LEFT, spacing: { after: 80 },
+        children: [new TextRun({ text: title, size: 44, bold: true, color: "0F4C5C", font: "Calibri" })] }),
+      new Paragraph({ alignment: AlignmentType.LEFT, spacing: { after: 240 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: "0F4C5C", space: 6 } },
+        children: [new TextRun({ text: subtitle, size: 22, italics: true, color: "555555", font: "Calibri" })] })
+    ];
+  }
+  function metaBlock(data) {
+    const { Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, ShadingType } = getDocxLib();
+    const f = data.formData;
+    const border = { style: BorderStyle.SINGLE, size: 1, color: "D9D2C5" };
+    const cellBorders = { top: border, bottom: border, left: border, right: border };
+    const cell = (label, value) => new TableCell({
+      width: { size: 4680, type: WidthType.DXA }, borders: cellBorders,
+      margins: { top: 100, bottom: 100, left: 140, right: 140 },
+      shading: { fill: "FAF7F2", type: ShadingType.CLEAR },
+      children: [
+        new Paragraph({ children: [new TextRun({ text: label, size: 16, bold: true, color: "C99700", font: "Calibri" })] }),
+        new Paragraph({ children: [new TextRun({ text: value, size: 22, color: "1A1A1A", font: "Calibri" })] })
+      ]
+    });
+    return [
+      new Table({ width: { size: 9360, type: WidthType.DXA }, columnWidths: [4680, 4680],
+        rows: [
+          new TableRow({ children: [cell("GRADE LEVEL", f.gradeLevel), cell("UNIT TITLE", f.unitTitle)] }),
+          new TableRow({ children: [cell("SESSIONS / WEEK", `${f.daysPerWeek} × ~${f.minutesPerSession} min`), cell("TOTAL WEEKS", f.totalWeeks)] })
+        ]
+      }),
+      new Paragraph({ spacing: { after: 240 }, children: [new TextRun("")] })
+    ];
+  }
+  function heading1(text) { const { Paragraph, TextRun, HeadingLevel } = getDocxLib(); return new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(text)] }); }
+  function heading2(text) { const { Paragraph, TextRun, HeadingLevel } = getDocxLib(); return new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(text)] }); }
+  function heading3(text) { const { Paragraph, TextRun, HeadingLevel } = getDocxLib(); return new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun(text)] }); }
+  function para(text, opts = {}) { const { Paragraph, TextRun } = getDocxLib(); return new Paragraph({ spacing: { after: 120 }, children: [new TextRun({ text, ...opts })] }); }
+  function bullet(text) { const { Paragraph, TextRun } = getDocxLib(); return new Paragraph({ numbering: { reference: "bullets", level: 0 }, spacing: { after: 80 }, children: [new TextRun(text)] }); }
+  function labeledPara(label, value) {
+    const { Paragraph, TextRun } = getDocxLib();
+    return new Paragraph({ spacing: { after: 100 },
+      children: [new TextRun({ text: `${label}: `, bold: true, color: "0F4C5C" }), new TextRun({ text: value })]
+    });
+  }
+
+  function buildAnalysisDoc(data) {
+    const { Document } = getDocxLib();
+    const a = data.analysis;
+    const children = [
+      ...titleBlock("Standards Analysis", `${data.formData.unitTitle} — ${data.formData.gradeLevel}`),
+      ...metaBlock(data),
+      heading1("Executive Summary"), para(a.executiveSummary),
+      heading1("High-Leverage Standards (Teach in Depth)"),
+      para("These standards carry the most conceptual weight and should anchor the condensed unit.", { italics: true, color: "555555" })
+    ];
+    a.highLeverageStandards.forEach(s => {
+      children.push(heading2(`${s.code} — ${s.title}`));
+      children.push(labeledPara("Rationale", s.rationale));
+      children.push(labeledPara("Science & Engineering Practice", s.sep));
+      children.push(labeledPara("Crosscutting Concept", s.ccc));
+    });
+    if (a.streamlinedStandards && a.streamlinedStandards.length) {
+      children.push(heading1("Streamlined Standards (Teach Efficiently)"));
+      a.streamlinedStandards.forEach(s => {
+        children.push(heading3(`${s.code} — ${s.title}`));
+        children.push(para(s.approach));
+      });
+    }
+    if (a.embeddedOrDeprioritized && a.embeddedOrDeprioritized.length) {
+      children.push(heading1("Embedded or Deprioritized Standards"));
+      a.embeddedOrDeprioritized.forEach(s => {
+        children.push(heading3(`${s.code} — ${s.title}`));
+        children.push(para(s.recommendation));
+      });
+    }
+    children.push(heading1("Connecticut Alignment Note"));
+    children.push(para(a.ctAlignmentNote));
+    return new Document({
+      styles: sharedStyles(), numbering: numberingConfig(),
+      sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children }]
+    });
+  }
+
+  function buildPacingDoc(data) {
+    const { Document, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, ShadingType, PageOrientation } = getDocxLib();
+    const p = data.pacing;
+    const widths = [900, 1700, 2800, 1700, 1900, 2400, 1560];
+    const headerCell = (text, w) => new TableCell({
+      width: { size: w, type: WidthType.DXA },
+      borders: {
+        top: { style: BorderStyle.SINGLE, size: 4, color: "0F4C5C" },
+        bottom: { style: BorderStyle.SINGLE, size: 4, color: "0F4C5C" },
+        left: { style: BorderStyle.SINGLE, size: 1, color: "0F4C5C" },
+        right: { style: BorderStyle.SINGLE, size: 1, color: "0F4C5C" }
+      },
+      margins: { top: 100, bottom: 100, left: 120, right: 120 },
+      shading: { fill: "0F4C5C", type: ShadingType.CLEAR },
+      children: [new Paragraph({ children: [new TextRun({ text, bold: true, color: "FFFFFF", size: 18 })] })]
+    });
+    const dataCell = (text, w) => new TableCell({
+      width: { size: w, type: WidthType.DXA },
+      borders: {
+        top: { style: BorderStyle.SINGLE, size: 1, color: "D9D2C5" },
+        bottom: { style: BorderStyle.SINGLE, size: 1, color: "D9D2C5" },
+        left: { style: BorderStyle.SINGLE, size: 1, color: "D9D2C5" },
+        right: { style: BorderStyle.SINGLE, size: 1, color: "D9D2C5" }
+      },
+      margins: { top: 80, bottom: 80, left: 120, right: 120 },
+      children: [new Paragraph({ children: [new TextRun({ text: text || "—", size: 18 })] })]
+    });
+    const headerLabels = ["Wk", "Session", "Title", "Standards", "5E Phase", "Discovery Asset", "Assessment"];
+    const headerRow = new TableRow({ tableHeader: true,
+      children: headerLabels.map((label, i) => headerCell(label, widths[i])) });
+    const rows = [];
+    p.weeks.forEach(w => {
+      w.sessions.forEach((s, idx) => {
+        rows.push(new TableRow({
+          children: [
+            dataCell(idx === 0 ? `${w.weekNumber}` : "", widths[0]),
+            dataCell(`${s.sessionNumber}`, widths[1]),
+            dataCell(s.title, widths[2]),
+            dataCell((s.standardCodes || []).join(", "), widths[3]),
+            dataCell(s.fivePhase, widths[4]),
+            dataCell(s.discoveryAsset, widths[5]),
+            dataCell(s.assessmentNote || "", widths[6])
+          ]
+        }));
+      });
+    });
+    const children = [
+      ...titleBlock("Revised Pacing Calendar", `${data.formData.unitTitle} — ${data.formData.gradeLevel}`),
+      heading1("Unit Overview"), para(p.overview),
+      heading1("Session-by-Session Calendar"),
+      new Table({ width: { size: 12960, type: WidthType.DXA }, columnWidths: widths, rows: [headerRow, ...rows] }),
+      new Paragraph({ children: [new TextRun("")], spacing: { after: 240 } }),
+      heading1("Assessment Plan"), para(p.assessmentPlan),
+      heading1("Differentiation Note"), para(p.differentiationNote)
+    ];
+    return new Document({
+      styles: sharedStyles(), numbering: numberingConfig(),
+      sections: [{
+        properties: { page: { size: { width: 12240, height: 15840, orientation: PageOrientation.LANDSCAPE }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
+        children
+      }]
+    });
+  }
+
+  function buildLessonsDoc(data) {
+    const { Document, Paragraph, TextRun } = getDocxLib();
+    const lessons = (data.lessons.lessons) || [];
+    const children = [
+      ...titleBlock("5E Lesson Plans", `${data.formData.unitTitle} — ${data.formData.gradeLevel}`),
+      ...metaBlock(data),
+      para(`This packet contains ${lessons.length} complete 5E lesson plans designed for ~${data.formData.minutesPerSession}-minute sessions and integrated with Discovery Education resources.`, { italics: true, color: "555555" })
+    ];
+    const phaseOrder = ['engage', 'explore', 'explain', 'elaborate', 'evaluate'];
+    const phaseLabels = { engage: 'ENGAGE', explore: 'EXPLORE', explain: 'EXPLAIN', elaborate: 'ELABORATE', evaluate: 'EVALUATE' };
+    lessons.forEach((lesson, idx) => {
+      if (idx > 0) children.push(new Paragraph({ children: [new TextRun("")], pageBreakBefore: true }));
+      children.push(heading1(`Lesson ${lesson.lessonNumber}: ${lesson.title}`));
+      children.push(labeledPara("Standards", (lesson.standardCodes || []).join(", ")));
+      children.push(labeledPara("Performance Expectation", lesson.performanceExpectation));
+      children.push(labeledPara("Science & Engineering Practice", lesson.sep));
+      children.push(labeledPara("Crosscutting Concept", lesson.ccc));
+      children.push(labeledPara("Sessions", lesson.sessions));
+      children.push(heading2("Materials"));
+      (lesson.materials || []).forEach(m => children.push(bullet(m)));
+      children.push(heading2("Prep Notes"));
+      children.push(para(lesson.prepNotes));
+      children.push(heading2("5E Phases"));
+      phaseOrder.forEach(ph => {
+        const phase = lesson.phases && lesson.phases[ph];
+        if (!phase) return;
+        children.push(heading3(`${phaseLabels[ph]} — ${phase.duration}`));
+        children.push(labeledPara("Teacher Moves", phase.teacherMoves));
+        children.push(labeledPara("Student Task", phase.studentTask));
+        children.push(labeledPara("Discovery Education Asset", phase.discoveryAsset));
+      });
+      children.push(heading2("Discussion Questions"));
+      (lesson.discussionQuestions || []).forEach(q => children.push(bullet(q)));
+      children.push(heading2("Differentiation"));
+      if (lesson.differentiation) {
+        if (lesson.differentiation.support) children.push(labeledPara("Support", lesson.differentiation.support));
+        if (lesson.differentiation.extension) children.push(labeledPara("Extension", lesson.differentiation.extension));
+        if (lesson.differentiation.ell) children.push(labeledPara("Multilingual Learners", lesson.differentiation.ell));
+      }
+      children.push(heading2("Exit Ticket / Formative Check"));
+      children.push(para(lesson.exitTicket));
+    });
+    return new Document({
+      styles: sharedStyles(), numbering: numberingConfig(),
+      sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children }]
+    });
+  }
+
+  // ============ DOWNLOAD ============
+  async function downloadDocFile(doc, filename, key) {
+    const { Packer } = getDocxLib();
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    downloadedFiles[key] = true;
+    const btn = document.getElementById('dl-' + key);
+    btn.classList.add('downloaded');
+    btn.querySelector('span').textContent = 'Downloaded — get again';
+  }
+  async function downloadAnalysis() { const doc = buildAnalysisDoc(generatedData); await downloadDocFile(doc, `${slug(generatedData.formData.unitTitle)}-standards-analysis.docx`, 'analysis'); }
+  async function downloadPacing() { const doc = buildPacingDoc(generatedData); await downloadDocFile(doc, `${slug(generatedData.formData.unitTitle)}-pacing-calendar.docx`, 'pacing'); }
+  async function downloadLessons() { const doc = buildLessonsDoc(generatedData); await downloadDocFile(doc, `${slug(generatedData.formData.unitTitle)}-5e-lesson-plans.docx`, 'lessons'); }
+</script>
+</body>
+</html>
