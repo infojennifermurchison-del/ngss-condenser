@@ -1,0 +1,32 @@
+<!-- ===========================================================================
+     Business Growth Stage Quiz — LIVE LINK version for GoHighLevel.
+
+     Use this AFTER you have deployed the site to Vercel. It loads the quiz
+     from your live web address, so any future updates appear automatically.
+
+     >>> ONE THING TO EDIT <<<
+     Replace  YOUR-PROJECT.vercel.app  below with your real Vercel address
+     (or bookmcg.com if you point your domain at Vercel). Keep the
+     "/business-quiz.html" part at the end.
+
+     Then paste this whole block into a GoHighLevel "Custom Code / HTML"
+     element on your audit page.
+     =========================================================================== -->
+<div style="max-width: 760px; margin: 0 auto;">
+  <iframe id="bmcg-quiz-frame"
+          src="https://YOUR-PROJECT.vercel.app/business-quiz.html"
+          title="Business Growth Stage Quiz"
+          scrolling="no"
+          style="width: 100%; border: 0; min-height: 620px; overflow: hidden;"></iframe>
+</div>
+
+<script>
+  (function () {
+    var frame = document.getElementById("bmcg-quiz-frame");
+    window.addEventListener("message", function (e) {
+      if (e.data && typeof e.data.bmcgQuizHeight === "number") {
+        frame.style.height = (e.data.bmcgQuizHeight + 24) + "px";
+      }
+    });
+  })();
+</script>

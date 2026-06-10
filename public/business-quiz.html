@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Business Growth Stage Quiz</title>
+<style>
+  :root {
+    --accent: #0F4C5C;
+    --accent-soft: #E8F1F2;
+    --gold: #C99700;
+    --gold-soft: #FFF8E7;
+    --paper: #FAF7F2;
+    --ink: #1A1A1A;
+    --rule: #D9D2C5;
+    --muted: #5B5B57;
+    --green: #2E7D52;
+    --green-soft: #E9F5EE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .ui-font { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+  }
+
+  /* Header */
+  header.masthead {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 18px;
+    margin-bottom: 28px;
+  }
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    margin: 0 0 6px;
+  }
+  h1.title {
+    font-size: 30px;
+    line-height: 1.15;
+    margin: 0 0 8px;
+    color: var(--accent);
+  }
+  .subtitle {
+    margin: 0;
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  /* Card */
+  .card {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 30px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+
+  /* Progress */
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .progress-track {
+    width: 100%;
+    height: 8px;
+    background: var(--accent-soft);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 26px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.35s ease;
+    border-radius: 99px;
+  }
+
+  .stage-tag {
+    display: inline-block;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 4px 9px;
+    border-radius: 99px;
+    margin-bottom: 14px;
+  }
+  .question {
+    font-size: 22px;
+    line-height: 1.35;
+    margin: 0 0 24px;
+    color: var(--ink);
+  }
+  .question .hint {
+    display: block;
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  /* Answer buttons */
+  .answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .answer-btn {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 18px 16px;
+    background: #fff;
+    border: 1.5px solid var(--rule);
+    border-radius: 4px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.12s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .answer-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .answer-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .answer-btn .glyph { font-size: 18px; }
+  .answer-btn.yes:hover { color: var(--green); border-color: var(--green); background: var(--green-soft); }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 22px;
+  }
+  .link-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 4px;
+  }
+  .link-btn:hover { color: var(--accent); }
+  .link-btn:disabled { opacity: 0; cursor: default; }
+
+  /* Buttons */
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    padding: 15px 28px;
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  .btn-primary:hover { opacity: 0.92; }
+  .btn-ghost {
+    background: #fff;
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
+    padding: 13px 24px;
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  .btn-ghost:hover { background: var(--accent-soft); }
+
+  /* Intro */
+  .intro-list { padding-left: 0; list-style: none; margin: 18px 0 26px; }
+  .intro-list li {
+    padding: 10px 0 10px 32px;
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+    font-size: 15px;
+  }
+  .intro-list li:last-child { border-bottom: none; }
+  .intro-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 4px;
+    top: 10px;
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .meta-line {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  /* Results */
+  .result-hero {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 4px;
+    padding: 30px;
+    margin-bottom: 24px;
+  }
+  .result-hero .eyebrow { color: var(--gold); }
+  .result-hero h2 {
+    font-size: 32px;
+    margin: 4px 0 10px;
+    line-height: 1.1;
+  }
+  .result-hero p { margin: 0; font-size: 16px; opacity: 0.94; }
+
+  .section-h {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 26px 0 12px;
+  }
+  .goal-box {
+    background: var(--gold-soft);
+    border-left: 4px solid var(--gold);
+    padding: 16px 18px;
+    border-radius: 0 3px 3px 0;
+    font-size: 16px;
+  }
+  .priorities { list-style: none; padding: 0; margin: 0; }
+  .priorities li {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .priorities li strong {
+    display: block;
+    color: var(--accent);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .priorities li span { font-size: 15px; color: var(--ink); }
+
+  /* Score bars */
+  .bars { margin: 8px 0 0; }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 13px;
+  }
+  .bar-label { width: 150px; flex-shrink: 0; color: var(--muted); }
+  .bar-label.is-top { color: var(--accent); font-weight: 700; }
+  .bar-track {
+    flex: 1;
+    height: 16px;
+    background: var(--accent-soft);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--rule);
+    border-radius: 99px;
+    transition: width 0.6s ease;
+  }
+  .bar-fill.is-top { background: var(--accent); }
+  .bar-val { width: 28px; text-align: right; color: var(--muted); }
+
+  /* Notes + advisor CTA */
+  .notes-area {
+    width: 100%;
+    min-height: 110px;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 14px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: #fff;
+    resize: vertical;
+    box-sizing: border-box;
+  }
+  .notes-area:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .notes-print { display: none; }
+  .cta {
+    background: var(--green-soft);
+    border: 1px solid #BFE3CD;
+    border-radius: 4px;
+    padding: 20px 22px;
+    margin-top: 26px;
+  }
+  .cta h3 {
+    margin: 0 0 6px;
+    color: var(--green);
+    font-size: 19px;
+  }
+  .cta p { margin: 0 0 14px; font-size: 15px; color: var(--ink); }
+  .cta-btn {
+    display: inline-block;
+    background: var(--green);
+    color: #fff;
+    text-decoration: none;
+    padding: 12px 22px;
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  .cta-btn:hover { opacity: 0.92; }
+
+  .result-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+  }
+  .disclaimer {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    font-size: 13px;
+    color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  .disclaimer a { color: var(--accent); }
+
+  footer.foot {
+    text-align: center;
+    margin-top: 30px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 560px) {
+    h1.title { font-size: 24px; }
+    .question { font-size: 19px; }
+    .result-hero h2 { font-size: 26px; }
+    .card { padding: 22px; }
+    .bar-label { width: 110px; }
+  }
+  @media print {
+    .result-actions, .progress-track, .progress-row, footer.foot, .cta { display: none !important; }
+    body { background: #fff; }
+    .card { box-shadow: none; border: none; padding: 0; }
+    .notes-area { display: none !important; }
+    .notes-print { border: 1px solid var(--rule); border-radius: 3px; padding: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">Find Your Business Stage</p>
+    <h1 class="title">Where Is Your Business Right Now?</h1>
+    <p class="subtitle">A quick, plain-English quiz that figures out your growth stage and hands you a focused to-do list for the next six months.</p>
+  </header>
+
+  <!-- INTRO -->
+  <section id="screen-intro" class="card">
+    <p class="meta-line">About 5 minutes · 24 yes/no questions · No sign-up</p>
+    <p style="margin-top:0;font-size:16px;">Every business goes through predictable stages as it grows. Knowing which one you're in makes it much easier to decide what to work on next. Answer honestly — there are no wrong answers, and your responses stay in your browser.</p>
+    <ul class="intro-list">
+      <li>Answer simple "Yes" or "No" questions about how your business runs today.</li>
+      <li>The quiz adds up your answers and finds the stage that fits best.</li>
+      <li>You get a clear goal plus four priorities to focus on right away.</li>
+    </ul>
+    <button class="btn-primary" id="start-btn">Start the quiz →</button>
+  </section>
+
+  <!-- QUESTIONS -->
+  <section id="screen-quiz" class="card hidden">
+    <div class="progress-row">
+      <span id="progress-count">Question 1 of 24</span>
+      <span id="progress-pct">4%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+
+    <span class="stage-tag" id="q-stage">Just starting out</span>
+    <p class="question" id="q-text">Question text goes here.</p>
+
+    <div class="answers">
+      <button class="answer-btn yes" data-answer="1"><span class="glyph">✓</span> Yes</button>
+      <button class="answer-btn" data-answer="0"><span class="glyph">✕</span> No</button>
+    </div>
+
+    <div class="nav-row">
+      <button class="link-btn" id="back-btn" disabled>← Back</button>
+      <button class="link-btn" id="restart-btn-quiz">Start over</button>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="screen-results" class="card hidden">
+    <div class="result-hero">
+      <p class="eyebrow">Your business stage</p>
+      <h2 id="r-stage-name">Stage</h2>
+      <p id="r-stage-desc">Description</p>
+    </div>
+
+    <h3 class="section-h">What this means</h3>
+    <p id="r-plain" style="margin:0;font-size:16px;"></p>
+
+    <h3 class="section-h">Your main goal for the next 6 months</h3>
+    <div class="goal-box" id="r-goal"></div>
+
+    <h3 class="section-h">Where to focus first</h3>
+    <ul class="priorities" id="r-priorities"></ul>
+
+    <h3 class="section-h">How your answers lined up</h3>
+    <div class="bars" id="r-bars"></div>
+
+    <h3 class="section-h">Your notes &amp; next steps</h3>
+    <p style="margin:0 0 10px;font-size:14px;color:var(--muted);" class="ui-font">Jot down what stood out, the priority you'll tackle first, or any questions for your advisor. Your notes are included when you save or print.</p>
+    <textarea class="notes-area" id="r-notes" placeholder="e.g. Biggest gap: cash flow forecasting. First step this month: build a simple 8-week cash projection. Question for my advisor: how big should my cash reserve be?"></textarea>
+    <div class="notes-print" id="r-notes-print"></div>
+
+    <div class="cta" id="r-cta">
+      <h3 id="cta-title">Want a second set of eyes?</h3>
+      <p id="cta-body">A short conversation can turn these priorities into a concrete plan. Reach out to talk through your results.</p>
+      <a class="cta-btn" id="cta-link" href="#" target="_blank" rel="noopener">Book a free consult</a>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-primary" onclick="window.print()">Save / Print results</button>
+      <button class="btn-ghost" id="restart-btn-results">Retake the quiz</button>
+    </div>
+
+    <div class="disclaimer">
+      <p>This quiz gives general guidance based on a well-known small-business growth framework. Every business is different, so treat these as a starting point for your own planning (and a good conversation with a trusted advisor).</p>
+      <p style="margin-bottom:0;">Based on the five stages of small-business growth by Neil C. Churchill &amp; Virginia L. Lewis, <a href="https://hbr.org/1983/05/the-five-stages-of-small-business-growth" target="_blank" rel="noopener">Harvard Business Review</a> (1983).</p>
+    </div>
+  </section>
+
+  <footer class="foot">Your answers never leave your browser.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ===========================================================================
+  // ADVISOR SETTINGS — edit these to point clients to you.
+  //   • link:  a booking URL (Calendly, etc.) or a "mailto:" email address.
+  //   • To hide the call-to-action entirely, set ADVISOR.enabled = false.
+  // ===========================================================================
+  var ADVISOR = {
+    enabled: true,
+    title: "Want a second set of eyes?",
+    body: "A short conversation can turn these priorities into a concrete plan. Reach out to talk through your results.",
+    buttonText: "Book a free consult",
+    link: "https://calendar.google.com/calendar/appointments/schedules/AcZssZ2cUi9y5W0yfles1HzBgXX-tPIo_pZ_KWw1MmGD5o514TWNGl5PAi2SAKptNTs1kGKJFGX3_0hW"
+  };
+
+  // ---- Quiz data ------------------------------------------------------------
+  // Each question belongs to a stage "bucket". We tally the "Yes" answers per
+  // bucket, then the bucket with the most Yeses is the business's stage.
+  var STAGES = {
+    existence:    { label: "Just starting out",     order: 1 },
+    survival:     { label: "Staying afloat",        order: 2 },
+    successDis:   { label: "Comfortable & steady",  order: 3 },
+    successGrow:  { label: "Ready to grow",         order: 3 },
+    takeoff:      { label: "Growing fast",          order: 4 },
+    maturity:     { label: "Large & established",   order: 5 }
+  };
+
+  var QUESTIONS = [
+    // Stage 1 — Existence
+    { stage: "existence", text: "Right now, is most of your energy going into finding customers and actually delivering your product or service?" },
+    { stage: "existence", text: "Are you (the owner) doing almost everything yourself — sales, the actual work, and the paperwork?" },
+    { stage: "existence", text: "Would the business struggle to keep going if you stepped away, or if cash got tight for even a short time?" },
+    { stage: "existence", text: "Do you mostly keep things in your head, without written systems or formal plans?" },
+
+    // Stage 2 — Survival
+    { stage: "survival", text: "Does the business usually bring in enough to cover its bills, but profit is still small or up-and-down?" },
+    { stage: "survival", text: "Is your biggest worry making sure there's enough cash coming in to keep the doors open?" },
+    { stage: "survival", text: "Have you handed off a few tasks to others, but you're still very hands-on day to day?" },
+    { stage: "survival", text: "Do you have a few basic routines in place, but not much long-term planning yet?" },
+
+    // Stage 3a — Success: Disengagement
+    { stage: "successDis", text: "Is the business making a steady profit and giving you a comfortable living?" },
+    { stage: "successDis", text: "Could it keep running well even if you were a lot less involved day to day?" },
+    { stage: "successDis", text: "Do you have solid systems and money controls — like budgets and reliable bookkeeping — in place?" },
+    { stage: "successDis", text: "Are you happy keeping things steady, without a strong push to grow much bigger?" },
+
+    // Stage 3b — Success: Growth
+    { stage: "successGrow", text: "Is the business profitable and stable, and are you actively looking for ways to expand?" },
+    { stage: "successGrow", text: "Are you putting profits back into the business to fuel growth?" },
+    { stage: "successGrow", text: "Do you have capable managers running daily operations so you can focus on the big picture?" },
+    { stage: "successGrow", text: "Are you using plans and budgets to guide your growth and spending?" },
+
+    // Stage 4 — Take-off
+    { stage: "takeoff", text: "Is your revenue or customer base growing quickly right now?" },
+    { stage: "takeoff", text: "Are you dealing with growing pains — cash stretched thin, needing to hire fast, or things getting more complex?" },
+    { stage: "takeoff", text: "Have you handed real decision-making authority to a strong management team?" },
+    { stage: "takeoff", text: "Is a lot of your focus on planning ahead and making operations more professional to keep up with growth?" },
+
+    // Stage 5 — Resource Maturity
+    { stage: "maturity", text: "Is your business large and well-established, with strong finances and plenty of resources?" },
+    { stage: "maturity", text: "Are your management systems, planning, and controls highly developed and built into how the company runs?" },
+    { stage: "maturity", text: "Is the company good at innovating and adapting when the market changes?" },
+    { stage: "maturity", text: "Is your main challenge keeping growth going and staying nimble so the company doesn't get stuck or stale?" }
+  ];
+
+  // ---- Results content ------------------------------------------------------
+  var RESULTS = {
+    existence: {
+      name: "Just Starting Out",
+      sub: "The Existence stage",
+      desc: "You're getting the business off the ground — landing customers and proving people will pay for what you offer.",
+      plain: "At this stage almost everything depends on you, and the big question is simply: can this become a real, working business? That's completely normal. Your job right now is to get enough customers and a smooth-enough way of delivering to keep going.",
+      goal: "Get the business on its feet and win a steady flow of paying customers.",
+      priorities: [
+        ["Find customers", "Put most of your time into sales and marketing. Get clear on who your ideal customer is and where to reach them."],
+        ["Make sure people want it", "Listen closely to early customers and keep improving your product or service so it truly solves their problem."],
+        ["Watch your cash", "Check your cash often. Make sure you can cover this month's bills, and look into small funding options if things get tight."],
+        ["Keep it simple", "Set up just enough basic steps to deliver reliably, and keep your costs and overhead low."]
+      ]
+    },
+    survival: {
+      name: "Staying Afloat",
+      sub: "The Survival stage",
+      desc: "You've proven the business works — now it's about turning that into steady money you can count on.",
+      plain: "Customers are coming in and you're covering costs, but profit is thin or unpredictable. The goal now is to get past 'just getting by' and reach a point where the business reliably makes money.",
+      goal: "Reach steady profit and a cash flow you can rely on.",
+      priorities: [
+        ["Make it more profitable", "Look hard at your prices and costs. Find places to raise your margins or trim spending that isn't pulling its weight."],
+        ["Steady the cash", "Start forecasting your cash a few weeks out and build a small reserve so a slow month doesn't become a crisis."],
+        ["Tidy up how you work", "Smooth out your main day-to-day tasks to save time and cut waste. Simple tools or automation can help."],
+        ["Keep customers coming back", "Repeat customers are cheaper than new ones. Focus on service and follow-up so people come back."]
+      ]
+    },
+    successDis: {
+      name: "Comfortable & Steady",
+      sub: "The Success stage — staying steady",
+      desc: "The business is profitable and stable, and you're happy to keep it running smoothly rather than chase rapid growth.",
+      plain: "You've built something that works and gives you a good living, and it can largely run without your hands on every detail. Your focus now is protecting what you've built and enjoying it — not necessarily getting bigger.",
+      goal: "Keep things stable and running smoothly, and free up more of your own time.",
+      priorities: [
+        ["Fine-tune what works", "Polish your existing systems for quality and efficiency. Look for small, steady improvements rather than big changes."],
+        ["Think about the future", "If you might step back or sell one day, start gently planning — develop leaders or note what a future handover could look like."],
+        ["Protect what you've built", "Review your finances, contracts, and insurance so an unexpected problem can't undo your hard work."],
+        ["Step back a little", "Keep delegating so the business leans on you less and you get to enjoy the rewards of what you've created."]
+      ]
+    },
+    successGrow: {
+      name: "Ready to Grow",
+      sub: "The Success stage — gearing up to grow",
+      desc: "The business is solid and profitable, and you've decided you want to expand. Now it's about doing that in a controlled way.",
+      plain: "You have a stable, profitable business and the appetite to grow it. The trick is to grow on purpose — with a plan, the right people, and the money to back it — so expansion strengthens the business instead of straining it.",
+      goal: "Get ready for controlled, well-planned growth.",
+      priorities: [
+        ["Make a growth plan", "Decide where growth will come from — new customers, products, or markets — and set clear, measurable targets."],
+        ["Build your team", "Hire and train managers who can take more off your plate, so you're free to focus on the bigger picture."],
+        ["Line up the money", "Make sure you have the funding and financial systems to support growth before you push the accelerator."],
+        ["Test before you leap", "Start small with a pilot in your new market or product line, learn from it, then scale what works."]
+      ]
+    },
+    takeoff: {
+      name: "Growing Fast",
+      sub: "The Take-off stage",
+      desc: "Growth is happening quickly — and the challenge is keeping up with it without things breaking.",
+      plain: "Revenue and demand are climbing fast. This is exciting, but rapid growth strains cash, people, and systems. Your focus now is making the business more organized and professional so it can handle its new size.",
+      goal: "Manage fast growth well and make the organization more professional.",
+      priorities: [
+        ["Get organized", "Put clear roles, reporting lines, and team structures in place so a bigger company doesn't turn into chaos."],
+        ["Stay ahead of cash", "Fast growth eats cash. Forecast carefully and manage it closely so a busy stretch doesn't cause a cash crunch."],
+        ["Hire and keep good people", "Recruit actively, bring new people on board well, and build a culture that makes strong employees want to stay."],
+        ["Use systems that scale", "Invest in tools and processes that can handle much higher volume without falling over."]
+      ]
+    },
+    maturity: {
+      name: "Large & Established",
+      sub: "The Resource Maturity stage",
+      desc: "You're a big, well-established business — now the goal is to stay strong, keep innovating, and not get stuck.",
+      plain: "You have the size, systems, and resources of an established company. The risk at this stage is getting comfortable and slow. Your focus is keeping the business sharp, innovative, and growing rather than coasting.",
+      goal: "Stay a leader, keep innovating, and set up the business for the long haul.",
+      priorities: [
+        ["Keep innovating", "Invest in new products, research, and technology so competitors don't pass you by."],
+        ["Grow through partnerships", "Look at alliances, partnerships, or acquisitions to reach new customers and add new strengths."],
+        ["Stay efficient", "Keep finding ways to run leaner and control costs — without cutting the quality or creativity that got you here."],
+        ["Develop your people", "Invest in leaders, keep employees engaged, and plan ahead so the right people are ready for tomorrow's roles."],
+        ["Spread your reach", "Explore new regions or customer groups so you're not too dependent on any single market."]
+      ]
+    }
+  };
+
+  // ---- State ----------------------------------------------------------------
+  var current = 0;
+  var answers = new Array(QUESTIONS.length).fill(null);
+
+  // ---- Elements -------------------------------------------------------------
+  var el = function (id) { return document.getElementById(id); };
+  var screens = {
+    intro: el("screen-intro"),
+    quiz: el("screen-quiz"),
+    results: el("screen-results")
+  };
+
+  function show(name) {
+    Object.keys(screens).forEach(function (k) {
+      screens[k].classList.toggle("hidden", k !== name);
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // ---- Quiz flow ------------------------------------------------------------
+  function renderQuestion() {
+    var q = QUESTIONS[current];
+    el("q-stage").textContent = STAGES[q.stage].label;
+    el("q-text").textContent = q.text;
+    el("progress-count").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+    var pct = Math.round(((current) / QUESTIONS.length) * 100);
+    el("progress-pct").textContent = pct + "%";
+    el("progress-fill").style.width = pct + "%";
+    el("back-btn").disabled = current === 0;
+  }
+
+  function answerQuestion(value) {
+    answers[current] = value;
+    if (current < QUESTIONS.length - 1) {
+      current++;
+      renderQuestion();
+    } else {
+      el("progress-fill").style.width = "100%";
+      el("progress-pct").textContent = "100%";
+      showResults();
+    }
+  }
+
+  // ---- Scoring --------------------------------------------------------------
+  function scoreQuiz() {
+    var raw = { existence: 0, survival: 0, successDis: 0, successGrow: 0, takeoff: 0, maturity: 0 };
+    QUESTIONS.forEach(function (q, i) {
+      if (answers[i] === 1) raw[q.stage]++;
+    });
+
+    // The two "Success" sub-stages compete for one stage slot.
+    var combined = {
+      existence: raw.existence,
+      survival: raw.survival,
+      success: Math.max(raw.successDis, raw.successGrow),
+      takeoff: raw.takeoff,
+      maturity: raw.maturity
+    };
+
+    // Pick the winner. On a tie, prefer the earlier stage so foundational
+    // priorities surface first.
+    var orderList = ["existence", "survival", "success", "takeoff", "maturity"];
+    var winner = orderList[0];
+    orderList.forEach(function (k) {
+      if (combined[k] > combined[winner]) winner = k;
+    });
+
+    // Resolve "success" into the right flavour.
+    var resultKey = winner;
+    if (winner === "success") {
+      resultKey = raw.successGrow > raw.successDis ? "successGrow" : "successDis";
+    }
+    // If they answered No to everything, gently default to the first stage.
+    var total = orderList.reduce(function (s, k) { return s + combined[k]; }, 0);
+    if (total === 0) resultKey = "existence";
+
+    return { resultKey: resultKey, raw: raw, combined: combined };
+  }
+
+  function showResults() {
+    var s = scoreQuiz();
+    var r = RESULTS[s.resultKey];
+
+    el("r-stage-name").textContent = r.name;
+    el("r-stage-desc").textContent = r.desc;
+    el("r-plain").textContent = r.plain;
+    el("r-goal").textContent = r.goal;
+
+    var ul = el("r-priorities");
+    ul.innerHTML = "";
+    r.priorities.forEach(function (p) {
+      var li = document.createElement("li");
+      var strong = document.createElement("strong");
+      strong.textContent = p[0];
+      var span = document.createElement("span");
+      span.textContent = p[1];
+      li.appendChild(strong);
+      li.appendChild(span);
+      ul.appendChild(li);
+    });
+
+    // Score bars (out of 4 per stage; success uses the higher of its two halves)
+    var bars = [
+      { key: "existence", label: "Just starting out", val: s.combined.existence },
+      { key: "survival", label: "Staying afloat", val: s.combined.survival },
+      { key: "success", label: "Comfortable / Ready to grow", val: s.combined.success },
+      { key: "takeoff", label: "Growing fast", val: s.combined.takeoff },
+      { key: "maturity", label: "Large & established", val: s.combined.maturity }
+    ];
+    var topKey = (s.resultKey === "successDis" || s.resultKey === "successGrow") ? "success" : s.resultKey;
+    var barsEl = el("r-bars");
+    barsEl.innerHTML = "";
+    bars.forEach(function (b) {
+      var isTop = b.key === topKey;
+      var row = document.createElement("div");
+      row.className = "bar-row";
+      row.innerHTML =
+        '<div class="bar-label' + (isTop ? " is-top" : "") + '">' + b.label + '</div>' +
+        '<div class="bar-track"><div class="bar-fill' + (isTop ? " is-top" : "") + '" style="width:' + (b.val / 4 * 100) + '%"></div></div>' +
+        '<div class="bar-val">' + b.val + '/4</div>';
+      barsEl.appendChild(row);
+    });
+
+    // Advisor call-to-action
+    var cta = el("r-cta");
+    if (ADVISOR.enabled && ADVISOR.link) {
+      el("cta-title").textContent = ADVISOR.title;
+      el("cta-body").textContent = ADVISOR.body;
+      var link = el("cta-link");
+      link.textContent = ADVISOR.buttonText;
+      link.href = ADVISOR.link;
+      // mailto links shouldn't open a blank tab
+      if (ADVISOR.link.indexOf("mailto:") === 0) link.removeAttribute("target");
+      cta.classList.remove("hidden");
+    } else {
+      cta.classList.add("hidden");
+    }
+
+    show("results");
+  }
+
+  // Mirror typed notes into a print-only block so they appear on the printout.
+  var notesEl = el("r-notes");
+  var notesPrint = el("r-notes-print");
+  if (notesEl) {
+    notesEl.addEventListener("input", function () {
+      if (notesEl.value.trim()) {
+        notesPrint.textContent = notesEl.value;
+        notesPrint.style.display = "block";
+        notesPrint.style.whiteSpace = "pre-wrap";
+      } else {
+        notesPrint.style.display = "none";
+      }
+    });
+  }
+
+  function restart() {
+    current = 0;
+    answers = new Array(QUESTIONS.length).fill(null);
+    renderQuestion();
+    show("quiz");
+  }
+
+  // ---- Wire up --------------------------------------------------------------
+  el("start-btn").addEventListener("click", function () {
+    renderQuestion();
+    show("quiz");
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll(".answer-btn"), function (btn) {
+    btn.addEventListener("click", function () {
+      answerQuestion(Number(btn.getAttribute("data-answer")));
+    });
+  });
+
+  el("back-btn").addEventListener("click", function () {
+    if (current > 0) { current--; renderQuestion(); }
+  });
+  el("restart-btn-quiz").addEventListener("click", restart);
+  el("restart-btn-results").addEventListener("click", restart);
+
+  // Keyboard shortcuts: Y / N / arrows
+  document.addEventListener("keydown", function (e) {
+    if (screens.quiz.classList.contains("hidden")) return;
+    var k = e.key.toLowerCase();
+    if (k === "y" || k === "1") answerQuestion(1);
+    else if (k === "n" || k === "0") answerQuestion(0);
+    else if (k === "arrowleft" || k === "backspace") {
+      if (current > 0) { e.preventDefault(); current--; renderQuestion(); }
+    }
+  });
+})();
+</script>
+<script>
+  // When this page is embedded in another site (e.g. a GoHighLevel page) via
+  // an iframe, report our height so the host frame can resize to fit. Harmless
+  // when the page is opened on its own.
+  (function () {
+    if (window.parent === window) return; // not embedded; nothing to do
+    function postHeight() {
+      try {
+        parent.postMessage({ bmcgQuizHeight: Math.ceil(document.body.scrollHeight) }, "*");
+      } catch (e) {}
+    }
+    window.addEventListener("load", postHeight);
+    if (window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
+    if (window.MutationObserver) new MutationObserver(postHeight).observe(document.body, { subtree: true, childList: true, attributes: true });
+    setInterval(postHeight, 800);
+  })();
+</script>
+</body>
+</html>
