@@ -815,5 +815,22 @@
   });
 })();
 </script>
+<script>
+  // When this page is embedded in another site (e.g. a GoHighLevel page) via
+  // an iframe, report our height so the host frame can resize to fit. Harmless
+  // when the page is opened on its own.
+  (function () {
+    if (window.parent === window) return; // not embedded; nothing to do
+    function postHeight() {
+      try {
+        parent.postMessage({ bmcgQuizHeight: Math.ceil(document.body.scrollHeight) }, "*");
+      } catch (e) {}
+    }
+    window.addEventListener("load", postHeight);
+    if (window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
+    if (window.MutationObserver) new MutationObserver(postHeight).observe(document.body, { subtree: true, childList: true, attributes: true });
+    setInterval(postHeight, 800);
+  })();
+</script>
 </body>
 </html>
