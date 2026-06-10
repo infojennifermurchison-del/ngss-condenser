@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Texas Rising Star — Category 2 Instruction Check</title>
+<link rel="stylesheet" href="/quiz-styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">Texas Rising Star · Category 2</p>
+    <h1 class="title">How Strong Are Your Teacher–Child Interactions?</h1>
+    <p class="subtitle">Category 2 is the most heavily weighted part of your Texas Rising Star score — 40% of it. This quick check shows where your instruction is strong and where a little focus could raise your star level and your reimbursement rate.</p>
+  </header>
+
+  <!-- INTRO -->
+  <section id="screen-intro" class="card">
+    <p class="meta-line">About 5 minutes · 15 questions · No sign-up</p>
+    <p style="margin-top:0;font-size:16px;">Texas Rising Star scores four categories, but <strong>Category 2 — Teacher–Child Interactions — counts for 40%</strong>, more than any other. This isn't about paperwork or compliance. It's about what actually happens between your teachers and children every day: warm relationships, rich conversation, and real teaching. Strengthen this, and you lift the category that moves your star level — and your reimbursement — the most.</p>
+    <ul class="intro-list">
+      <li>Rate how often each teaching practice happens across your classrooms.</li>
+      <li>See your strength in each of the five interaction areas assessors look at.</li>
+      <li>Get specific coaching ideas for the area that will raise your score fastest.</li>
+    </ul>
+    <button class="btn-primary" id="start-btn">Start the check →</button>
+  </section>
+
+  <!-- QUESTIONS -->
+  <section id="screen-quiz" class="card hidden">
+    <div class="progress-row">
+      <span id="progress-count">Question 1 of 15</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+
+    <span class="stage-tag" id="q-stage">Warm &amp; Responsive Style</span>
+    <p class="question" id="q-text">Question text goes here.</p>
+
+    <div class="answers stack">
+      <button class="answer-btn scale" data-answer="0"><span class="glyph">○</span> <span>Not yet<span class="scale-sub">— rarely, or not in place</span></span></button>
+      <button class="answer-btn scale" data-answer="1"><span class="glyph">◐</span> <span>Sometimes<span class="scale-sub">— some teachers, or some of the time</span></span></button>
+      <button class="answer-btn scale yes" data-answer="2"><span class="glyph">●</span> <span>Consistently<span class="scale-sub">— across the program, most of the time</span></span></button>
+    </div>
+
+    <div class="nav-row">
+      <button class="link-btn" id="back-btn" disabled>← Back</button>
+      <button class="link-btn" id="restart-btn-quiz">Start over</button>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="screen-results" class="card hidden">
+    <div class="result-hero">
+      <p class="eyebrow">Your Category 2 strength</p>
+      <h2 id="r-band-name">Band</h2>
+      <p id="r-band-desc">Description</p>
+    </div>
+
+    <h3 class="section-h">What this means for your star level &amp; reimbursement</h3>
+    <p id="r-plain" style="margin:0;font-size:16px;"></p>
+
+    <h3 class="section-h">Your five interaction areas</h3>
+    <p style="margin:0 0 12px;font-size:14px;color:var(--muted);" class="ui-font">Each area is scored out of 6. Your lowest area (highlighted) is usually the fastest place to gain points.</p>
+    <div class="bars" id="r-bars"></div>
+
+    <h3 class="section-h">Where to focus first</h3>
+    <ul class="priorities" id="r-priorities"></ul>
+
+    <h3 class="section-h">Your notes &amp; next steps</h3>
+    <p style="margin:0 0 10px;font-size:14px;color:var(--muted);" class="ui-font">Jot down which classrooms or teachers to coach first, and any questions. Your notes are included when you save or print.</p>
+    <textarea class="notes-area" id="r-notes" placeholder="e.g. Focus area: Language Facilitation. Start with the 3-year-old room. Plan: model open-ended questions during centers this week. Question for my coach: how do assessors observe this?"></textarea>
+    <div class="notes-print" id="r-notes-print"></div>
+
+    <div class="cta" id="r-cta">
+      <h3 id="cta-title">Want help raising your Category 2 score?</h3>
+      <p id="cta-body">A short conversation can turn these focus areas into a simple coaching plan for your teachers. Let's talk through your results.</p>
+      <a class="cta-btn" id="cta-link" href="#" target="_blank" rel="noopener">Book a free consult</a>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-primary" onclick="window.print()">Save / Print results</button>
+      <button class="btn-ghost" id="restart-btn-results">Retake the check</button>
+    </div>
+
+    <div class="disclaimer">
+      <p>This self-check is a coaching tool, not an official Texas Rising Star assessment or score. It mirrors the interaction areas in Category 2 to help you focus your improvement efforts. Your official star level is determined by a certified TRS assessor.</p>
+      <p style="margin-bottom:0;">Based on the Texas Rising Star Certification Guidelines, Category 2: Teacher–Child Interactions (weighted 40%). See <a href="https://www.childcare.texas.gov/texas-rising-star/about-texas-rising-star/assessment-categories" target="_blank" rel="noopener">Texas Child Care Connection — Assessment Categories</a>.</p>
+    </div>
+  </section>
+
+  <footer class="foot">Your answers never leave your browser.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ===========================================================================
+  // ADVISOR SETTINGS — edit to point providers to you.
+  // ===========================================================================
+  var ADVISOR = {
+    enabled: true,
+    title: "Want help raising your Category 2 score?",
+    body: "A short conversation can turn these focus areas into a simple coaching plan for your teachers. Let's talk through your results.",
+    buttonText: "Book a free consult",
+    link: "https://calendar.google.com/calendar/appointments/schedules/AcZssZ2cUi9y5W0yfles1HzBgXX-tPIo_pZ_KWw1MmGD5o514TWNGl5PAi2SAKptNTs1kGKJFGX3_0hW"
+  };
+
+  // ---- The five Category 2 interaction areas (instruction-focused) ----------
+  var SUBS = {
+    warm:       { label: "Warm & Responsive Style" },
+    language:   { label: "Language Facilitation & Support" },
+    learning:   { label: "Instructional Support & Learning" },
+    play:       { label: "Play-Based Interactions & Engagement" },
+    regulation: { label: "Supporting Regulation & Guidance" }
+  };
+
+  // Coaching tips shown when an area is a focus area.
+  var TIPS = {
+    warm: [
+      "Coach teachers to get down to children's eye level and use a warm tone, smiles, and gentle reassurance throughout the day.",
+      "Practice noticing children's cues and signs of stress and responding quickly and calmly.",
+      "Replace harsh or critical words with calm redirection — especially during transitions and conflicts."
+    ],
+    language: [
+      "Train teachers to have real back-and-forth conversations, adding new words and building on what children say.",
+      "Encourage lots of open-ended questions (“What do you think will happen?”) instead of yes/no questions.",
+      "Narrate and describe during play and routines so rich vocabulary happens all day long."
+    ],
+    learning: [
+      "Tie activities to clear learning goals and build on what children already know.",
+      "Use scaffolding — hints, prompts, and just-enough help so each child reaches the next step.",
+      "Prompt thinking with “why” and “how” questions, and let children predict, problem-solve, and explain."
+    ],
+    play: [
+      "Have teachers join and extend children's play, following their interests rather than directing every step.",
+      "Keep children actively engaged with little wait time, and plan smooth transitions.",
+      "Use a mix of individual and small-group time, and offer children real choices."
+    ],
+    regulation: [
+      "Help children name and manage feelings; model calming strategies (co-regulation).",
+      "Use positive guidance — clear expectations, redirection, and encouragement — instead of punishment.",
+      "Coach peer problem-solving so children learn to resolve conflicts themselves."
+    ]
+  };
+
+  // 3 questions per area = 15 total. Scale: Not yet (0) / Sometimes (1) / Consistently (2).
+  var QUESTIONS = [
+    { sub: "warm", text: "Teachers get down to children's eye level and use a warm tone, smiles, and gentle reassurance throughout the day." },
+    { sub: "warm", text: "Teachers notice children's cues and signs of stress and respond promptly and sensitively." },
+    { sub: "warm", text: "Teachers stay calm and patient during conflicts and transitions, avoiding harsh or critical language." },
+
+    { sub: "language", text: "Teachers hold back-and-forth conversations, adding new words and building on what children say." },
+    { sub: "language", text: "Teachers ask open-ended questions that get children thinking and talking, not just yes/no questions." },
+    { sub: "language", text: "Teachers narrate, describe, and label during play and routines to build vocabulary." },
+
+    { sub: "learning", text: "Teachers connect activities to clear learning goals and build on what children already know." },
+    { sub: "learning", text: "Teachers scaffold learning — giving hints and just-enough help so each child reaches the next step." },
+    { sub: "learning", text: "Teachers prompt thinking with “why/how” questions and let children predict and problem-solve." },
+
+    { sub: "play", text: "Teachers join children's play to extend and deepen it, following their interests." },
+    { sub: "play", text: "Children stay actively engaged, with little wasted or waiting time." },
+    { sub: "play", text: "Teachers offer real choices and use a mix of individual and small-group activities." },
+
+    { sub: "regulation", text: "Teachers help children name and manage their feelings and calm down (co-regulation)." },
+    { sub: "regulation", text: "Teachers use positive guidance — clear expectations, redirection, encouragement — instead of punishment." },
+    { sub: "regulation", text: "Teachers help children resolve conflicts and build social skills with peers." }
+  ];
+
+  // ---- Result bands (by total out of 30) ------------------------------------
+  var BANDS = [
+    {
+      min: 0.90,
+      name: "Exemplary — 4-Star strength",
+      desc: "Your teacher–child interactions are a genuine strength and reflect the top of the Category 2 scale.",
+      plain: "Interactions this strong put you in the range top-rated 4-Star programs reach in Category 2 — the category that carries the most weight in your overall star level and the highest reimbursement tier. Your job now is to protect this: keep coaching consistent as staff change, and use your strongest teachers to mentor newer ones so every classroom stays at this level."
+    },
+    {
+      min: 0.75,
+      name: "Strong — in the 4-Star range",
+      desc: "Your interactions are solid across the board, with a few areas that could be even more consistent.",
+      plain: "You're in strong shape in the category that matters most for your star level and reimbursement. The gap between “strong” and “top” is usually consistency — making the best practices happen in every classroom, every day, not just in your best rooms. Tightening up your lowest area below could be enough to lift your Category 2 score and protect a higher reimbursement rate."
+    },
+    {
+      min: 0.50,
+      name: "On the rise — close to your next star",
+      desc: "Good things are happening, but the quality varies between teachers, rooms, or times of day.",
+      plain: "Because Category 2 is 40% of your score, this is the highest-leverage place to invest. Small, focused coaching here can move your star level — and your reimbursement rate — more than improvements in any other category. Start with your lowest area below and aim to make those practices consistent across all classrooms."
+    },
+    {
+      min: 0.0,
+      name: "Building your foundation",
+      desc: "There's a lot of opportunity here — and because Category 2 is so heavily weighted, it's the best place to start.",
+      plain: "This is actually good news: the most heavily weighted category (40% of your score) is also where you have the most room to grow, so focused effort here pays off fastest in both star level and reimbursement. You don't need to fix everything at once. Pick the one focus area below, coach it across your classrooms for a few weeks, then move to the next."
+    }
+  ];
+
+  function bandFor(pct) {
+    for (var i = 0; i < BANDS.length; i++) { if (pct >= BANDS[i].min) return BANDS[i]; }
+    return BANDS[BANDS.length - 1];
+  }
+
+  // ---- State ----------------------------------------------------------------
+  var current = 0;
+  var answers = new Array(QUESTIONS.length).fill(null);
+
+  var el = function (id) { return document.getElementById(id); };
+  var screens = { intro: el("screen-intro"), quiz: el("screen-quiz"), results: el("screen-results") };
+
+  function show(name) {
+    Object.keys(screens).forEach(function (k) { screens[k].classList.toggle("hidden", k !== name); });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function renderQuestion() {
+    var q = QUESTIONS[current];
+    el("q-stage").textContent = SUBS[q.sub].label;
+    el("q-text").textContent = q.text;
+    el("progress-count").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+    var pct = Math.round((current / QUESTIONS.length) * 100);
+    el("progress-pct").textContent = pct + "%";
+    el("progress-fill").style.width = pct + "%";
+    el("back-btn").disabled = current === 0;
+  }
+
+  function answerQuestion(value) {
+    answers[current] = value;
+    if (current < QUESTIONS.length - 1) { current++; renderQuestion(); }
+    else { el("progress-fill").style.width = "100%"; el("progress-pct").textContent = "100%"; showResults(); }
+  }
+
+  function score() {
+    var subTotals = { warm: 0, language: 0, learning: 0, play: 0, regulation: 0 };
+    QUESTIONS.forEach(function (q, i) { subTotals[q.sub] += (answers[i] || 0); });
+    var total = 0;
+    Object.keys(subTotals).forEach(function (k) { total += subTotals[k]; });
+    return { subTotals: subTotals, total: total, max: QUESTIONS.length * 2 };
+  }
+
+  function showResults() {
+    var s = score();
+    var pct = s.total / s.max;
+    var band = bandFor(pct);
+
+    el("r-band-name").textContent = band.name;
+    el("r-band-desc").textContent = band.desc;
+    el("r-plain").textContent = band.plain;
+
+    // Find lowest area(s) to highlight and recommend.
+    var order = Object.keys(SUBS);
+    var sorted = order.slice().sort(function (a, b) { return s.subTotals[a] - s.subTotals[b]; });
+    var lowest = sorted[0];
+    // Focus on up to 2 lowest areas (only those scoring 5/6 or below).
+    var focus = sorted.filter(function (k) { return s.subTotals[k] <= 5; }).slice(0, 2);
+    if (focus.length === 0) focus = [sorted[0]];
+
+    // Bars (out of 6), lowest highlighted.
+    var barsEl = el("r-bars");
+    barsEl.innerHTML = "";
+    order.forEach(function (k) {
+      var v = s.subTotals[k];
+      var isLow = k === lowest;
+      var row = document.createElement("div");
+      row.className = "bar-row";
+      row.innerHTML =
+        '<div class="bar-label' + (isLow ? " is-top" : "") + '">' + SUBS[k].label + '</div>' +
+        '<div class="bar-track"><div class="bar-fill' + (isLow ? " is-top" : "") + '" style="width:' + (v / 6 * 100) + '%"></div></div>' +
+        '<div class="bar-val">' + v + '/6</div>';
+      barsEl.appendChild(row);
+    });
+
+    // Focus recommendations.
+    var ul = el("r-priorities");
+    ul.innerHTML = "";
+    focus.forEach(function (k) {
+      var li = document.createElement("li");
+      var strong = document.createElement("strong");
+      strong.textContent = SUBS[k].label + " (" + s.subTotals[k] + "/6)";
+      li.appendChild(strong);
+      var inner = document.createElement("ul");
+      inner.style.margin = "6px 0 0";
+      inner.style.paddingLeft = "18px";
+      TIPS[k].forEach(function (t) {
+        var tli = document.createElement("li");
+        tli.style.fontSize = "15px";
+        tli.style.marginBottom = "4px";
+        tli.textContent = t;
+        inner.appendChild(tli);
+      });
+      li.appendChild(inner);
+      ul.appendChild(li);
+    });
+
+    // Advisor CTA
+    var cta = el("r-cta");
+    if (ADVISOR.enabled && ADVISOR.link) {
+      el("cta-title").textContent = ADVISOR.title;
+      el("cta-body").textContent = ADVISOR.body;
+      var link = el("cta-link");
+      link.textContent = ADVISOR.buttonText;
+      link.href = ADVISOR.link;
+      if (ADVISOR.link.indexOf("mailto:") === 0) link.removeAttribute("target");
+      cta.classList.remove("hidden");
+    } else { cta.classList.add("hidden"); }
+
+    show("results");
+  }
+
+  // Notes -> print mirror
+  var notesEl = el("r-notes");
+  var notesPrint = el("r-notes-print");
+  if (notesEl) {
+    notesEl.addEventListener("input", function () {
+      if (notesEl.value.trim()) {
+        notesPrint.textContent = notesEl.value;
+        notesPrint.style.display = "block";
+        notesPrint.style.whiteSpace = "pre-wrap";
+      } else { notesPrint.style.display = "none"; }
+    });
+  }
+
+  function restart() {
+    current = 0;
+    answers = new Array(QUESTIONS.length).fill(null);
+    renderQuestion();
+    show("quiz");
+  }
+
+  el("start-btn").addEventListener("click", function () { renderQuestion(); show("quiz"); });
+  Array.prototype.forEach.call(document.querySelectorAll(".answer-btn"), function (btn) {
+    btn.addEventListener("click", function () { answerQuestion(Number(btn.getAttribute("data-answer"))); });
+  });
+  el("back-btn").addEventListener("click", function () { if (current > 0) { current--; renderQuestion(); } });
+  el("restart-btn-quiz").addEventListener("click", restart);
+  el("restart-btn-results").addEventListener("click", restart);
+
+  document.addEventListener("keydown", function (e) {
+    if (screens.quiz.classList.contains("hidden")) return;
+    var k = e.key.toLowerCase();
+    if (k === "1") answerQuestion(0);
+    else if (k === "2") answerQuestion(1);
+    else if (k === "3") answerQuestion(2);
+    else if (k === "arrowleft" || k === "backspace") { if (current > 0) { e.preventDefault(); current--; renderQuestion(); } }
+  });
+})();
+</script>
+<script>
+  // Report height when embedded in an iframe (e.g. a GoHighLevel page).
+  (function () {
+    if (window.parent === window) return;
+    function postHeight() {
+      try { parent.postMessage({ bmcgQuizHeight: Math.ceil(document.body.scrollHeight) }, "*"); } catch (e) {}
+    }
+    window.addEventListener("load", postHeight);
+    if (window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
+    if (window.MutationObserver) new MutationObserver(postHeight).observe(document.body, { subtree: true, childList: true, attributes: true });
+    setInterval(postHeight, 800);
+  })();
+</script>
+</body>
+</html>
