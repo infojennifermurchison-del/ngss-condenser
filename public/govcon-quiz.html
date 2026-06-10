@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Government Contracting Readiness Quiz</title>
+<link rel="stylesheet" href="/quiz-styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">Government Contracting</p>
+    <h1 class="title">Are You Ready to Win Government Contracts?</h1>
+    <p class="subtitle">A quick, plain-English check of where you stand — from registrations and certifications to bidding and delivery — with a clear next step based on your answers.</p>
+  </header>
+
+  <!-- INTRO -->
+  <section id="screen-intro" class="card">
+    <p class="meta-line">About 5 minutes · 20 yes/no questions · No sign-up</p>
+    <p style="margin-top:0;font-size:16px;">Government contracting rewards preparation more than almost anything else. The steps build on each other — you have to be registered before you can be certified, positioned before you bid, and ready to deliver before you win. This check shows which step you're on and exactly where to focus next.</p>
+    <ul class="intro-list">
+      <li>Answer simple "Yes" or "No" questions about how ready your business is.</li>
+      <li>See your readiness level and your strength in each of the five areas.</li>
+      <li>Get a clear "start here first" step with concrete actions.</li>
+    </ul>
+    <button class="btn-primary" id="start-btn">Start the quiz →</button>
+  </section>
+
+  <!-- QUESTIONS -->
+  <section id="screen-quiz" class="card hidden">
+    <div class="progress-row">
+      <span id="progress-count">Question 1 of 20</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+
+    <span class="stage-tag" id="q-stage">Foundations &amp; Registrations</span>
+    <p class="question" id="q-text">Question text goes here.</p>
+
+    <div class="answers">
+      <button class="answer-btn yes" data-answer="1"><span class="glyph">✓</span> Yes</button>
+      <button class="answer-btn" data-answer="0"><span class="glyph">✕</span> No / Not sure</button>
+    </div>
+
+    <div class="nav-row">
+      <button class="link-btn" id="back-btn" disabled>← Back</button>
+      <button class="link-btn" id="restart-btn-quiz">Start over</button>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="screen-results" class="card hidden">
+    <div class="result-hero">
+      <p class="eyebrow">Your readiness level</p>
+      <h2 id="r-band-name">Level</h2>
+      <p id="r-band-desc">Description</p>
+    </div>
+
+    <h3 class="section-h">What this means</h3>
+    <p id="r-plain" style="margin:0;font-size:16px;"></p>
+
+    <h3 class="section-h">Your five readiness areas</h3>
+    <p style="margin:0 0 12px;font-size:14px;color:var(--muted);" class="ui-font">Each area is scored out of 4. These steps build on each other from top to bottom.</p>
+    <div class="bars" id="r-bars"></div>
+
+    <h3 class="section-h">Start here first</h3>
+    <ul class="priorities" id="r-priorities"></ul>
+
+    <h3 class="section-h">Your notes &amp; next steps</h3>
+    <p style="margin:0 0 10px;font-size:14px;color:var(--muted);" class="ui-font">Jot down your first action and any questions. Your notes are included when you save or print.</p>
+    <textarea class="notes-area" id="r-notes" placeholder="e.g. First step: register in SAM.gov and get our UEI. Then identify NAICS codes. Question for my advisor: which set-asides do we qualify for?"></textarea>
+    <div class="notes-print" id="r-notes-print"></div>
+
+    <div class="cta" id="r-cta">
+      <h3 id="cta-title">Want a clear path to your first (or next) contract?</h3>
+      <p id="cta-body">A short conversation can turn these steps into a simple action plan. Let's talk through your results.</p>
+      <a class="cta-btn" id="cta-link" href="#" target="_blank" rel="noopener">Book a free consult</a>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-primary" onclick="window.print()">Save / Print results</button>
+      <button class="btn-ghost" id="restart-btn-results">Retake the quiz</button>
+    </div>
+
+    <div class="disclaimer">
+      <p>This quiz gives general guidance to help you focus your government-contracting efforts. It is not legal, financial, or certification advice. Requirements change, so confirm specifics with official sources such as <a href="https://sam.gov" target="_blank" rel="noopener">SAM.gov</a> and the <a href="https://www.sba.gov" target="_blank" rel="noopener">U.S. Small Business Administration</a>.</p>
+    </div>
+  </section>
+
+  <footer class="foot">Your answers never leave your browser.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ===========================================================================
+  // ADVISOR SETTINGS — edit to point clients to you.
+  // ===========================================================================
+  var ADVISOR = {
+    enabled: true,
+    title: "Want a clear path to your first (or next) contract?",
+    body: "A short conversation can turn these steps into a simple action plan. Let's talk through your results.",
+    buttonText: "Book a free consult",
+    link: "https://calendar.google.com/calendar/appointments/schedules/AcZssZ2cUi9y5W0yfles1HzBgXX-tPIo_pZ_KWw1MmGD5o514TWNGl5PAi2SAKptNTs1kGKJFGX3_0hW"
+  };
+
+  // ---- Five readiness areas, in the order they build on each other ----------
+  var AREAS = ["foundations", "certs", "positioning", "pipeline", "performance"];
+  var AREA_LABELS = {
+    foundations: "Foundations & Registrations",
+    certs:       "Certifications & Set-Asides",
+    positioning: "Market Positioning",
+    pipeline:    "Pipeline & Bidding",
+    performance: "Performance & Growth"
+  };
+
+  var TIPS = {
+    foundations: [
+      "Register (free) at SAM.gov and get your UEI — nothing can move forward until this is active.",
+      "Pin down the NAICS codes that describe what you sell; they drive which opportunities and set-asides apply to you.",
+      "Make sure your entity, licenses, EIN, and a business bank account are clean and current."
+    ],
+    certs: [
+      "Check which set-asides you may qualify for (WOSB/EDWOSB, 8(a), HUBZone, SDVOSB) — they can dramatically reduce your competition.",
+      "For Texas state and local work, register as a HUB (Historically Underutilized Business).",
+      "Decide whether you're targeting federal, state, or local work first, and focus your setup there."
+    ],
+    positioning: [
+      "Build a sharp one-page capability statement: who you are, what you do, your codes, what makes you different, and contact info.",
+      "Identify the specific agencies and prime contractors that actually buy what you offer.",
+      "Gather proof of past performance — even commercial or non-government work counts when you're starting out."
+    ],
+    pipeline: [
+      "Set a weekly routine to scan SAM.gov, agency forecasts, and bid boards for opportunities that fit.",
+      "Use a quick bid/no-bid checklist so you only spend time on work you can realistically win.",
+      "Pursue subcontracting and teaming with prime contractors — often the fastest route to a first contract and past performance."
+    ],
+    performance: [
+      "Line up cash flow or financing so you can deliver while waiting 30+ days to get paid.",
+      "Put simple systems in place for deliverables, reporting, and compliance before you win.",
+      "Capture references and a record of strong past performance from every job — it's how you win the next, bigger one."
+    ]
+  };
+
+  // 4 questions per area = 20 total.
+  var QUESTIONS = [
+    { area: "foundations", text: "Is your business registered in SAM.gov with an active UEI (Unique Entity ID)?" },
+    { area: "foundations", text: "Have you identified the NAICS codes that match what your business sells?" },
+    { area: "foundations", text: "Are your business entity, licenses, and EIN set up and in good standing?" },
+    { area: "foundations", text: "Do you have a business bank account and basic bookkeeping that could stand up to a simple review?" },
+
+    { area: "certs", text: "Do you know which small-business set-asides you might qualify for (e.g., WOSB, 8(a), HUBZone, SDVOSB)?" },
+    { area: "certs", text: "Have you completed — or started — at least one certification that fits your business?" },
+    { area: "certs", text: "If you want state or local work, are you registered as a Texas HUB or in the relevant vendor system?" },
+    { area: "certs", text: "Do you understand the difference between federal, state, and local contracting and which you're targeting?" },
+
+    { area: "positioning", text: "Do you have a one-page capability statement ready to send to buyers?" },
+    { area: "positioning", text: "Have you identified specific agencies or prime contractors that buy what you offer?" },
+    { area: "positioning", text: "Can you point to past work or clients that proves you can deliver what you're bidding on?" },
+    { area: "positioning", text: "Have you researched who currently wins these contracts and at roughly what price?" },
+
+    { area: "pipeline", text: "Are you regularly finding opportunities (SAM.gov, agency forecasts, bid boards)?" },
+    { area: "pipeline", text: "Do you have a simple way to decide which bids are worth pursuing (bid/no-bid)?" },
+    { area: "pipeline", text: "Have you connected with prime contractors or partners about teaming or subcontracting?" },
+    { area: "pipeline", text: "Have you submitted at least one bid or quote — or are you ready to?" },
+
+    { area: "performance", text: "Do you have the cash flow or financing to deliver before you get paid (government often pays in 30+ days)?" },
+    { area: "performance", text: "Do you have systems to manage a contract's deliverables, reporting, and compliance?" },
+    { area: "performance", text: "Are you collecting strong past-performance records and references from each job?" },
+    { area: "performance", text: "Do you have a plan to grow — more contracts, larger ceilings, or new agencies?" }
+  ];
+
+  // ---- Readiness bands (by total Yes out of 20) -----------------------------
+  var BANDS = [
+    {
+      min: 0.85,
+      name: "Active & Growing",
+      desc: "You're set up, positioned, and ready to win and deliver.",
+      plain: "You've done the hard setup work. Now it's about winning more and delivering well — protecting cash flow, managing contracts cleanly, and building the past-performance record that wins bigger work. Use the focus step below to shore up any remaining gap."
+    },
+    {
+      min: 0.60,
+      name: "Bid-Ready",
+      desc: "You have the foundations and positioning to start competing for work.",
+      plain: "You're ready to compete. The biggest gains now come from a steady pipeline and sharp, well-chosen bids. Tighten the area below, then focus on finding the right opportunities and submitting strong, on-time responses."
+    },
+    {
+      min: 0.30,
+      name: "Getting Set Up",
+      desc: "You've started laying the groundwork; now it's about filling the gaps.",
+      plain: "You're past square one. Focus on closing the gaps in your earliest unfinished area below — in contracting the steps build on each other, so registrations and certifications need to be solid before bidding pays off."
+    },
+    {
+      min: 0.0,
+      name: "Exploring — let's build your foundation",
+      desc: "You're early in the journey, and that's a fine place to start.",
+      plain: "Government contracting rewards preparation. Right now the goal is simply to get registered and set up correctly so you can compete. Start with the focus step below — once your foundations are in place, the rest opens up quickly."
+    }
+  ];
+
+  function bandFor(pct) {
+    for (var i = 0; i < BANDS.length; i++) { if (pct >= BANDS[i].min) return BANDS[i]; }
+    return BANDS[BANDS.length - 1];
+  }
+
+  // ---- State ----------------------------------------------------------------
+  var current = 0;
+  var answers = new Array(QUESTIONS.length).fill(null);
+
+  var el = function (id) { return document.getElementById(id); };
+  var screens = { intro: el("screen-intro"), quiz: el("screen-quiz"), results: el("screen-results") };
+
+  function show(name) {
+    Object.keys(screens).forEach(function (k) { screens[k].classList.toggle("hidden", k !== name); });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function renderQuestion() {
+    var q = QUESTIONS[current];
+    el("q-stage").textContent = AREA_LABELS[q.area];
+    el("q-text").textContent = q.text;
+    el("progress-count").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+    var pct = Math.round((current / QUESTIONS.length) * 100);
+    el("progress-pct").textContent = pct + "%";
+    el("progress-fill").style.width = pct + "%";
+    el("back-btn").disabled = current === 0;
+  }
+
+  function answerQuestion(value) {
+    answers[current] = value;
+    if (current < QUESTIONS.length - 1) { current++; renderQuestion(); }
+    else { el("progress-fill").style.width = "100%"; el("progress-pct").textContent = "100%"; showResults(); }
+  }
+
+  function score() {
+    var areaTotals = { foundations: 0, certs: 0, positioning: 0, pipeline: 0, performance: 0 };
+    QUESTIONS.forEach(function (q, i) { if (answers[i] === 1) areaTotals[q.area]++; });
+    var total = 0;
+    AREAS.forEach(function (k) { total += areaTotals[k]; });
+    return { areaTotals: areaTotals, total: total, max: QUESTIONS.length };
+  }
+
+  function showResults() {
+    var s = score();
+    var band = bandFor(s.total / s.max);
+
+    el("r-band-name").textContent = band.name;
+    el("r-band-desc").textContent = band.desc;
+    el("r-plain").textContent = band.plain;
+
+    // "Start here first" = earliest area (in build order) with any gap.
+    var focusArea = AREAS.find(function (k) { return s.areaTotals[k] < 4; }) || "performance";
+
+    // Bars (out of 4), focus area highlighted.
+    var barsEl = el("r-bars");
+    barsEl.innerHTML = "";
+    AREAS.forEach(function (k) {
+      var v = s.areaTotals[k];
+      var isFocus = k === focusArea;
+      var row = document.createElement("div");
+      row.className = "bar-row";
+      row.innerHTML =
+        '<div class="bar-label' + (isFocus ? " is-top" : "") + '">' + AREA_LABELS[k] + '</div>' +
+        '<div class="bar-track"><div class="bar-fill' + (isFocus ? " is-top" : "") + '" style="width:' + (v / 4 * 100) + '%"></div></div>' +
+        '<div class="bar-val">' + v + '/4</div>';
+      barsEl.appendChild(row);
+    });
+
+    // Focus actions.
+    var ul = el("r-priorities");
+    ul.innerHTML = "";
+    var li = document.createElement("li");
+    var strong = document.createElement("strong");
+    strong.textContent = AREA_LABELS[focusArea] + " (" + s.areaTotals[focusArea] + "/4)";
+    li.appendChild(strong);
+    var inner = document.createElement("ul");
+    inner.style.margin = "6px 0 0";
+    inner.style.paddingLeft = "18px";
+    TIPS[focusArea].forEach(function (t) {
+      var tli = document.createElement("li");
+      tli.style.fontSize = "15px";
+      tli.style.marginBottom = "4px";
+      tli.textContent = t;
+      inner.appendChild(tli);
+    });
+    li.appendChild(inner);
+    ul.appendChild(li);
+
+    // Advisor CTA
+    var cta = el("r-cta");
+    if (ADVISOR.enabled && ADVISOR.link) {
+      el("cta-title").textContent = ADVISOR.title;
+      el("cta-body").textContent = ADVISOR.body;
+      var link = el("cta-link");
+      link.textContent = ADVISOR.buttonText;
+      link.href = ADVISOR.link;
+      if (ADVISOR.link.indexOf("mailto:") === 0) link.removeAttribute("target");
+      cta.classList.remove("hidden");
+    } else { cta.classList.add("hidden"); }
+
+    show("results");
+  }
+
+  // Notes -> print mirror
+  var notesEl = el("r-notes");
+  var notesPrint = el("r-notes-print");
+  if (notesEl) {
+    notesEl.addEventListener("input", function () {
+      if (notesEl.value.trim()) {
+        notesPrint.textContent = notesEl.value;
+        notesPrint.style.display = "block";
+        notesPrint.style.whiteSpace = "pre-wrap";
+      } else { notesPrint.style.display = "none"; }
+    });
+  }
+
+  function restart() {
+    current = 0;
+    answers = new Array(QUESTIONS.length).fill(null);
+    renderQuestion();
+    show("quiz");
+  }
+
+  el("start-btn").addEventListener("click", function () { renderQuestion(); show("quiz"); });
+  Array.prototype.forEach.call(document.querySelectorAll(".answer-btn"), function (btn) {
+    btn.addEventListener("click", function () { answerQuestion(Number(btn.getAttribute("data-answer"))); });
+  });
+  el("back-btn").addEventListener("click", function () { if (current > 0) { current--; renderQuestion(); } });
+  el("restart-btn-quiz").addEventListener("click", restart);
+  el("restart-btn-results").addEventListener("click", restart);
+
+  document.addEventListener("keydown", function (e) {
+    if (screens.quiz.classList.contains("hidden")) return;
+    var k = e.key.toLowerCase();
+    if (k === "y" || k === "1") answerQuestion(1);
+    else if (k === "n" || k === "0") answerQuestion(0);
+    else if (k === "arrowleft" || k === "backspace") { if (current > 0) { e.preventDefault(); current--; renderQuestion(); } }
+  });
+})();
+</script>
+<script>
+  // Report height when embedded in an iframe (e.g. a GoHighLevel page).
+  (function () {
+    if (window.parent === window) return;
+    function postHeight() {
+      try { parent.postMessage({ bmcgQuizHeight: Math.ceil(document.body.scrollHeight) }, "*"); } catch (e) {}
+    }
+    window.addEventListener("load", postHeight);
+    if (window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
+    if (window.MutationObserver) new MutationObserver(postHeight).observe(document.body, { subtree: true, childList: true, attributes: true });
+    setInterval(postHeight, 800);
+  })();
+</script>
+</body>
+</html>

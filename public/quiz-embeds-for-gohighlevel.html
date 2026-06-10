@@ -1,0 +1,70 @@
+<!-- ===========================================================================
+     QUIZ EMBED CODES FOR GOHIGHLEVEL
+     ---------------------------------------------------------------------------
+     You have three quizzes, one for each audience. Each one goes on its own
+     page in GoHighLevel (the page each home-page button links to).
+
+     HOW TO USE:
+       1. Finish deploying the site to Vercel (one time).
+       2. Below, replace  YOUR-PROJECT.vercel.app  with your real Vercel
+          address in ALL THREE blocks (keep the /xxx-quiz.html part).
+       3. For each quiz, copy its block and paste it into a GoHighLevel
+          "Custom Code / HTML" element on the matching page.
+
+     Each block loads the live quiz, so any future updates appear automatically
+     and the frame resizes itself to fit.
+     =========================================================================== -->
+
+
+<!-- ========== 1) BUSINESS GROWTH QUIZ  (the "I'm a business" page) ========== -->
+<div style="max-width: 760px; margin: 0 auto;">
+  <iframe id="bmcg-quiz-business"
+          src="https://YOUR-PROJECT.vercel.app/business-quiz.html"
+          title="Business Growth Stage Quiz"
+          scrolling="no"
+          style="width: 100%; border: 0; min-height: 620px; overflow: hidden;"></iframe>
+</div>
+<script>
+  (function () {
+    var f = document.getElementById("bmcg-quiz-business");
+    window.addEventListener("message", function (e) {
+      if (e.data && typeof e.data.bmcgQuizHeight === "number") f.style.height = (e.data.bmcgQuizHeight + 24) + "px";
+    });
+  })();
+</script>
+
+
+<!-- ========== 2) DAYCARE / TEXAS RISING STAR QUIZ  (the daycare page) ========== -->
+<div style="max-width: 760px; margin: 0 auto;">
+  <iframe id="bmcg-quiz-daycare"
+          src="https://YOUR-PROJECT.vercel.app/daycare-quiz.html"
+          title="Texas Rising Star Category 2 Check"
+          scrolling="no"
+          style="width: 100%; border: 0; min-height: 620px; overflow: hidden;"></iframe>
+</div>
+<script>
+  (function () {
+    var f = document.getElementById("bmcg-quiz-daycare");
+    window.addEventListener("message", function (e) {
+      if (e.data && typeof e.data.bmcgQuizHeight === "number") f.style.height = (e.data.bmcgQuizHeight + 24) + "px";
+    });
+  })();
+</script>
+
+
+<!-- ========== 3) GOVERNMENT CONTRACTING QUIZ  (the govcon page) ========== -->
+<div style="max-width: 760px; margin: 0 auto;">
+  <iframe id="bmcg-quiz-govcon"
+          src="https://YOUR-PROJECT.vercel.app/govcon-quiz.html"
+          title="Government Contracting Readiness Quiz"
+          scrolling="no"
+          style="width: 100%; border: 0; min-height: 620px; overflow: hidden;"></iframe>
+</div>
+<script>
+  (function () {
+    var f = document.getElementById("bmcg-quiz-govcon");
+    window.addEventListener("message", function (e) {
+      if (e.data && typeof e.data.bmcgQuizHeight === "number") f.style.height = (e.data.bmcgQuizHeight + 24) + "px";
+    });
+  })();
+</script>
