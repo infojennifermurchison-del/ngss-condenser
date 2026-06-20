@@ -1,0 +1,148 @@
+<!-- =====================================================================
+     HERO HEADER + FOOTER  (with "back to home" links)
+     ---------------------------------------------------------------------
+     HOW TO USE:
+       • Paste the HEADER block at the TOP of a page / code block.
+       • Paste the FOOTER block at the BOTTOM of the same page.
+       • In BOTH blocks, change these two things:
+           1) https://YOUR-HOME-PAGE-URL   →  your real home page link
+           2) Your Business Name           →  your brand name
+       • They match your quiz colors and work on phones and computers.
+     ===================================================================== -->
+
+
+<!-- ============================ HERO HEADER ============================ -->
+<style>
+  .bmcg-hero {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #FAF7F2;
+    border-bottom: 2px solid #0F4C5C;
+  }
+  .bmcg-hero__inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  /* Brand (clickable → home) */
+  .bmcg-hero__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .bmcg-hero__logo {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 3px;
+    background: #0F4C5C;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .bmcg-hero__name {
+    font-size: 19px;
+    font-weight: 700;
+    color: #0F4C5C;
+    line-height: 1.1;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .bmcg-hero__tag {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #C99700;
+    margin-top: 2px;
+  }
+  /* Back-to-home button */
+  .bmcg-hero__back {
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0F4C5C;
+    border: 1.5px solid #0F4C5C;
+    padding: 9px 16px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+  }
+  .bmcg-hero__back:hover { background: #0F4C5C; color: #fff; }
+  @media (max-width: 460px) {
+    .bmcg-hero__inner { justify-content: center; text-align: center; }
+  }
+</style>
+
+<header class="bmcg-hero">
+  <div class="bmcg-hero__inner">
+
+    <!-- Brand: the whole thing links home. Change the URL + name + initial. -->
+    <a class="bmcg-hero__brand" href="https://YOUR-HOME-PAGE-URL">
+      <span class="bmcg-hero__logo">B</span>
+      <span class="bmcg-hero__name">
+        Your Business Name
+        <span class="bmcg-hero__tag">Home</span>
+      </span>
+    </a>
+
+    <!-- Explicit back-home button -->
+    <a class="bmcg-hero__back" href="https://YOUR-HOME-PAGE-URL">← Back to home</a>
+
+  </div>
+</header>
+<!-- ========================== END HERO HEADER ========================= -->
+
+
+
+
+<!-- ============================== FOOTER ============================== -->
+<style>
+  .bmcg-foot {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #FAF7F2;
+    border-top: 1px solid #D9D2C5;
+    margin-top: 40px;
+  }
+  .bmcg-foot__inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 22px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: #5B5B57;
+  }
+  .bmcg-foot__home {
+    text-decoration: none;
+    font-weight: 700;
+    color: #0F4C5C;
+    border-bottom: 1.5px solid #0F4C5C;
+    padding-bottom: 1px;
+  }
+  .bmcg-foot__home:hover { color: #C99700; border-color: #C99700; }
+  .bmcg-foot__copy { color: #78716C; }
+  @media (max-width: 460px) {
+    .bmcg-foot__inner { justify-content: center; text-align: center; }
+  }
+</style>
+
+<footer class="bmcg-foot">
+  <div class="bmcg-foot__inner">
+    <a class="bmcg-foot__home" href="https://YOUR-HOME-PAGE-URL">← Back to home</a>
+    <span class="bmcg-foot__copy">© 2026 Your Business Name. All rights reserved.</span>
+  </div>
+</footer>
+<!-- ============================ END FOOTER =========================== -->
