@@ -117,6 +117,7 @@
       <div class="tab admin-only hidden" data-tab="approvals">Approvals <span id="pendingCount" class="badge ml-1 hidden" style="background:var(--gold-soft);color:var(--gold)"></span></div>
       <div class="tab admin-only hidden" data-tab="reports">Reports</div>
       <div class="tab admin-only hidden" data-tab="manage">Manage Students</div>
+      <div class="tab admin-only hidden" data-tab="team">Team</div>
     </div>
   </header>
 
@@ -542,6 +543,28 @@
       </div>
     </section>
 
+    <!-- ---------- TEAM TAB (admin) ---------- -->
+    <section id="tab-team" class="hidden">
+      <div class="max-w-2xl space-y-5">
+        <div class="card p-6">
+          <h2 class="text-lg font-bold serif mb-1" style="color:var(--accent)">Add a Team Member</h2>
+          <p class="text-sm text-gray-500 mb-4">Create a login for a mentor (or another admin). They sign in with this email and password.</p>
+          <form id="userForm" class="grid sm:grid-cols-2 gap-3">
+            <div><label class="field-label">Full name *</label><input id="uf_name" class="field-input" required></div>
+            <div><label class="field-label">Email *</label><input id="uf_email" type="email" class="field-input" required></div>
+            <div><label class="field-label">Temporary password *</label><input id="uf_pass" class="field-input" required minlength="8" placeholder="at least 8 characters"></div>
+            <div><label class="field-label">Role</label><select id="uf_role" class="field-input"><option value="mentor">Mentor</option><option value="admin">Admin</option></select></div>
+            <div class="sm:col-span-2"><button type="submit" class="btn-primary">Add Team Member</button></div>
+          </form>
+          <p class="text-xs mt-2" style="color:var(--gray)">Share the password privately with the person. To change it later, remove and re-add the login, or update it in Supabase.</p>
+        </div>
+        <div class="card p-6">
+          <h2 class="text-lg font-bold serif mb-3" style="color:var(--accent)">Current Team</h2>
+          <div id="teamList" class="divide-y" style="border-color:var(--rule)"></div>
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -554,6 +577,7 @@ let ME = null;            // { id, full_name, role }
 let MENTORS = [];         // profiles list (admin)
 let STUDENTS = [];        // cached students
 let SELECTED = null;      // selected student id
+let DEMO = false;         // true in ?demo mode (no real backend)
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => (s == null ? '' : String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
@@ -673,6 +697,7 @@ function makeDemoClient(store, role) {
 }
 
 function startDemo(role) {
+  DEMO = true;
   const store = demoStore();
   sb = makeDemoClient(store, role);
 
@@ -803,18 +828,24 @@ async function onSignedIn() {
     rb.style.background = 'var(--accent-soft)'; rb.style.color = 'var(--accent)';
   }
 
-  if (ME.role === 'admin') {
-    const { data } = await sb.from('profiles').select('id, full_name, role');
-    MENTORS = data || [];
-    const sel = $('sf_mentor');
+  if (ME.role === 'admin') await refreshMentors();
+
+  await loadStudents();
+}
+
+// (Re)load the list of mentors/admins and repopulate the "assigned mentor" dropdown.
+async function refreshMentors() {
+  const { data } = await sb.from('profiles').select('id, full_name, role');
+  MENTORS = data || [];
+  const sel = $('sf_mentor');
+  if (sel) {
+    sel.innerHTML = '<option value="">— Unassigned —</option>';
     MENTORS.filter(m => m.role === 'mentor' || m.role === 'admin').forEach(m => {
       const o = document.createElement('option');
       o.value = m.id; o.textContent = m.full_name || '(unnamed)';
       sel.appendChild(o);
     });
   }
-
-  await loadStudents();
 }
 
 // ---------- Tabs ----------
@@ -823,10 +854,11 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     const name = tab.dataset.tab;
-    ['students', 'intake', 'approvals', 'reports', 'manage'].forEach(s => $('tab-' + s).classList.toggle('hidden', s !== name));
+    ['students', 'intake', 'approvals', 'reports', 'manage', 'team'].forEach(s => $('tab-' + s).classList.toggle('hidden', s !== name));
     if (name === 'reports') loadReportStats();
     if (name === 'approvals') loadApprovals();
     if (name === 'intake') { buildNeedsRows(); initSigPads(); }
+    if (name === 'team') loadTeam();
   });
 });
 
@@ -1467,6 +1499,75 @@ function printIntake(id) {
   setTimeout(() => { try { w.print(); } catch (e) {} }, 500);
 }
 window.printIntake = printIntake;
+
+// ---------- Team / user management (admin) ----------
+async function loadTeam() {
+  let users;
+  if (DEMO) { users = MENTORS; }
+  else {
+    const { data: { session } } = await sb.auth.getSession();
+    const r = await fetch('/api/admin-users', { headers: { Authorization: 'Bearer ' + (session?.access_token || '') } });
+    const d = await r.json();
+    if (!r.ok) { toast(d.error || 'Could not load team', false); return; }
+    users = d.users || [];
+  }
+  renderTeam(users);
+}
+
+function renderTeam(users) {
+  $('teamList').innerHTML = (users || []).map(u => `
+    <div class="flex items-center justify-between py-3">
+      <div>
+        <div class="font-semibold text-sm">${esc(u.full_name || '(unnamed)')}
+          <span class="badge ml-1" style="background:${u.role === 'admin' ? 'var(--gold-soft)' : 'var(--accent-soft)'};color:${u.role === 'admin' ? 'var(--gold)' : 'var(--accent)'}">${esc(u.role)}</span></div>
+        <div class="text-xs text-gray-500">${esc(u.email || '')}</div>
+      </div>
+      ${u.id === ME.id ? '<span class="text-xs text-gray-400">you</span>' : `<button onclick="removeUser('${u.id}')" class="btn-ghost text-xs">Remove</button>`}
+    </div>`).join('') || '<div class="text-sm text-gray-400">No team members yet.</div>';
+}
+
+$('userForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const payload = { full_name: $('uf_name').value.trim(), email: $('uf_email').value.trim(), password: $('uf_pass').value, role: $('uf_role').value };
+  if (!payload.full_name || !payload.email || !payload.password) { toast('Name, email, and password are required', false); return; }
+  const btn = e.target.querySelector('button[type=submit]'); btn.disabled = true;
+  try {
+    if (DEMO) {
+      MENTORS.push({ id: 'demo-u-' + (MENTORS.length + 1), full_name: payload.full_name, email: payload.email, role: payload.role });
+      toast('Team member added (demo)');
+    } else {
+      const { data: { session } } = await sb.auth.getSession();
+      const r = await fetch('/api/admin-users', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (session?.access_token || '') },
+        body: JSON.stringify(payload)
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Could not add user');
+      await refreshMentors();
+      toast('Team member added');
+    }
+    e.target.reset();
+    loadTeam();
+  } catch (err) { toast(err.message, false); }
+  finally { btn.disabled = false; }
+});
+
+async function removeUser(id) {
+  if (!confirm('Remove this team member\'s login? They will no longer be able to sign in.')) return;
+  try {
+    if (DEMO) { MENTORS = MENTORS.filter(m => m.id !== id); toast('Removed (demo)'); }
+    else {
+      const { data: { session } } = await sb.auth.getSession();
+      const r = await fetch('/api/admin-users?id=' + encodeURIComponent(id), { method: 'DELETE', headers: { Authorization: 'Bearer ' + (session?.access_token || '') } });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Could not remove user');
+      await refreshMentors();
+      toast('Team member removed');
+    }
+    loadTeam();
+  } catch (err) { toast(err.message, false); }
+}
+window.removeUser = removeUser;
 
 // ---------- Manage students (admin) ----------
 $('studentForm').addEventListener('submit', async (e) => {
