@@ -342,6 +342,10 @@
                 </div>
                 <label class="field-label mt-2">Guardian signature</label>
                 <div class="sig-wrap"><canvas class="sigpad" data-sig="consentB.signature"></canvas><button type="button" class="sig-clear">Clear</button></div>
+                <div class="flex flex-wrap gap-4 text-sm mt-1">
+                  <label class="flex gap-1 items-center"><input type="radio" name="signedbyB" data-f="consentB.signed_by" value="Parent signed themselves">Parent signed themselves</label>
+                  <label class="flex gap-1 items-center"><input type="radio" name="signedbyB" data-f="consentB.signed_by" value="Parent gave permission for staff to sign on their behalf">Parent gave permission for staff to sign on their behalf</label>
+                </div>
               </div>
 
               <div>
@@ -360,6 +364,10 @@
                 </div>
                 <label class="field-label mt-2">Guardian signature</label>
                 <div class="sig-wrap"><canvas class="sigpad" data-sig="consentC.signature"></canvas><button type="button" class="sig-clear">Clear</button></div>
+                <div class="flex flex-wrap gap-4 text-sm mt-1">
+                  <label class="flex gap-1 items-center"><input type="radio" name="signedbyC" data-f="consentC.signed_by" value="Parent signed themselves">Parent signed themselves</label>
+                  <label class="flex gap-1 items-center"><input type="radio" name="signedbyC" data-f="consentC.signed_by" value="Parent gave permission for staff to sign on their behalf">Parent gave permission for staff to sign on their behalf</label>
+                </div>
               </div>
 
               <div>
@@ -376,6 +384,10 @@
                 </div>
                 <label class="field-label mt-2">Guardian signature</label>
                 <div class="sig-wrap"><canvas class="sigpad" data-sig="consentD.signature"></canvas><button type="button" class="sig-clear">Clear</button></div>
+                <div class="flex flex-wrap gap-4 text-sm mt-1">
+                  <label class="flex gap-1 items-center"><input type="radio" name="signedbyD" data-f="consentD.signed_by" value="Parent signed themselves">Parent signed themselves</label>
+                  <label class="flex gap-1 items-center"><input type="radio" name="signedbyD" data-f="consentD.signed_by" value="Parent gave permission for staff to sign on their behalf">Parent gave permission for staff to sign on their behalf</label>
+                </div>
               </div>
 
               <div>
@@ -397,6 +409,10 @@
                 </div>
                 <label class="field-label mt-2">Guardian signature</label>
                 <div class="sig-wrap"><canvas class="sigpad" data-sig="consentE.signature"></canvas><button type="button" class="sig-clear">Clear</button></div>
+                <div class="flex flex-wrap gap-4 text-sm mt-1">
+                  <label class="flex gap-1 items-center"><input type="radio" name="signedbyE" data-f="consentE.signed_by" value="Parent signed themselves">Parent signed themselves</label>
+                  <label class="flex gap-1 items-center"><input type="radio" name="signedbyE" data-f="consentE.signed_by" value="Parent gave permission for staff to sign on their behalf">Parent gave permission for staff to sign on their behalf</label>
+                </div>
               </div>
 
               <div class="pt-2 border-t" style="border-color:var(--rule)">
@@ -1272,7 +1288,7 @@ function printIntake(id) {
   const r = (l, v) => v ? `<tr><td class="l">${esc(l)}</td><td>${esc(v)}</td></tr>` : '';
   const ar = (l, a) => (a && a.length) ? `<tr><td class="l">${esc(l)}</td><td>${esc(a.join(', '))}</td></tr>` : '';
   const sec = (title, rows) => rows.trim() ? `<h2>${esc(title)}</h2><table>${rows}</table>` : '';
-  const sig = (label, c) => (c && (c.signature || c.signed_name)) ? `<div class="sig"><div class="sl">${esc(label)}</div>${c.signature ? `<img src="${c.signature}">` : '<div class="sigline"></div>'}<div class="sn">${esc(c.signed_name || '')}${c.signed_at ? ' — signed electronically ' + fmtDate(c.signed_at.slice(0, 10)) : ''}</div></div>` : '';
+  const sig = (label, c) => (c && (c.signature || c.signed_name)) ? `<div class="sig"><div class="sl">${esc(label)}</div>${c.signature ? `<img src="${c.signature}">` : '<div class="sigline"></div>'}<div class="sn">${esc(c.signed_name || '')}${c.signed_at ? ' — signed electronically ' + fmtDate(c.signed_at.slice(0, 10)) : ''}${c.signed_by ? '<br><span style="color:#5b6472">' + esc(c.signed_by) + '</span>' : ''}</div></div>` : '';
   const needs = Object.entries(i.needs || {}).filter(([k, v]) => v && typeof v === 'object' && (v.identified || v.referral || v.notes))
     .map(([k, v]) => `<tr><td class="l">${esc((NEED_ROWS.find(n => n[0] === k) || [k, k])[1])}</td><td>${v.identified ? 'Identified' : ''}${v.referral ? ' · referral made' : ''}${v.notes ? ' — ' + esc(v.notes) : ''}</td></tr>`).join('');
 
