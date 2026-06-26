@@ -111,13 +111,33 @@ create table if not exists public.sessions (
   session_date      date not null,
   duration_minutes  integer not null default 0 check (duration_minutes >= 0),
   setting           text,        -- in-person, virtual, phone, group, etc.
-  session_type      text,        -- mentoring, academic, check-in, crisis, family, etc.
+  session_type      text,        -- 'Student session' or 'Metrics check' (service provided)
   topics            text,        -- what was covered
   progress_notes    text,        -- narrative notes
   concerns          text,        -- risk flags / concerns raised
   follow_up         text,        -- follow-up actions / next steps
+  -- captured EVERY session:
+  absences_since_last integer,   -- # absences since the previous meeting
+  absence_reasons     text,      -- reason(s) for those absences
+  -- captured on a METRICS CHECK (feeds the admin month-end report):
+  currently_truant    text,      -- Yes / No
+  truant_prior_month  text,      -- Yes / No — truant before this month
+  referred_to_court   text,      -- Yes / No — referred to truancy court
+  no_longer_truant    text,      -- Yes / No — no longer considered truant
+  quarter_grades      text,      -- grades / GPA (end of quarter)
+  discipline          text,      -- discipline incidents (end of quarter)
   created_at        timestamptz not null default now()
 );
+
+-- If upgrading an existing install (safe to re-run):
+alter table public.sessions add column if not exists absences_since_last integer;
+alter table public.sessions add column if not exists absence_reasons text;
+alter table public.sessions add column if not exists currently_truant text;
+alter table public.sessions add column if not exists truant_prior_month text;
+alter table public.sessions add column if not exists referred_to_court text;
+alter table public.sessions add column if not exists no_longer_truant text;
+alter table public.sessions add column if not exists quarter_grades text;
+alter table public.sessions add column if not exists discipline text;
 
 create index if not exists sessions_student_idx on public.sessions (student_id);
 create index if not exists sessions_mentor_idx  on public.sessions (mentor_id);

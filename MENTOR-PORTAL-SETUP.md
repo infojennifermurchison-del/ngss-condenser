@@ -104,6 +104,20 @@ Live URL once deployed: `https://YOUR-PROJECT.vercel.app/mentor`
 - The intake data then feeds the student's profile, the AI intervention plan, and the Excel
   reports.
 
+**Metrics checks & the month-end report**
+- Every time a mentor logs a session they record **absences since the last meeting** and
+  the **reason**. Under **Student service provided** they choose **Student session** or
+  **Metrics check**.
+- A **Metrics check** (do it at least once a month per youth) captures the truancy data
+  behind your report: currently truant?, truant before this month?, referred to truancy
+  court?, no longer truant?, plus end-of-quarter **grades** and **discipline**.
+- **Admin → Reports → Month-End Report:** pick the month and click **Generate** to see the
+  six numbers, then **Download to Excel**. It warns you about any active youth who are
+  **missing a metrics check** that month (so the numbers stay accurate).
+- The six numbers: (1) service hours completed, (2) youth currently enrolled, (3) previously
+  truant youth referred to truancy court, (4) truant youth not referred to court, (5) youth
+  no longer considered truant, (6) total truant youth prior to this month.
+
 **Mentors**
 - Sign in → **Students** tab → search/select a youth.
 - **Log a Session**: date, duration in minutes, setting, type, topics, notes, concerns, follow-up.

@@ -460,9 +460,26 @@
     </section>
 
     <!-- ---------- REPORTS TAB (admin) ---------- -->
-    <section id="tab-reports" class="hidden">
+    <section id="tab-reports" class="hidden space-y-6">
+
+      <!-- Month-End Report -->
       <div class="card p-6">
-        <h2 class="text-lg font-bold serif mb-1" style="color:var(--accent)">Excel Reports</h2>
+        <h2 class="text-lg font-bold serif mb-1" style="color:var(--accent)">Month-End Report</h2>
+        <p class="text-sm text-gray-500 mb-4">The six numbers to submit at month end, built from mentors' metrics checks and logged hours for the selected month.</p>
+        <div class="grid sm:grid-cols-3 gap-4 mb-5">
+          <div>
+            <label class="field-label">Report month</label>
+            <input id="meMonth" type="month" class="field-input" />
+          </div>
+          <div class="flex items-end"><button id="meRunBtn" class="btn-primary w-full">Generate</button></div>
+          <div class="flex items-end"><button id="meExcelBtn" class="btn-ghost w-full">⬇ Download to Excel</button></div>
+        </div>
+        <div id="meResults"></div>
+      </div>
+
+      <!-- Full data export -->
+      <div class="card p-6">
+        <h2 class="text-lg font-bold serif mb-1" style="color:var(--accent)">Full Data Export</h2>
         <p class="text-sm text-gray-500 mb-5">Download program data as a multi-sheet Excel workbook (.xlsx). Optionally filter sessions by date range.</p>
         <div class="grid sm:grid-cols-3 gap-4 mb-5">
           <div>
@@ -578,7 +595,11 @@ function demoStore() {
     { id: 'se4', student_id: 's2', mentor_id: 'u-devon', session_date: '2026-06-03', duration_minutes: 60, setting: 'Phone', session_type: 'Behavioral', topics: 'Conflict with teammate', progress_notes: 'Talked through the situation; practiced a calm-down strategy.', concerns: 'Quick to anger when frustrated.', follow_up: 'Role-play hard conversations next time.', created_at: '2026-06-03T15:00:00Z' },
     { id: 'se5', student_id: 's3', mentor_id: 'u-aisha', session_date: '2026-06-16', duration_minutes: 45, setting: 'In-person', session_type: 'Mentoring / check-in', topics: 'Making friends, joining science club', progress_notes: 'Agreed to attend one club meeting this week. Visibly nervous but willing.', concerns: 'Social isolation.', follow_up: 'Follow up after the club meeting.', created_at: '2026-06-16T14:00:00Z' },
     { id: 'se6', student_id: 's4', mentor_id: 'u-luis', session_date: '2026-06-15', duration_minutes: 60, setting: 'In-person', session_type: 'Academic support', topics: 'Organization system, planner setup', progress_notes: 'Set up a color-coded planner and a backpack clean-out routine.', concerns: 'Missing assignments due to disorganization.', follow_up: 'Review planner use next week.', created_at: '2026-06-15T17:00:00Z' },
-    { id: 'se7', student_id: 's4', mentor_id: 'u-luis', session_date: '2026-06-08', duration_minutes: 30, setting: 'Virtual', session_type: 'Mentoring / check-in', topics: 'Music project, weekend recap', progress_notes: 'Shared a track he produced. Used it to talk about goal follow-through.', concerns: '', follow_up: '', created_at: '2026-06-08T17:00:00Z' }
+    { id: 'se7', student_id: 's4', mentor_id: 'u-luis', session_date: '2026-06-08', duration_minutes: 30, setting: 'Virtual', session_type: 'Student session', topics: 'Music project, weekend recap', progress_notes: 'Shared a track he produced. Used it to talk about goal follow-through.', concerns: '', follow_up: '', absences_since_last: 1, absence_reasons: 'Overslept', created_at: '2026-06-08T17:00:00Z' },
+    // Monthly metrics checks (feed the Month-End Report). s4 intentionally has none, to show the "missing" warning.
+    { id: 'se8', student_id: 's1', mentor_id: 'u-maya', session_date: '2026-06-20', duration_minutes: 20, setting: 'In-person', session_type: 'Metrics check', absences_since_last: 0, absence_reasons: '', currently_truant: 'No', truant_prior_month: 'Yes', referred_to_court: 'No', no_longer_truant: 'Yes', quarter_grades: '3.0 GPA', discipline: 'None', progress_notes: 'Attendance fully recovered this quarter.', created_at: '2026-06-20T16:00:00Z' },
+    { id: 'se9', student_id: 's2', mentor_id: 'u-devon', session_date: '2026-06-19', duration_minutes: 20, setting: 'In-person', session_type: 'Metrics check', absences_since_last: 3, absence_reasons: 'Transportation, illness', currently_truant: 'Yes', truant_prior_month: 'Yes', referred_to_court: 'Yes', no_longer_truant: 'No', quarter_grades: '2.1 GPA', discipline: '1 referral', progress_notes: 'Still truant; court referral in process.', created_at: '2026-06-19T15:00:00Z' },
+    { id: 'se10', student_id: 's3', mentor_id: 'u-aisha', session_date: '2026-06-18', duration_minutes: 20, setting: 'In-person', session_type: 'Metrics check', absences_since_last: 4, absence_reasons: 'Anxiety, bullying concern', currently_truant: 'Yes', truant_prior_month: 'Yes', referred_to_court: 'No', no_longer_truant: 'No', quarter_grades: 'C average', discipline: 'None', progress_notes: 'Truant, not yet referred to court; working on anxiety.', created_at: '2026-06-18T14:00:00Z' }
   ];
   const intervention_plans = [
     { id: 'p1', student_id: 's2', created_by: 'u-devon', title: 'Intervention Plan — 6/3/2026', status: 'active', input_summary: 'Chronic absenteeism (6 days last month) and low class engagement; wants to stay eligible for basketball. Strong athlete, responds well to clear goals.', plan_content: 'SUMMARY & STRENGTHS\nMarcus is a motivated athlete who responds well to structure and clear, short-term goals. His commitment to basketball is a powerful lever for engagement.\n\nIDENTIFIED NEEDS / AREAS OF FOCUS\n- Improve school attendance and arrive on time\n- Rebuild classroom engagement and assignment completion\n- Strengthen emotional regulation when frustrated\n\nSMART GOALS\n1. Reduce unexcused absences to no more than one per month over the next 8 weeks.\n2. Turn in at least 90% of assignments each week this marking period.\n\nSTRATEGIES & MENTOR ACTIONS\n- Co-create a morning routine chart and review it weekly.\n- Connect attendance to basketball eligibility as natural motivation.\n- Practice a calm-down strategy and role-play hard conversations.\n\nSUPPORTS & REFERRALS\n- Coordinate with the school attendance counselor and his coach.\n- Loop in guardian for morning routine support.\n\nPROGRESS INDICATORS\n- Weekly attendance and assignment-completion data trending up.\n\nREVIEW DATE & NEXT STEPS\n- Review in 4 weeks; adjust goals based on attendance data.', created_at: '2026-06-03T16:00:00Z' }
@@ -895,22 +916,43 @@ async function selectStudent(id) {
         <div><label class="field-label">Date *</label><input id="se_date" type="date" class="field-input" required value="${new Date().toISOString().slice(0,10)}"></div>
         <div><label class="field-label">Duration (minutes) *</label><input id="se_dur" type="number" min="0" class="field-input" required placeholder="60"></div>
         <div>
+          <label class="field-label">Student service provided *</label>
+          <select id="se_type" class="field-input" onchange="toggleMetrics()">
+            <option>Student session</option>
+            <option>Metrics check</option>
+            <option>Academic support</option>
+            <option>Crisis / urgent</option>
+            <option>Family engagement</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
           <label class="field-label">Setting</label>
           <select id="se_setting" class="field-input">
             <option>In-person</option><option>Virtual</option><option>Phone</option><option>Group</option><option>Other</option>
           </select>
         </div>
-        <div>
-          <label class="field-label">Session type</label>
-          <select id="se_type" class="field-input">
-            <option>Mentoring / check-in</option><option>Academic support</option><option>Behavioral</option>
-            <option>Crisis / urgent</option><option>Family engagement</option><option>Goal setting</option><option>Other</option>
-          </select>
-        </div>
+        <div><label class="field-label">Absences since last meeting</label><input id="se_absences" type="number" min="0" class="field-input" placeholder="e.g. 2"></div>
+        <div><label class="field-label">Reason for those absences</label><input id="se_absreason" class="field-input" placeholder="e.g. illness, transportation"></div>
         <div class="sm:col-span-2"><label class="field-label">Topics covered</label><input id="se_topics" class="field-input"></div>
         <div class="sm:col-span-2"><label class="field-label">Progress notes</label><textarea id="se_notes" rows="2" class="field-input"></textarea></div>
         <div><label class="field-label">Concerns / risk flags</label><textarea id="se_concerns" rows="2" class="field-input"></textarea></div>
         <div><label class="field-label">Follow-up / next steps</label><textarea id="se_follow" rows="2" class="field-input"></textarea></div>
+
+        <!-- Metrics check block: shown when "Metrics check" is selected. Feeds the month-end report. -->
+        <div id="metricsBlock" class="sm:col-span-2 hidden rounded p-4" style="background:var(--gold-soft);border:1px solid var(--rule)">
+          <div class="font-bold text-sm uppercase tracking-wide mb-1" style="color:var(--accent)">Monthly Metrics Check</div>
+          <p class="text-xs mb-3" style="color:var(--gray)">Complete once a month for each youth. These answers generate the coordinator's month-end report.</p>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div><label class="field-label">Currently considered truant?</label><select id="mx_truant" class="field-input"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+            <div><label class="field-label">Was truant prior to this month?</label><select id="mx_prior" class="field-input"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+            <div><label class="field-label">Referred to truancy court?</label><select id="mx_court" class="field-input"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+            <div><label class="field-label">No longer considered truant?</label><select id="mx_nolonger" class="field-input"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+            <div><label class="field-label">Grades / GPA (end of quarter)</label><input id="mx_grades" class="field-input" placeholder="e.g. 2.4 GPA / C average"></div>
+            <div><label class="field-label">Discipline incidents (end of quarter)</label><input id="mx_discipline" class="field-input" placeholder="e.g. 1 referral, none"></div>
+          </div>
+        </div>
+
         <div class="sm:col-span-2"><button type="submit" class="btn-primary">Save Session</button></div>
       </form>
     </div>
@@ -946,10 +988,13 @@ async function selectStudent(id) {
         <span class="font-semibold">${fmtDate(x.session_date)} · ${esc(x.session_type || '')}</span>
         <span class="text-gray-500">${hours(x.duration_minutes).toFixed(1)} hr · ${esc(x.setting || '')}${x.mentor_id ? ' · ' + esc(mentorName(x.mentor_id)) : ''}</span>
       </div>
+      ${(x.absences_since_last != null || x.absence_reasons) ? `<div><span class="text-gray-400">Absences since last:</span> ${esc(x.absences_since_last != null ? String(x.absences_since_last) : '—')}${x.absence_reasons ? ' (' + esc(x.absence_reasons) + ')' : ''}</div>` : ''}
       ${x.topics ? `<div class="mt-1"><span class="text-gray-400">Topics:</span> ${esc(x.topics)}</div>` : ''}
       ${x.progress_notes ? `<div><span class="text-gray-400">Notes:</span> ${esc(x.progress_notes)}</div>` : ''}
       ${x.concerns ? `<div class="text-red-700"><span class="text-gray-400">Concerns:</span> ${esc(x.concerns)}</div>` : ''}
       ${x.follow_up ? `<div><span class="text-gray-400">Follow-up:</span> ${esc(x.follow_up)}</div>` : ''}
+      ${x.session_type === 'Metrics check' ? `<div class="mt-1 pt-1 border-t" style="border-color:var(--rule)"><span class="badge" style="background:var(--gold-soft);color:var(--gold)">METRICS</span>
+        ${[x.currently_truant ? 'Truant: ' + x.currently_truant : '', x.referred_to_court ? 'Court: ' + x.referred_to_court : '', x.no_longer_truant ? 'No longer truant: ' + x.no_longer_truant : '', x.quarter_grades ? 'Grades: ' + x.quarter_grades : '', x.discipline ? 'Discipline: ' + x.discipline : ''].filter(Boolean).map(esc).join(' · ')}</div>` : ''}
     </div>`).join('') || '<div class="text-sm text-gray-400">No sessions logged yet.</div>';
 
   // plan history
@@ -964,6 +1009,14 @@ async function selectStudent(id) {
   // wire forms
   $('sessionForm').addEventListener('submit', saveSession);
   $('genPlanBtn').addEventListener('click', () => generatePlan(s, sessions || []));
+  toggleMetrics();
+}
+
+// Show the metrics-check block only when "Metrics check" is the selected service.
+function toggleMetrics() {
+  const isMetrics = $('se_type') && $('se_type').value === 'Metrics check';
+  const block = $('metricsBlock');
+  if (block) block.classList.toggle('hidden', !isMetrics);
 }
 
 // ---------- Save session ----------
@@ -971,6 +1024,7 @@ async function saveSession(e) {
   e.preventDefault();
   const btn = e.target.querySelector('button[type=submit]');
   btn.disabled = true;
+  const isMetrics = $('se_type').value === 'Metrics check';
   const payload = {
     student_id: SELECTED,
     mentor_id: ME.id,
@@ -981,12 +1035,20 @@ async function saveSession(e) {
     topics: $('se_topics').value.trim(),
     progress_notes: $('se_notes').value.trim(),
     concerns: $('se_concerns').value.trim(),
-    follow_up: $('se_follow').value.trim()
+    follow_up: $('se_follow').value.trim(),
+    absences_since_last: $('se_absences').value === '' ? null : parseInt($('se_absences').value, 10),
+    absence_reasons: $('se_absreason').value.trim(),
+    currently_truant: isMetrics ? ($('mx_truant').value || null) : null,
+    truant_prior_month: isMetrics ? ($('mx_prior').value || null) : null,
+    referred_to_court: isMetrics ? ($('mx_court').value || null) : null,
+    no_longer_truant: isMetrics ? ($('mx_nolonger').value || null) : null,
+    quarter_grades: isMetrics ? ($('mx_grades').value.trim() || null) : null,
+    discipline: isMetrics ? ($('mx_discipline').value.trim() || null) : null
   };
   const { error } = await sb.from('sessions').insert(payload);
   btn.disabled = false;
   if (error) { toast(error.message, false); return; }
-  toast('Session logged');
+  toast(isMetrics ? 'Metrics check saved' : 'Session logged');
   selectStudent(SELECTED);
 }
 
@@ -1458,6 +1520,7 @@ window.editStudent = editStudent;
 
 // ---------- Reports (admin) ----------
 async function loadReportStats() {
+  if ($('meMonth') && !$('meMonth').value) $('meMonth').value = new Date().toISOString().slice(0, 7);
   const [{ data: sessions }, { data: plans }] = await Promise.all([
     sb.from('sessions').select('duration_minutes, mentor_id'),
     sb.from('intervention_plans').select('id')
@@ -1517,8 +1580,13 @@ $('downloadReportBtn').addEventListener('click', async () => {
     // Sheet 2: Sessions log
     const sessRows = (sessions || []).map(x => ({
       'Date': x.session_date, 'Student': sName(x.student_id), 'Mentor': mentorName(x.mentor_id) || '',
-      'Type': x.session_type || '', 'Setting': x.setting || '',
+      'Service provided': x.session_type || '', 'Setting': x.setting || '',
       'Duration (min)': x.duration_minutes, 'Contact hours': hours(x.duration_minutes).toFixed(2),
+      'Absences since last': x.absences_since_last != null ? x.absences_since_last : '',
+      'Absence reasons': x.absence_reasons || '',
+      'Currently truant': x.currently_truant || '', 'Truant prior': x.truant_prior_month || '',
+      'Referred to court': x.referred_to_court || '', 'No longer truant': x.no_longer_truant || '',
+      'Grades/GPA': x.quarter_grades || '', 'Discipline': x.discipline || '',
       'Topics': x.topics || '', 'Progress notes': x.progress_notes || '',
       'Concerns': x.concerns || '', 'Follow-up': x.follow_up || ''
     }));
@@ -1567,6 +1635,115 @@ $('downloadReportBtn').addEventListener('click', async () => {
   } finally {
     btn.disabled = false; btn.textContent = '⬇ Download Excel Report';
   }
+});
+
+// ---------- Month-End Report (admin) ----------
+// The six numbers are built from each youth's latest METRICS CHECK in the chosen month,
+// plus all logged hours that month.
+let lastMonthEnd = null;
+
+async function fetchMonthSessions(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  const from = ym + '-01';
+  const lastDay = new Date(y, m, 0).getDate();
+  const to = ym + '-' + String(lastDay).padStart(2, '0');
+  const { data } = await sb.from('sessions').select('*').gte('session_date', from).lte('session_date', to);
+  return data || [];
+}
+
+async function computeMonthEnd(ym) {
+  await loadStudents();
+  const sessions = await fetchMonthSessions(ym);
+  const active = STUDENTS.filter(s => s.program_status === 'active');
+  const latestMetrics = {};
+  sessions.filter(x => x.session_type === 'Metrics check').forEach(x => {
+    const cur = latestMetrics[x.student_id];
+    if (!cur || x.session_date > cur.session_date) latestMetrics[x.student_id] = x;
+  });
+  const metrics = Object.values(latestMetrics);
+  const num = {
+    serviceHours: sessions.reduce((a, x) => a + hours(x.duration_minutes), 0),
+    enrolled: active.length,
+    referredToCourt: metrics.filter(m => m.referred_to_court === 'Yes').length,
+    truantNotReferred: metrics.filter(m => m.currently_truant === 'Yes' && m.referred_to_court !== 'Yes').length,
+    noLongerTruant: metrics.filter(m => m.no_longer_truant === 'Yes').length,
+    truantPrior: metrics.filter(m => m.truant_prior_month === 'Yes').length
+  };
+  const missing = active.filter(s => !latestMetrics[s.id]);
+  lastMonthEnd = { ym, num, latestMetrics, missing };
+  return lastMonthEnd;
+}
+
+const ME_LABELS = [
+  ['serviceHours', '1. Service hours completed by program youth'],
+  ['enrolled', '2. Youth currently enrolled in the program'],
+  ['referredToCourt', '3. Previously truant youth referred to truancy court'],
+  ['truantNotReferred', '4. Truant youth not referred to court'],
+  ['noLongerTruant', '5. Youth no longer considered truant'],
+  ['truantPrior', '6. Total truant youth prior to this month']
+];
+
+function renderMonthEnd(r) {
+  const monthName = new Date(r.ym + '-01T00:00:00').toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  const card = (label, val) => `
+    <div class="card p-4 flex items-center justify-between" style="border-color:var(--rule)">
+      <div class="text-sm pr-3">${label}</div>
+      <div class="text-2xl font-bold" style="color:var(--accent)">${val}</div>
+    </div>`;
+  const v = k => k === 'serviceHours' ? r.num.serviceHours.toFixed(1) : r.num[k];
+  const missingHtml = r.missing.length
+    ? `<div class="rounded p-3 mt-3 text-sm" style="background:var(--gold-soft);border:1px solid var(--rule)">
+        <strong>⚠ ${r.missing.length} active youth have no metrics check for ${esc(monthName)}.</strong>
+        The truancy numbers above won't count them until a mentor completes one:
+        <div class="mt-1">${r.missing.map(s => esc(s.first_name + ' ' + s.last_name)).join(', ')}</div></div>`
+    : `<div class="text-sm mt-3" style="color:#15803d">✓ Every active youth has a metrics check for ${esc(monthName)}.</div>`;
+  $('meResults').innerHTML = `<div class="text-sm font-semibold mb-2" style="color:var(--gray)">${esc(monthName)}</div>
+    <div class="grid sm:grid-cols-2 gap-2">${ME_LABELS.map(([k, l]) => card(l, v(k))).join('')}</div>${missingHtml}`;
+}
+
+$('meRunBtn').addEventListener('click', async () => {
+  const ym = $('meMonth').value;
+  if (!ym) { toast('Pick a report month', false); return; }
+  const btn = $('meRunBtn'); btn.disabled = true; btn.textContent = 'Generating…';
+  try { renderMonthEnd(await computeMonthEnd(ym)); }
+  catch (e) { toast(e.message, false); }
+  finally { btn.disabled = false; btn.textContent = 'Generate'; }
+});
+
+$('meExcelBtn').addEventListener('click', async () => {
+  const ym = $('meMonth').value;
+  if (!ym) { toast('Pick a report month', false); return; }
+  const btn = $('meExcelBtn'); btn.disabled = true; btn.textContent = 'Building…';
+  try {
+    const r = (lastMonthEnd && lastMonthEnd.ym === ym) ? lastMonthEnd : await computeMonthEnd(ym);
+    renderMonthEnd(r);
+    const monthName = new Date(ym + '-01T00:00:00').toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    const studentById = Object.fromEntries(STUDENTS.map(s => [s.id, s]));
+    const sName = id => { const s = studentById[id]; return s ? `${s.last_name}, ${s.first_name}` : '(unknown)'; };
+
+    // Sheet 1: the six numbers
+    const summary = ME_LABELS.map(([k, l]) => ({
+      'Report month': monthName, 'Metric': l.replace(/^\d+\.\s*/, ''),
+      'Number': k === 'serviceHours' ? Number(r.num.serviceHours.toFixed(1)) : r.num[k]
+    }));
+    // Sheet 2: the metrics check behind each number
+    const detail = Object.values(r.latestMetrics).map(m => ({
+      'Student': sName(m.student_id), 'Mentor': mentorName(m.mentor_id) || '', 'Date': m.session_date,
+      'Currently truant': m.currently_truant || '', 'Truant prior to month': m.truant_prior_month || '',
+      'Referred to court': m.referred_to_court || '', 'No longer truant': m.no_longer_truant || '',
+      'Grades / GPA': m.quarter_grades || '', 'Discipline': m.discipline || ''
+    }));
+    // Sheet 3: who still needs a metrics check
+    const missing = r.missing.map(s => ({ 'Student': `${s.last_name}, ${s.first_name}`, 'Assigned mentor': mentorName(s.assigned_mentor) || '', 'Status': 'No metrics check this month' }));
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), 'Month-End Summary');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detail.length ? detail : [{ Note: 'No metrics checks recorded this month' }]), 'Metrics Detail');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(missing.length ? missing : [{ Note: 'All active youth have a metrics check' }]), 'Missing Metrics');
+    XLSX.writeFile(wb, `month-end-report-${ym}.xlsx`);
+    toast('Month-end report downloaded');
+  } catch (e) { toast(e.message, false); }
+  finally { btn.disabled = false; btn.textContent = '⬇ Download to Excel'; }
 });
 </script>
 </body>
