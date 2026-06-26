@@ -475,6 +475,13 @@
           <div class="flex items-end"><button id="meExcelBtn" class="btn-ghost w-full">⬇ Download to Excel</button></div>
         </div>
         <div id="meResults"></div>
+        <div class="mt-4 pt-4 border-t" style="border-color:var(--rule)">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="text-sm pr-3"><strong>Mentor reminders</strong> — automatically emailed on the 25th and the last day of each month to anyone missing a metrics check.</div>
+            <button id="sendRemindersBtn" class="btn-ghost">✉ Send reminders now</button>
+          </div>
+          <div id="reminderStatus" class="text-xs mt-1" style="color:var(--gray)"></div>
+        </div>
       </div>
 
       <!-- Full data export -->
@@ -1744,6 +1751,27 @@ $('meExcelBtn').addEventListener('click', async () => {
     toast('Month-end report downloaded');
   } catch (e) { toast(e.message, false); }
   finally { btn.disabled = false; btn.textContent = '⬇ Download to Excel'; }
+});
+
+// Manually trigger the reminder emails (admin). Sends to mentors who still have
+// uncovered youth this month, plus a summary to the admin.
+$('sendRemindersBtn').addEventListener('click', async () => {
+  if (new URLSearchParams(location.search).has('demo')) {
+    toast('Demo mode — reminders are only sent in the live app', false); return;
+  }
+  const btn = $('sendRemindersBtn'); btn.disabled = true; btn.textContent = 'Sending…';
+  $('reminderStatus').textContent = '';
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const resp = await fetch('/api/send-reminders?force=1', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + (session?.access_token || '') }
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Failed to send');
+    $('reminderStatus').textContent = `Sent ${data.emailsSent || 0} email(s) · ${data.uncovered || 0} youth still missing a check for ${data.month || 'this month'}.`;
+    toast('Reminders sent');
+  } catch (e) { $('reminderStatus').textContent = e.message; toast(e.message, false); }
+  finally { btn.disabled = false; btn.textContent = '✉ Send reminders now'; }
 });
 </script>
 </body>

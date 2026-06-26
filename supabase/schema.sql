@@ -11,9 +11,13 @@
 create table if not exists public.profiles (
   id          uuid primary key references auth.users (id) on delete cascade,
   full_name   text not null default '',
+  email       text,   -- copied from the auth user; used by the reminder emails
   role        text not null default 'mentor' check (role in ('admin', 'mentor')),
   created_at  timestamptz not null default now()
 );
+
+-- If upgrading an existing install (safe to re-run):
+alter table public.profiles add column if not exists email text;
 
 -- Helper: read the current app user's role WITHOUT triggering RLS recursion.
 -- SECURITY DEFINER lets it bypass RLS when reading profiles. (Named app_user_role
@@ -47,10 +51,11 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, role)
+  insert into public.profiles (id, full_name, email, role)
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
+    new.email,
     coalesce(new.raw_user_meta_data ->> 'role', 'mentor')
   )
   on conflict (id) do nothing;
@@ -62,6 +67,10 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Backfill emails for any users created before the email column existed:
+update public.profiles p set email = u.email
+from auth.users u where u.id = p.id and p.email is distinct from u.email;
 
 -- ---------------------------------------------------------------------------
 -- 2. STUDENTS  (the youth in the program — the shared caseload)
