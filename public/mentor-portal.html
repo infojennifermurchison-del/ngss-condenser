@@ -102,8 +102,10 @@
       </div>
     </div>
     <!-- Tabs -->
-    <div class="max-w-6xl mx-auto px-4 flex gap-1">
+    <div class="max-w-6xl mx-auto px-4 flex gap-1 flex-wrap">
       <div class="tab active" data-tab="students">Students</div>
+      <div class="tab" data-tab="intake">New Intake</div>
+      <div class="tab admin-only hidden" data-tab="approvals">Approvals <span id="pendingCount" class="badge ml-1 hidden" style="background:var(--gold-soft);color:var(--gold)"></span></div>
       <div class="tab admin-only hidden" data-tab="reports">Reports</div>
       <div class="tab admin-only hidden" data-tab="manage">Manage Students</div>
     </div>
@@ -131,6 +133,266 @@
           </div>
           <div id="studentDetail" class="hidden space-y-5"></div>
         </div>
+      </div>
+    </section>
+
+    <!-- ---------- NEW INTAKE TAB (staff/mentors + admin) ---------- -->
+    <section id="tab-intake" class="hidden">
+      <div class="card p-6 max-w-3xl mx-auto">
+        <div class="flex items-center gap-3 mb-1">
+          <h2 class="text-lg font-bold serif" style="color:var(--accent)">Form A — Student Intake &amp; Enrollment</h2>
+        </div>
+        <p class="text-sm text-gray-500 mb-1">Safe Schools, Safer Families Truancy Program. Completed by program staff with the parent/guardian.</p>
+        <p class="text-xs mb-5" style="color:var(--gray)">Submitting creates the student profile as <strong>Pending approval</strong>. An administrator approves them for service before they join the active caseload. Signatures on Forms B–E are collected on paper; record below what is on file.</p>
+        <form id="intakeForm" class="space-y-3">
+
+          <details open class="card" style="background:var(--paper)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">1. Student Information</summary>
+            <div class="grid sm:grid-cols-2 gap-3 p-4 pt-0">
+              <div><label class="field-label">First name *</label><input data-f="a.first_name" class="field-input" required></div>
+              <div><label class="field-label">Last name *</label><input data-f="a.last_name" class="field-input" required></div>
+              <div><label class="field-label">Date of birth</label><input type="date" data-f="a.dob" class="field-input"></div>
+              <div><label class="field-label">Grade</label><input data-f="a.grade" class="field-input"></div>
+              <div><label class="field-label">Student ID #</label><input data-f="a.student_id" class="field-input"></div>
+              <div><label class="field-label">Primary language at home</label><input data-f="a.primary_language" class="field-input"></div>
+              <div class="sm:col-span-2"><label class="field-label">Home address</label><input data-f="a.home_address" class="field-input"></div>
+              <div><label class="field-label">City</label><input data-f="a.city" class="field-input"></div>
+              <div><label class="field-label">ZIP</label><input data-f="a.zip" class="field-input"></div>
+              <div class="sm:col-span-2">
+                <label class="field-label">Race / ethnicity (voluntary, for reporting only — check all that apply)</label>
+                <div class="grid sm:grid-cols-2 gap-1 text-sm">
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="a.race" value="American Indian or Alaska Native">American Indian or Alaska Native</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="a.race" value="Asian">Asian</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="a.race" value="Black or African American">Black or African American</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="a.race" value="Hispanic or Latino">Hispanic or Latino</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="a.race" value="Middle Eastern or North African">Middle Eastern or North African</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="a.race" value="White">White</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="a.race" value="Native Hawaiian or Pacific Islander">Native Hawaiian or Pacific Islander</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="a.race" value="Prefer not to answer">Prefer not to answer</label>
+                </div>
+                <input data-f="a.race_other" class="field-input mt-1" placeholder="Other (specify)">
+              </div>
+            </div>
+          </details>
+
+          <details class="card" style="background:var(--paper)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">2. School &amp; Enrolling District</summary>
+            <div class="grid sm:grid-cols-2 gap-3 p-4 pt-0">
+              <div><label class="field-label">School / campus</label><input data-f="school.campus" class="field-input"></div>
+              <div><label class="field-label">District</label><input data-f="school.district" class="field-input"></div>
+              <div><label class="field-label">School counselor / contact</label><input data-f="school.counselor" class="field-input"></div>
+              <div><label class="field-label">School phone</label><input data-f="school.phone" class="field-input"></div>
+            </div>
+          </details>
+
+          <details class="card" style="background:var(--paper)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">3. Parent / Legal Guardian</summary>
+            <div class="grid sm:grid-cols-2 gap-3 p-4 pt-0">
+              <div><label class="field-label">Name</label><input data-f="guardian.name" class="field-input"></div>
+              <div><label class="field-label">Relationship to student</label><input data-f="guardian.relationship" class="field-input"></div>
+              <div><label class="field-label">Mobile phone</label><input data-f="guardian.mobile" class="field-input"></div>
+              <div><label class="field-label">Alt. phone</label><input data-f="guardian.alt_phone" class="field-input"></div>
+              <div><label class="field-label">Email</label><input data-f="guardian.email" class="field-input"></div>
+              <div><label class="field-label">Address (if different)</label><input data-f="guardian.address" class="field-input"></div>
+              <div><label class="field-label">Preferred contact method</label><input data-f="guardian.preferred_contact" class="field-input"></div>
+              <div><label class="field-label">Preferred language</label><input data-f="guardian.preferred_language" class="field-input"></div>
+            </div>
+          </details>
+
+          <details class="card" style="background:var(--paper)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">4. Emergency Contact (other than above)</summary>
+            <div class="grid sm:grid-cols-2 gap-3 p-4 pt-0">
+              <div><label class="field-label">Name</label><input data-f="emergency.name" class="field-input"></div>
+              <div><label class="field-label">Relationship</label><input data-f="emergency.relationship" class="field-input"></div>
+              <div><label class="field-label">Phone</label><input data-f="emergency.phone" class="field-input"></div>
+            </div>
+          </details>
+
+          <details class="card" style="background:var(--paper)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">5. Referral &amp; Eligibility</summary>
+            <div class="grid sm:grid-cols-2 gap-3 p-4 pt-0">
+              <div class="sm:col-span-2">
+                <label class="field-label">Referral source</label>
+                <div class="grid sm:grid-cols-2 gap-1 text-sm">
+                  <label class="flex gap-2 items-center"><input type="radio" name="refsource" data-f="referral.source" value="School / counselor">School / counselor</label>
+                  <label class="flex gap-2 items-center"><input type="radio" name="refsource" data-f="referral.source" value="HHD program manager">HHD program manager</label>
+                  <label class="flex gap-2 items-center"><input type="radio" name="refsource" data-f="referral.source" value="Juvenile Probation">Juvenile Probation</label>
+                  <label class="flex gap-2 items-center"><input type="radio" name="refsource" data-f="referral.source" value="Family self-referral">Family self-referral</label>
+                  <label class="flex gap-2 items-center"><input type="radio" name="refsource" data-f="referral.source" value="Other">Other</label>
+                </div>
+              </div>
+              <div><label class="field-label">Other (referral source)</label><input data-f="referral.source_other" class="field-input"></div>
+              <div><label class="field-label">Referrer name (if applicable)</label><input data-f="referral.referrer_name" class="field-input"></div>
+              <div class="sm:col-span-2">
+                <label class="field-label">Eligibility indicators (check all that apply)</label>
+                <div class="grid gap-1 text-sm">
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="eligibility" value="Chronic absenteeism (≥10% of instructional days)">Chronic absenteeism (≥10% of instructional days)</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="eligibility" value="Truancy (10+ unexcused absences in 6 months)">Truancy (10+ unexcused absences in 6 months)</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="eligibility" value="Documented behavioral / disciplinary incident">Documented behavioral / disciplinary incident</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="eligibility" value="Counselor referral for emotional regulation">Counselor referral for emotional regulation</label>
+                </div>
+              </div>
+              <div>
+                <label class="field-label">Current 504 Plan or IEP?</label>
+                <div class="flex gap-3 text-sm">
+                  <label class="flex gap-1 items-center"><input type="radio" name="iep" data-f="referral.iep" value="No">No</label>
+                  <label class="flex gap-1 items-center"><input type="radio" name="iep" data-f="referral.iep" value="Yes — 504">Yes — 504</label>
+                  <label class="flex gap-1 items-center"><input type="radio" name="iep" data-f="referral.iep" value="Yes — IEP">Yes — IEP</label>
+                </div>
+              </div>
+              <div>
+                <label class="field-label">Behavioral goals present?</label>
+                <div class="flex gap-3 text-sm">
+                  <label class="flex gap-1 items-center"><input type="radio" name="behgoals" data-f="referral.behavioral_goals" value="Yes">Yes</label>
+                  <label class="flex gap-1 items-center"><input type="radio" name="behgoals" data-f="referral.behavioral_goals" value="No">No</label>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details class="card" style="background:var(--paper)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">6. Attendance &amp; Academic Standing</summary>
+            <div class="grid sm:grid-cols-3 gap-3 p-4 pt-0">
+              <div><label class="field-label">Approx. attendance rate (%)</label><input data-f="attendance.rate" class="field-input"></div>
+              <div><label class="field-label">Total absences</label><input data-f="attendance.total_absences" class="field-input"></div>
+              <div><label class="field-label">Unexcused</label><input data-f="attendance.unexcused" class="field-input"></div>
+              <div class="sm:col-span-3">
+                <label class="field-label">Primary reason(s) for absences (check all that apply)</label>
+                <div class="grid sm:grid-cols-2 gap-1 text-sm">
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="attendance_reasons" value="Illness / chronic health">Illness / chronic health</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="attendance_reasons" value="Mental health / anxiety">Mental health / anxiety</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="attendance_reasons" value="Transportation">Transportation</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="attendance_reasons" value="Caregiving / family responsibilities">Caregiving / family responsibilities</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="attendance_reasons" value="Housing instability">Housing instability</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="attendance_reasons" value="Bullying / safety concern">Bullying / safety concern</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="attendance_reasons" value="School avoidance / disengagement">School avoidance / disengagement</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="attendance_reasons" value="Suspension / discipline">Suspension / discipline</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="attendance_reasons" value="Work obligations">Work obligations</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="attendance_reasons" value="Not disclosed / unknown">Not disclosed / unknown</label>
+                </div>
+                <input data-f="attendance.reasons_other" class="field-input mt-1" placeholder="Other (specify)">
+              </div>
+              <div class="sm:col-span-3"><label class="field-label">Notes on attendance barriers</label><textarea data-f="attendance.barriers_notes" rows="2" class="field-input"></textarea></div>
+              <div><label class="field-label">Current grades / GPA</label><input data-f="academic.grades_gpa" class="field-input"></div>
+              <div class="sm:col-span-2"><label class="field-label">Core subject(s) of concern</label><input data-f="academic.subjects_concern" class="field-input"></div>
+              <div class="sm:col-span-3">
+                <div class="grid sm:grid-cols-3 gap-1 text-sm">
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="academic.flags" value="Currently failing one or more courses">Currently failing one or more courses</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="academic.flags" value="Retained / repeating a grade">Retained / repeating a grade</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="academic.flags" value="On track for promotion">On track for promotion</label>
+                </div>
+              </div>
+              <div class="sm:col-span-3"><label class="field-label">Notes on academic standing</label><textarea data-f="academic.notes" rows="2" class="field-input"></textarea></div>
+            </div>
+          </details>
+
+          <details class="card" style="background:var(--paper)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">7. Health, Safety &amp; Support</summary>
+            <div class="grid gap-3 p-4 pt-0">
+              <div><label class="field-label">Allergies / medical conditions relevant to participation</label><input data-f="health.allergies" class="field-input"></div>
+              <div><label class="field-label">Current behavioral-health support / provider (optional)</label><input data-f="health.bh_provider" class="field-input"></div>
+              <div><label class="field-label">Accommodations the student needs</label><input data-f="health.accommodations" class="field-input"></div>
+            </div>
+          </details>
+
+          <details class="card" style="background:var(--paper)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">8. Barriers &amp; Basic Needs</summary>
+            <div class="p-4 pt-0 overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead><tr style="color:var(--gray)"><th class="text-left py-1">Need</th><th class="py-1">Identified</th><th class="py-1">Referral made</th><th class="text-left py-1 pl-2">Notes</th></tr></thead>
+                <tbody id="needsRows"></tbody>
+              </table>
+            </div>
+          </details>
+
+          <details class="card" style="background:var(--paper)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">9. Forms Completed at Intake</summary>
+            <div class="grid sm:grid-cols-2 gap-3 p-4 pt-0">
+              <div class="sm:col-span-2">
+                <div class="grid sm:grid-cols-2 gap-1 text-sm">
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="forms_done" value="Form B — Program Consent">Form B — Program Consent</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="forms_done" value="Form C — FERPA Records Release">Form C — FERPA Records Release</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="forms_done" value="Form D — Photography/Media (optional)">Form D — Photography/Media (optional)</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="forms_done" value="Student acknowledgment (on Form B)">Student acknowledgment (on Form B)</label>
+                </div>
+              </div>
+              <div><label class="field-label">Staff completing intake</label><input data-f="intake_meta.staff_name" class="field-input"></div>
+              <div><label class="field-label">Date</label><input type="date" data-f="intake_meta.date" class="field-input"></div>
+            </div>
+          </details>
+
+          <details class="card" style="background:var(--gold-soft)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">Consent &amp; Authorizations on file (Forms B–E)</summary>
+            <div class="p-4 pt-0 space-y-4">
+              <p class="text-xs" style="color:var(--gray)">Record what was signed on paper. The wet signatures live on the printed forms; this just tracks status and key selections.</p>
+
+              <div>
+                <div class="field-label">Form B — Program Consent &amp; Voluntary Participation</div>
+                <div class="grid sm:grid-cols-2 gap-1 text-sm">
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-f="consentB.init_enroll">Initialed: consent to enrollment/participation</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-f="consentB.init_pullout">Initialed: understands pull-out sessions / home visits</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-f="consentB.init_voluntary">Initialed: participation is voluntary, may withdraw</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-f="consentB.init_confidentiality">Initialed: understands limits to confidentiality</label>
+                </div>
+                <div class="grid sm:grid-cols-3 gap-3 mt-2">
+                  <div><label class="field-label">Guardian signed?</label><select data-f="consentB.signed" class="field-input"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+                  <div><label class="field-label">Date signed</label><input type="date" data-f="consentB.date" class="field-input"></div>
+                  <div><label class="field-label">Student willing?</label><select data-f="consentB.student_willing" class="field-input"><option value="">—</option><option>Yes</option><option>Unsure</option><option>No</option></select></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="field-label">Form C — FERPA Records Release</div>
+                <div class="grid sm:grid-cols-2 gap-1 text-sm">
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="consentC.records" value="Attendance records">Attendance records</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="consentC.records" value="Disciplinary records">Disciplinary records</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="consentC.records" value="Academic records / grades">Academic records / grades</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="consentC.records" value="Behavioral / counseling records">Behavioral / counseling records</label>
+                  <label class="flex gap-2 items-center"><input type="checkbox" data-multi="consentC.records" value="504/IEP behavioral documentation">504/IEP behavioral documentation</label>
+                </div>
+                <div class="grid sm:grid-cols-3 gap-3 mt-2">
+                  <div><label class="field-label">Assigned counselor</label><input data-f="consentC.counselor_name" class="field-input"></div>
+                  <div><label class="field-label">Authorization expires (optional)</label><input type="date" data-f="consentC.expires" class="field-input"></div>
+                  <div><label class="field-label">Signed?</label><select data-f="consentC.signed" class="field-input"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="field-label">Form D — Photography / Media (optional)</div>
+                <select data-f="consentD.permission" class="field-input">
+                  <option value="">— Select —</option>
+                  <option>GRANT — full (documentation, reporting & promotional)</option>
+                  <option>GRANT — program activities only (no public/promotional)</option>
+                  <option>DO NOT grant permission</option>
+                </select>
+                <div class="grid sm:grid-cols-2 gap-3 mt-2">
+                  <div><label class="field-label">Community partner activities?</label><select data-f="consentD.community_partner" class="field-input"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+                  <div><label class="field-label">Date signed</label><input type="date" data-f="consentD.date" class="field-input"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="field-label">Form E — Authorization to Release Student from Class</div>
+                <div class="grid sm:grid-cols-2 gap-3">
+                  <div><label class="field-label">Authorized?</label><select data-f="consentE.authorized" class="field-input"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+                  <div><label class="field-label">Preferred time (optional)</label><input data-f="consentE.time" class="field-input"></div>
+                </div>
+                <label class="field-label mt-2">Preferred days (optional)</label>
+                <div class="flex gap-3 text-sm">
+                  <label class="flex gap-1 items-center"><input type="checkbox" data-multi="consentE.days" value="Mon">Mon</label>
+                  <label class="flex gap-1 items-center"><input type="checkbox" data-multi="consentE.days" value="Tue">Tue</label>
+                  <label class="flex gap-1 items-center"><input type="checkbox" data-multi="consentE.days" value="Wed">Wed</label>
+                  <label class="flex gap-1 items-center"><input type="checkbox" data-multi="consentE.days" value="Thu">Thu</label>
+                  <label class="flex gap-1 items-center"><input type="checkbox" data-multi="consentE.days" value="Fri">Fri</label>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <div class="flex gap-2 pt-2">
+            <button type="submit" class="btn-primary">Submit Intake (Pending Approval)</button>
+            <button type="button" id="intakeResetBtn" class="btn-ghost">Clear form</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ---------- APPROVALS TAB (admin) ---------- -->
+    <section id="tab-approvals" class="hidden">
+      <div class="max-w-3xl mx-auto">
+        <h2 class="text-lg font-bold serif mb-1" style="color:var(--accent)">Pending Approvals</h2>
+        <p class="text-sm text-gray-500 mb-4">Review each submitted intake and approve the student for service, or decline.</p>
+        <div id="approvalList" class="space-y-3"></div>
       </div>
     </section>
 
@@ -238,10 +500,13 @@ function demoStore() {
   const profiles = Object.values(P);
   const students = [
     { id: 's1', first_name: 'Aaliyah', last_name: 'Brooks', date_of_birth: '2010-04-12', grade: '8', school: 'Lincoln Middle', guardian_name: 'Renee Brooks', guardian_contact: '(860) 555-0142', program_status: 'active', assigned_mentor: 'u-maya', background: 'Joined the program in the fall. Bright and creative; loses motivation when overwhelmed. Loves drawing and graphic design.', created_by: 'u-admin', created_at: '2025-09-15T12:00:00Z' },
-    { id: 's2', first_name: 'Marcus', last_name: 'Johnson', date_of_birth: '2008-11-03', grade: '10', school: 'Central High', guardian_name: 'Denise Johnson', guardian_contact: '(860) 555-0188', program_status: 'active', assigned_mentor: 'u-devon', background: 'Referred by school counselor for attendance concerns. Strong athlete — plays on the basketball team.', created_by: 'u-admin', created_at: '2025-09-20T12:00:00Z' },
+    { id: 's2', first_name: 'Marcus', last_name: 'Johnson', date_of_birth: '2008-11-03', grade: '10', school: 'Central High', guardian_name: 'Denise Johnson', guardian_contact: '(860) 555-0188', program_status: 'active', assigned_mentor: 'u-devon', background: 'Referred by school counselor for attendance concerns. Strong athlete — plays on the basketball team.', created_by: 'u-admin', created_at: '2025-09-20T12:00:00Z',
+      intake: { a:{first_name:'Marcus',last_name:'Johnson',dob:'2008-11-03',grade:'10',primary_language:'English',race:['Black or African American']}, school:{campus:'Central High',district:'Houston ISD',counselor:'Ms. Pérez'}, guardian:{name:'Denise Johnson',relationship:'Mother',mobile:'(860) 555-0188'}, referral:{source:'School / counselor',iep:'No'}, eligibility:['Chronic absenteeism (≥10% of instructional days)','Truancy (10+ unexcused absences in 6 months)'], attendance:{rate:'82',total_absences:'18',unexcused:'12',barriers_notes:'Misses first period; transportation after late nights.'}, attendance_reasons:['Transportation','School avoidance / disengagement'], academic:{grades_gpa:'2.1 GPA',subjects_concern:'Algebra, English'}, needs:{transportation:{identified:true,referral:true,notes:'Bus pass requested'}}, consentB:{signed:'Yes',student_willing:'Yes'}, consentC:{signed:'Yes',records:['Attendance records','Disciplinary records']}, consentD:{permission:'GRANT — program activities only (no public/promotional)'}, consentE:{authorized:'Yes',days:['Tue','Thu']}, intake_meta:{staff_name:'Devon Carter',date:'2025-09-20'} } },
     { id: 's3', first_name: 'Sofia', last_name: 'Reyes', date_of_birth: '2011-02-27', grade: '7', school: 'Lincoln Middle', guardian_name: 'Carmen Reyes', guardian_contact: '(860) 555-0173', program_status: 'active', assigned_mentor: 'u-aisha', background: 'New to the district this year. Quiet, working on building peer connections. Interested in science and animals.', created_by: 'u-admin', created_at: '2025-10-02T12:00:00Z' },
     { id: 's4', first_name: 'Tyrone', last_name: 'Walker', date_of_birth: '2009-07-19', grade: '9', school: 'Central High', guardian_name: 'Patricia Walker', guardian_contact: '(860) 555-0156', program_status: 'active', assigned_mentor: 'u-luis', background: 'Transitioning to high school. Goal is to improve organization and study habits. Enjoys music production.', created_by: 'u-admin', created_at: '2025-10-10T12:00:00Z' },
-    { id: 's5', first_name: 'Emma', last_name: 'Nguyen', date_of_birth: '2010-12-05', grade: '8', school: 'Lincoln Middle', guardian_name: 'Linh Nguyen', guardian_contact: '(860) 555-0199', program_status: 'inactive', assigned_mentor: 'u-maya', background: 'Completed first cycle of the program. Re-engaging after a family move.', created_by: 'u-admin', created_at: '2025-08-28T12:00:00Z' }
+    { id: 's5', first_name: 'Emma', last_name: 'Nguyen', date_of_birth: '2010-12-05', grade: '8', school: 'Lincoln Middle', guardian_name: 'Linh Nguyen', guardian_contact: '(860) 555-0199', program_status: 'inactive', assigned_mentor: 'u-maya', background: 'Completed first cycle of the program. Re-engaging after a family move.', created_by: 'u-admin', created_at: '2025-08-28T12:00:00Z' },
+    { id: 's6', first_name: 'Jayden', last_name: 'Carter', date_of_birth: '2011-06-14', grade: '7', school: 'Lincoln Middle', guardian_name: 'Tasha Carter', guardian_contact: '(832) 555-0121', program_status: 'pending', assigned_mentor: null, created_by: 'u-maya', created_at: '2026-06-24T12:00:00Z', intake_completed_at: '2026-06-24T12:00:00Z',
+      intake: { a:{first_name:'Jayden',last_name:'Carter',dob:'2011-06-14',grade:'7',primary_language:'English',home_address:'123 Oak St',city:'Cypress',zip:'77429',race:['Black or African American','Hispanic or Latino']}, school:{campus:'Lincoln Middle',district:'Houston ISD',counselor:'Mr. Adeyemi',phone:'(832) 555-0100'}, guardian:{name:'Tasha Carter',relationship:'Mother',mobile:'(832) 555-0121',email:'tasha.c@example.com',preferred_contact:'Text'}, emergency:{name:'Gloria Carter',relationship:'Grandmother',phone:'(832) 555-0145'}, referral:{source:'School / counselor',referrer_name:'Mr. Adeyemi',iep:'Yes — 504',behavioral_goals:'Yes'}, eligibility:['Chronic absenteeism (≥10% of instructional days)','Counselor referral for emotional regulation'], attendance:{rate:'79',total_absences:'21',unexcused:'9',barriers_notes:'Anxiety around mornings; some bullying reported.'}, attendance_reasons:['Mental health / anxiety','Bullying / safety concern'], academic:{grades_gpa:'C average',subjects_concern:'Math',flags:['Currently failing one or more courses']}, health:{accommodations:'Check-in/check-out, quiet space when overwhelmed'}, needs:{food:{identified:true,referral:false,notes:''},technology:{identified:true,referral:true,notes:'Needs hotspot'}}, consentB:{signed:'Yes',student_willing:'Unsure',init_enroll:true,init_voluntary:true}, consentC:{signed:'Yes',records:['Attendance records','Academic records / grades','Behavioral / counseling records']}, consentD:{permission:'DO NOT grant permission',community_partner:'No'}, consentE:{authorized:'Yes',days:['Mon','Wed','Fri'],time:'10:00 AM'}, intake_meta:{staff_name:'Maya Thompson',date:'2026-06-24'} } }
   ];
   const sessions = [
     { id: 'se1', student_id: 's1', mentor_id: 'u-maya', session_date: '2026-06-18', duration_minutes: 60, setting: 'In-person', session_type: 'Mentoring / check-in', topics: 'Weekly check-in, upcoming art project', progress_notes: 'Engaged and upbeat. Shared portfolio she has been building.', concerns: '', follow_up: 'Help research summer art programs.', created_at: '2026-06-18T16:00:00Z' },
@@ -467,8 +732,10 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     const name = tab.dataset.tab;
-    ['students', 'reports', 'manage'].forEach(s => $('tab-' + s).classList.toggle('hidden', s !== name));
+    ['students', 'intake', 'approvals', 'reports', 'manage'].forEach(s => $('tab-' + s).classList.toggle('hidden', s !== name));
     if (name === 'reports') loadReportStats();
+    if (name === 'approvals') loadApprovals();
+    if (name === 'intake') buildNeedsRows();
   });
 });
 
@@ -479,6 +746,22 @@ async function loadStudents() {
   if (error) { toast(error.message, false); return; }
   STUDENTS = data || [];
   renderStudentList();
+  updatePendingBadge();
+}
+
+// Caseload = approved students only. Pending/declined live in the Approvals tab.
+function caseloadStudents() {
+  return STUDENTS.filter(s => !['pending', 'declined'].includes(s.program_status));
+}
+function pendingStudents() {
+  return STUDENTS.filter(s => s.program_status === 'pending');
+}
+function updatePendingBadge() {
+  const n = pendingStudents().length;
+  const b = $('pendingCount');
+  if (!b) return;
+  b.textContent = n;
+  b.classList.toggle('hidden', n === 0);
 }
 
 function mentorName(id) {
@@ -488,7 +771,7 @@ function mentorName(id) {
 
 function renderStudentList() {
   const q = ($('studentSearch').value || '').toLowerCase();
-  const list = STUDENTS.filter(s =>
+  const list = caseloadStudents().filter(s =>
     (s.first_name + ' ' + s.last_name).toLowerCase().includes(q));
   $('studentCount').textContent = list.length + ' shown';
   $('studentList').innerHTML = list.map(s => `
@@ -538,6 +821,7 @@ async function selectStudent(id) {
         </div>
       </div>
       ${s.background ? `<p class="text-sm mt-3 pt-3 border-t" style="border-color:var(--rule)">${esc(s.background)}</p>` : ''}
+      ${s.intake ? `<div class="mt-3 pt-3 border-t" style="border-color:var(--rule)">${intakeSummaryHTML(s)}</div>` : ''}
     </div>
 
     <!-- Log a session -->
@@ -659,9 +943,27 @@ async function generatePlan(student, sessions) {
 
   const age = student.date_of_birth ? Math.floor((Date.now() - new Date(student.date_of_birth)) / 31557600000) : null;
 
-  const system = `You are an experienced youth-development specialist and licensed clinical social worker who writes intervention plans for youth mentors. Your plans are strengths-based, trauma-informed, culturally responsive, and grounded in positive youth development. You write in clear, warm, practical language a mentor can act on. You never diagnose; you flag when professional referral is warranted. Always include a safety note when concerns suggest risk.`;
+  // Pull relevant facts from the intake (Form A) to ground the plan.
+  let intakeBlock = '';
+  const i = student.intake;
+  if (i) {
+    const parts = [];
+    if (i.eligibility?.length) parts.push(`- Eligibility indicators: ${i.eligibility.join('; ')}`);
+    if (i.attendance?.rate || i.attendance?.total_absences || i.attendance?.unexcused) parts.push(`- Attendance: ${i.attendance.rate ? i.attendance.rate + '% rate, ' : ''}${i.attendance.total_absences || '?'} absences (${i.attendance.unexcused || '?'} unexcused)`);
+    if (i.attendance_reasons?.length) parts.push(`- Reasons for absences: ${i.attendance_reasons.join('; ')}`);
+    if (i.attendance?.barriers_notes) parts.push(`- Attendance barrier notes: ${i.attendance.barriers_notes}`);
+    if (i.academic?.grades_gpa || i.academic?.subjects_concern) parts.push(`- Academic: ${i.academic.grades_gpa || ''} ${i.academic.subjects_concern ? '(concern: ' + i.academic.subjects_concern + ')' : ''}`);
+    if (i.referral?.iep && i.referral.iep !== 'No') parts.push(`- Special education: ${i.referral.iep}`);
+    if (i.health?.bh_provider) parts.push(`- Behavioral-health provider involved: ${i.health.bh_provider}`);
+    if (i.health?.accommodations) parts.push(`- Accommodations needed: ${i.health.accommodations}`);
+    const needs = Object.entries(i.needs || {}).filter(([k, v]) => v && typeof v === 'object' && v.identified).map(([k]) => (NEED_ROWS.find(n => n[0] === k) || [k, k])[1]);
+    if (needs.length) parts.push(`- Basic-needs barriers identified: ${needs.join('; ')}`);
+    if (parts.length) intakeBlock = `\nINTAKE (Form A) HIGHLIGHTS\n${parts.join('\n')}\n`;
+  }
 
-  const prompt = `Create an individualized intervention plan for a youth in a mentoring program.
+  const system = `You are an experienced youth-development specialist and licensed clinical social worker who writes intervention plans for youth mentors in a school-attendance / truancy-prevention program. Your plans are strengths-based, trauma-informed, culturally responsive, and grounded in positive youth development. You write in clear, warm, practical language a mentor can act on. You never diagnose; you flag when professional referral is warranted. Always include a safety note when concerns suggest risk.`;
+
+  const prompt = `Create an individualized intervention plan for a youth in a truancy-prevention mentoring program.
 
 YOUTH PROFILE
 - Name: ${student.first_name} ${student.last_name}
@@ -669,7 +971,7 @@ ${age ? `- Approx. age: ${age}` : ''}
 - Grade: ${student.grade || 'n/a'} | School: ${student.school || 'n/a'}
 - Program status: ${student.program_status}
 ${student.background ? `- Background: ${student.background}` : ''}
-
+${intakeBlock}
 MENTOR'S CURRENT INPUT (presenting concerns + goals)
 ${input}
 
@@ -721,6 +1023,160 @@ Keep it concise and usable. Use plain headings (no markdown symbols needed).`;
     btn.disabled = false;
     btn.innerHTML = '✨ Generate Intervention Plan';
   }
+}
+
+// ---------- Intake (staff/mentors) ----------
+const NEED_ROWS = [
+  ['transportation', 'Transportation'], ['clothing', 'Clothing / uniforms / shoes'],
+  ['food', 'Food insecurity'], ['supplies', 'School supplies'], ['hygiene', 'Hygiene supplies'],
+  ['technology', 'Technology / internet access'], ['housing', 'Stable housing'],
+  ['childcare', 'Childcare'], ['medical', 'Medical / dental access'], ['other', 'Other']
+];
+let needsBuilt = false;
+function buildNeedsRows() {
+  if (needsBuilt) return;
+  const tb = $('needsRows');
+  if (!tb) return;
+  tb.innerHTML = NEED_ROWS.map(([k, label]) => `
+    <tr class="border-t" style="border-color:var(--rule)">
+      <td class="py-2">${label}${k === 'other' ? ' <input data-f="needs.other_label" class="field-input inline-block w-32 ml-1" style="padding:4px 6px" placeholder="specify">' : ''}</td>
+      <td class="text-center"><input type="checkbox" data-f="needs.${k}.identified"></td>
+      <td class="text-center"><input type="checkbox" data-f="needs.${k}.referral"></td>
+      <td class="pl-2"><input data-f="needs.${k}.notes" class="field-input" style="padding:5px 8px"></td>
+    </tr>`).join('');
+  needsBuilt = true;
+}
+
+// Generic collector: reads every [data-f] and [data-multi] into a nested object.
+function collectIntake(root) {
+  const obj = {};
+  const setPath = (path, val) => {
+    const ks = path.split('.'); let o = obj;
+    ks.forEach((k, i) => { if (i === ks.length - 1) o[k] = val; else o = (o[k] = o[k] || {}); });
+  };
+  root.querySelectorAll('[data-f]').forEach(el => {
+    if (el.type === 'checkbox') setPath(el.dataset.f, el.checked);
+    else if (el.type === 'radio') { if (el.checked) setPath(el.dataset.f, el.value); }
+    else { const v = (el.value || '').trim(); if (v) setPath(el.dataset.f, v); }
+  });
+  const groups = {};
+  root.querySelectorAll('[data-multi]').forEach(el => {
+    const g = el.dataset.multi; (groups[g] = groups[g] || []); if (el.checked) groups[g].push(el.value);
+  });
+  Object.entries(groups).forEach(([g, arr]) => { if (arr.length) setPath(g, arr); });
+  return obj;
+}
+
+$('intakeResetBtn').addEventListener('click', () => $('intakeForm').reset());
+
+$('intakeForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const intake = collectIntake(form);
+  const first = intake.a?.first_name, last = intake.a?.last_name;
+  if (!first || !last) { toast('First and last name are required', false); return; }
+  const btn = form.querySelector('button[type=submit]');
+  btn.disabled = true;
+  const payload = {
+    first_name: first,
+    last_name: last,
+    date_of_birth: intake.a?.dob || null,
+    grade: intake.a?.grade || null,
+    school: intake.school?.campus || null,
+    guardian_name: intake.guardian?.name || null,
+    guardian_contact: intake.guardian?.mobile || intake.guardian?.email || null,
+    program_status: 'pending',
+    intake: intake,
+    intake_completed_at: new Date().toISOString(),
+    created_by: ME.id
+  };
+  const { error } = await sb.from('students').insert(payload);
+  btn.disabled = false;
+  if (error) { toast(error.message, false); return; }
+  form.reset();
+  toast('Intake submitted — pending approval');
+  await loadStudents();
+  // Jump the admin to the approvals queue; mentors back to students.
+  document.querySelector(ME.role === 'admin' ? '.tab[data-tab=approvals]' : '.tab[data-tab=students]').click();
+});
+
+// ---------- Approvals (admin) ----------
+async function loadApprovals() {
+  await loadStudents();
+  const pend = pendingStudents();
+  $('approvalList').innerHTML = pend.length ? pend.map(s => approvalCard(s)).join('')
+    : '<div class="card p-8 text-center text-gray-400 text-sm">No intakes waiting for approval. 🎉</div>';
+  pend.forEach(s => {
+    const root = document.getElementById('appr-' + s.id);
+    root.querySelector('[data-approve]').addEventListener('click', () => decideStudent(s.id, 'active'));
+    root.querySelector('[data-decline]').addEventListener('click', () => decideStudent(s.id, 'declined'));
+  });
+}
+
+function approvalCard(s) {
+  const i = s.intake || {};
+  const elig = (i.eligibility || []).join(', ');
+  const reasons = (i.attendance_reasons || []).join(', ');
+  return `<div class="card p-4" id="appr-${s.id}">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <div class="font-bold serif text-lg" style="color:var(--accent)">${esc(s.first_name)} ${esc(s.last_name)}</div>
+        <div class="text-xs text-gray-500">${esc(s.grade ? 'Grade ' + s.grade : '')}${s.grade && s.school ? ' · ' : ''}${esc(s.school || '')} · submitted ${fmtDate((s.intake_completed_at||s.created_at||'').slice(0,10))}</div>
+      </div>
+      <div class="flex gap-2 shrink-0">
+        <button data-approve class="btn-primary" style="padding:8px 14px">✓ Approve for Service</button>
+        <button data-decline class="btn-ghost">Decline</button>
+      </div>
+    </div>
+    ${intakeSummaryHTML(s)}
+  </div>`;
+}
+
+async function decideStudent(id, status) {
+  const patch = { program_status: status };
+  if (status === 'active') { patch.approved_by = ME.id; patch.approved_at = new Date().toISOString(); }
+  const { error } = await sb.from('students').update(patch).eq('id', id);
+  if (error) { toast(error.message, false); return; }
+  toast(status === 'active' ? 'Approved for service' : 'Intake declined');
+  await loadApprovals();
+}
+
+// Shared: render an intake as a readable summary (used in approvals + student detail).
+function intakeSummaryHTML(s) {
+  const i = s.intake; if (!i) return '';
+  const row = (label, val) => val ? `<div><span style="color:var(--gray)">${label}:</span> ${esc(val)}</div>` : '';
+  const list = (label, arr) => (arr && arr.length) ? `<div><span style="color:var(--gray)">${label}:</span> ${esc(arr.join(', '))}</div>` : '';
+  const needs = Object.entries(i.needs || {}).filter(([k, v]) => v && typeof v === 'object' && v.identified)
+    .map(([k]) => (NEED_ROWS.find(n => n[0] === k) || [k, k])[1]);
+  const consents = [];
+  if (i.consentB?.signed === 'Yes') consents.push('Consent (B)');
+  if (i.consentC?.signed === 'Yes') consents.push('FERPA (C)');
+  if (i.consentD?.permission) consents.push('Media (D): ' + i.consentD.permission.split(' —')[0]);
+  if (i.consentE?.authorized === 'Yes') consents.push('Release from class (E)');
+  return `<details class="mt-3 text-sm"><summary class="cursor-pointer" style="color:var(--accent)">View intake details</summary>
+    <div class="grid sm:grid-cols-2 gap-x-4 gap-y-1 mt-2 pt-2 border-t" style="border-color:var(--rule)">
+      ${row('DOB', i.a?.dob ? fmtDate(i.a.dob) : '')}
+      ${row('Primary language', i.a?.primary_language)}
+      ${list('Race/ethnicity', i.a?.race)}
+      ${row('District', i.school?.district)}
+      ${row('Counselor', i.school?.counselor)}
+      ${row('Guardian', [i.guardian?.name, i.guardian?.relationship].filter(Boolean).join(', '))}
+      ${row('Guardian phone', i.guardian?.mobile)}
+      ${row('Emergency contact', [i.emergency?.name, i.emergency?.phone].filter(Boolean).join(' · '))}
+      ${row('Referral source', [i.referral?.source, i.referral?.source_other].filter(Boolean).join(' — '))}
+      ${list('Eligibility', i.eligibility)}
+      ${row('504/IEP', i.referral?.iep)}
+      ${row('Attendance rate', i.attendance?.rate ? i.attendance.rate + '%' : '')}
+      ${row('Absences (total / unexcused)', [i.attendance?.total_absences, i.attendance?.unexcused].some(Boolean) ? `${i.attendance?.total_absences||'?'} / ${i.attendance?.unexcused||'?'}` : '')}
+      ${list('Absence reasons', i.attendance_reasons)}
+      ${row('Grades / GPA', i.academic?.grades_gpa)}
+      ${row('Subjects of concern', i.academic?.subjects_concern)}
+      ${row('Allergies / medical', i.health?.allergies)}
+      ${row('Accommodations', i.health?.accommodations)}
+      ${needs.length ? `<div class="sm:col-span-2"><span style="color:var(--gray)">Needs identified:</span> ${esc(needs.join(', '))}</div>` : ''}
+      ${consents.length ? `<div class="sm:col-span-2"><span style="color:var(--gray)">Consents on file:</span> ${esc(consents.join(' · '))}</div>` : ''}
+      ${i.intake_meta?.staff_name ? `<div class="sm:col-span-2 text-xs text-gray-400 mt-1">Intake by ${esc(i.intake_meta.staff_name)}${i.intake_meta.date ? ' on ' + fmtDate(i.intake_meta.date) : ''}</div>` : ''}
+    </div></details>`;
 }
 
 // ---------- Manage students (admin) ----------
@@ -814,13 +1270,29 @@ $('downloadReportBtn').addEventListener('click', async () => {
     const studentById = Object.fromEntries(STUDENTS.map(s => [s.id, s]));
     const sName = (id) => { const s = studentById[id]; return s ? `${s.last_name}, ${s.first_name}` : '(unknown)'; };
 
-    // Sheet 1: Caseload roster
-    const roster = STUDENTS.map(s => ({
-      'Last name': s.last_name, 'First name': s.first_name, 'DOB': s.date_of_birth || '',
-      'Grade': s.grade || '', 'School': s.school || '', 'Status': s.program_status,
-      'Assigned mentor': mentorName(s.assigned_mentor) || '', 'Guardian': s.guardian_name || '',
-      'Guardian contact': s.guardian_contact || '', 'Background': s.background || ''
-    }));
+    // Sheet 1: Caseload roster (with intake highlights)
+    const needLabel = (k) => (NEED_ROWS.find(n => n[0] === k) || [k, k])[1];
+    const roster = STUDENTS.map(s => {
+      const i = s.intake || {};
+      const needs = Object.entries(i.needs || {}).filter(([k, v]) => v && typeof v === 'object' && v.identified).map(([k]) => needLabel(k));
+      return {
+        'Last name': s.last_name, 'First name': s.first_name, 'DOB': s.date_of_birth || '',
+        'Grade': s.grade || '', 'School': s.school || '', 'District': i.school?.district || '',
+        'Status': s.program_status,
+        'Assigned mentor': mentorName(s.assigned_mentor) || '', 'Guardian': s.guardian_name || '',
+        'Guardian contact': s.guardian_contact || '',
+        'Referral source': [i.referral?.source, i.referral?.source_other].filter(Boolean).join(' — '),
+        'Eligibility': (i.eligibility || []).join('; '),
+        'Attendance %': i.attendance?.rate || '', 'Total absences': i.attendance?.total_absences || '',
+        'Unexcused': i.attendance?.unexcused || '', 'Absence reasons': (i.attendance_reasons || []).join('; '),
+        '504/IEP': i.referral?.iep || '', 'Grades/GPA': i.academic?.grades_gpa || '',
+        'Needs identified': needs.join('; '),
+        'Consent B': i.consentB?.signed || '', 'FERPA C': i.consentC?.signed || '',
+        'Media D': i.consentD?.permission ? i.consentD.permission.split(' —')[0] : '',
+        'Release E': i.consentE?.authorized || '',
+        'Background': s.background || ''
+      };
+    });
 
     // Sheet 2: Sessions log
     const sessRows = (sessions || []).map(x => ({

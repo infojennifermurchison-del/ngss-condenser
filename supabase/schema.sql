@@ -75,12 +75,31 @@ create table if not exists public.students (
   school            text,
   guardian_name     text,
   guardian_contact  text,
-  program_status    text not null default 'active' check (program_status in ('active', 'inactive', 'completed')),
+  -- 'pending'  = intake submitted, awaiting admin approval for service
+  -- 'active'   = approved and being served    'declined' = not enrolled
+  program_status    text not null default 'active'
+                    check (program_status in ('pending', 'active', 'inactive', 'completed', 'declined')),
   assigned_mentor   uuid references public.profiles (id) on delete set null,
   background        text,
+  -- Full Form A + B/C/D/E intake captured as structured data (see app).
+  intake            jsonb,
+  intake_completed_at timestamptz,
+  approved_by       uuid references public.profiles (id) on delete set null,
+  approved_at       timestamptz,
   created_by        uuid references public.profiles (id) on delete set null,
   created_at        timestamptz not null default now()
 );
+
+-- If upgrading an existing install, add the new columns (safe to re-run):
+alter table public.students add column if not exists intake jsonb;
+alter table public.students add column if not exists intake_completed_at timestamptz;
+alter table public.students add column if not exists approved_by uuid references public.profiles (id) on delete set null;
+alter table public.students add column if not exists approved_at timestamptz;
+do $$ begin
+  alter table public.students drop constraint if exists students_program_status_check;
+  alter table public.students add constraint students_program_status_check
+    check (program_status in ('pending', 'active', 'inactive', 'completed', 'declined'));
+exception when others then null; end $$;
 
 -- ---------------------------------------------------------------------------
 -- 3. SESSIONS  (contact-hour logs + session information)
@@ -144,14 +163,25 @@ drop policy if exists profiles_admin_all on public.profiles;
 create policy profiles_admin_all on public.profiles
   for all using (public.is_admin()) with check (public.is_admin());
 
--- ---- STUDENTS ----  (all signed-in users can see the roster; admin manages it)
+-- ---- STUDENTS ----
+-- All signed-in users can see the roster. Any staff member (mentor or admin) can
+-- SUBMIT an intake (insert). Approving/editing/deleting students is ADMIN-only.
 drop policy if exists students_select on public.students;
 create policy students_select on public.students
   for select using (auth.role() = 'authenticated');
 
-drop policy if exists students_admin_write on public.students;
-create policy students_admin_write on public.students
-  for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists students_admin_write on public.students;  -- replaced by the policies below
+drop policy if exists students_insert on public.students;
+create policy students_insert on public.students
+  for insert with check (auth.uid() = created_by or public.is_admin());
+
+drop policy if exists students_admin_update on public.students;
+create policy students_admin_update on public.students
+  for update using (public.is_admin()) with check (public.is_admin());
+
+drop policy if exists students_admin_delete on public.students;
+create policy students_admin_delete on public.students
+  for delete using (public.is_admin());
 
 -- ---- SESSIONS ----  (everyone reads for continuity; mentors create their own)
 drop policy if exists sessions_select on public.sessions;

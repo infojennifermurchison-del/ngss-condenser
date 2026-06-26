@@ -91,6 +91,17 @@ Live URL once deployed: `https://YOUR-PROJECT.vercel.app/mentor`
 
 ## How it's used day to day
 
+**Intake → Approval (how a youth joins the caseload)**
+- Any staff member/mentor opens the **New Intake** tab and fills out **Form A — Student
+  Intake & Enrollment** (all 10 sections), plus records which consents (Forms B–E) are on
+  file. Signatures stay on paper; the app tracks status and key selections.
+- Submitting creates the student as **Pending approval** — they do NOT appear in the active
+  caseload yet.
+- The **admin** opens the **Approvals** tab, reviews each intake, and clicks **Approve for
+  Service** (the youth joins the caseload) or **Decline**.
+- The intake data then feeds the student's profile, the AI intervention plan, and the Excel
+  reports.
+
 **Mentors**
 - Sign in → **Students** tab → search/select a youth.
 - **Log a Session**: date, duration in minutes, setting, type, topics, notes, concerns, follow-up.
