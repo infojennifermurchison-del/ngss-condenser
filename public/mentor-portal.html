@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Youth Mentorship Portal</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --accent: #0F4C5C;
+    --accent-soft: #E8F1F2;
+    --gold: #C99700;
+    --gold-soft: #FFF8E7;
+    --paper: #FAF7F2;
+    --ink: #1A1A1A;
+    --rule: #D9D2C5;
+  }
+  body { background: var(--paper); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+  .serif { font-family: Georgia, 'Times New Roman', serif; }
+  .field-label { display:block; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:5px; color:var(--accent); }
+  .field-input { width:100%; padding:9px 11px; background:white; border:1px solid #D6D3D1; border-radius:3px; color:#1C1917; font-size:14px; outline:none; box-sizing:border-box; transition:border-color .15s, box-shadow .15s; }
+  .field-input:focus { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  textarea.field-input { resize:vertical; line-height:1.5; }
+  .btn-primary { background:var(--accent); color:white; padding:11px 20px; border-radius:3px; font-weight:700; font-size:14px; border:none; cursor:pointer; transition:opacity .15s; }
+  .btn-primary:hover { opacity:.9; }
+  .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+  .btn-gold { background:var(--gold); color:white; }
+  .btn-ghost { background:white; color:var(--accent); border:1px solid var(--rule); padding:9px 16px; border-radius:3px; font-weight:600; font-size:13px; cursor:pointer; }
+  .btn-ghost:hover { background:var(--accent-soft); }
+  .card { background:white; border:1px solid var(--rule); border-radius:6px; }
+  .badge { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; letter-spacing:.03em; }
+  .tab { padding:10px 16px; font-weight:600; font-size:14px; color:#6b6b6b; cursor:pointer; border-bottom:2px solid transparent; }
+  .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .plan-body { white-space:pre-wrap; line-height:1.6; font-size:14px; }
+  .plan-body h1,.plan-body h2,.plan-body h3 { font-weight:700; color:var(--accent); margin:14px 0 6px; }
+  .spinner { width:18px; height:18px; border:2px solid rgba(255,255,255,.4); border-top-color:white; border-radius:50%; animation:spin .7s linear infinite; display:inline-block; vertical-align:middle; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .row-hover:hover { background:var(--accent-soft); }
+</style>
+</head>
+<body>
+
+<!-- ===================== TOAST ===================== -->
+<div id="toast" class="hidden fixed top-4 right-4 z-50 px-4 py-3 rounded-md text-white text-sm font-semibold shadow-lg"></div>
+
+<!-- ===================== SETUP NOTICE ===================== -->
+<div id="setupNotice" class="hidden max-w-2xl mx-auto mt-16 p-8 card">
+  <h1 class="text-xl font-bold serif mb-3" style="color:var(--accent)">Almost there — finish setup</h1>
+  <p class="text-sm leading-relaxed mb-3">This portal needs its database connection configured. In your <strong>Vercel project → Settings → Environment Variables</strong>, add:</p>
+  <ul class="text-sm list-disc pl-5 space-y-1 mb-3">
+    <li><code class="bg-gray-100 px-1">SUPABASE_URL</code> — your Supabase project URL</li>
+    <li><code class="bg-gray-100 px-1">SUPABASE_ANON_KEY</code> — your Supabase anon/public key</li>
+    <li><code class="bg-gray-100 px-1">ANTHROPIC_API_KEY</code> — for AI intervention plans</li>
+  </ul>
+  <p class="text-sm">Then redeploy. Full steps are in <code class="bg-gray-100 px-1">MENTOR-PORTAL-SETUP.md</code>.</p>
+</div>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="loginView" class="hidden min-h-screen flex items-center justify-center px-4">
+  <div class="card w-full max-w-sm p-8">
+    <div class="text-center mb-6">
+      <div class="badge" style="background:var(--gold-soft); color:var(--gold)">YOUTH MENTORSHIP</div>
+      <h1 class="text-2xl font-bold serif mt-3" style="color:var(--accent)">Mentor Portal</h1>
+      <p class="text-sm text-gray-500 mt-1">Sign in to continue</p>
+    </div>
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label class="field-label">Email</label>
+        <input id="loginEmail" type="email" class="field-input" autocomplete="username" required />
+      </div>
+      <div>
+        <label class="field-label">Password</label>
+        <input id="loginPassword" type="password" class="field-input" autocomplete="current-password" required />
+      </div>
+      <p id="loginError" class="hidden text-sm text-red-600"></p>
+      <button type="submit" id="loginBtn" class="btn-primary w-full">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="appView" class="hidden">
+  <!-- Header -->
+  <header class="bg-white border-b" style="border-color:var(--rule)">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="font-bold serif text-lg" style="color:var(--accent)">Mentor Portal</span>
+        <span id="roleBadge" class="badge"></span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="userName" class="text-sm text-gray-600"></span>
+        <button id="logoutBtn" class="btn-ghost">Sign Out</button>
+      </div>
+    </div>
+    <!-- Tabs -->
+    <div class="max-w-6xl mx-auto px-4 flex gap-1">
+      <div class="tab active" data-tab="students">Students</div>
+      <div class="tab admin-only hidden" data-tab="reports">Reports</div>
+      <div class="tab admin-only hidden" data-tab="manage">Manage Students</div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+
+    <!-- ---------- STUDENTS TAB ---------- -->
+    <section id="tab-students">
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Student list -->
+        <div class="md:col-span-1">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-bold text-sm uppercase tracking-wide" style="color:var(--accent)">Students in Program</h2>
+            <span id="studentCount" class="text-xs text-gray-400"></span>
+          </div>
+          <input id="studentSearch" class="field-input mb-2" placeholder="Search by name…" />
+          <div id="studentList" class="card divide-y overflow-y-auto" style="max-height:70vh; border-color:var(--rule)"></div>
+        </div>
+
+        <!-- Student detail -->
+        <div class="md:col-span-2">
+          <div id="noStudentSelected" class="card p-10 text-center text-gray-400">
+            Select a student to view their record, log a session, or build an intervention plan.
+          </div>
+          <div id="studentDetail" class="hidden space-y-5"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- REPORTS TAB (admin) ---------- -->
+    <section id="tab-reports" class="hidden">
+      <div class="card p-6">
+        <h2 class="text-lg font-bold serif mb-1" style="color:var(--accent)">Excel Reports</h2>
+        <p class="text-sm text-gray-500 mb-5">Download program data as a multi-sheet Excel workbook (.xlsx). Optionally filter sessions by date range.</p>
+        <div class="grid sm:grid-cols-3 gap-4 mb-5">
+          <div>
+            <label class="field-label">From date</label>
+            <input id="repFrom" type="date" class="field-input" />
+          </div>
+          <div>
+            <label class="field-label">To date</label>
+            <input id="repTo" type="date" class="field-input" />
+          </div>
+          <div class="flex items-end">
+            <button id="downloadReportBtn" class="btn-primary w-full">⬇ Download Excel Report</button>
+          </div>
+        </div>
+        <div id="reportStats" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+      </div>
+    </section>
+
+    <!-- ---------- MANAGE STUDENTS TAB (admin) ---------- -->
+    <section id="tab-manage" class="hidden">
+      <div class="card p-6 max-w-2xl">
+        <h2 class="text-lg font-bold serif mb-4" id="manageTitle" style="color:var(--accent)">Add a Student</h2>
+        <form id="studentForm" class="grid sm:grid-cols-2 gap-4">
+          <input type="hidden" id="sf_id" />
+          <div><label class="field-label">First name *</label><input id="sf_first" class="field-input" required /></div>
+          <div><label class="field-label">Last name *</label><input id="sf_last" class="field-input" required /></div>
+          <div><label class="field-label">Date of birth</label><input id="sf_dob" type="date" class="field-input" /></div>
+          <div><label class="field-label">Grade</label><input id="sf_grade" class="field-input" /></div>
+          <div><label class="field-label">School</label><input id="sf_school" class="field-input" /></div>
+          <div>
+            <label class="field-label">Program status</label>
+            <select id="sf_status" class="field-input">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <div><label class="field-label">Guardian name</label><input id="sf_guardian" class="field-input" /></div>
+          <div><label class="field-label">Guardian contact</label><input id="sf_guardiancontact" class="field-input" /></div>
+          <div class="sm:col-span-2">
+            <label class="field-label">Assigned mentor</label>
+            <select id="sf_mentor" class="field-input"><option value="">— Unassigned —</option></select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="field-label">Background / notes</label>
+            <textarea id="sf_background" rows="3" class="field-input"></textarea>
+          </div>
+          <div class="sm:col-span-2 flex gap-2">
+            <button type="submit" class="btn-primary">Save Student</button>
+            <button type="button" id="cancelEditBtn" class="btn-ghost hidden">Cancel edit</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+// =========================================================================
+// Youth Mentorship Portal — single-file app
+// =========================================================================
+let sb = null;            // supabase client
+let ME = null;            // { id, full_name, role }
+let MENTORS = [];         // profiles list (admin)
+let STUDENTS = [];        // cached students
+let SELECTED = null;      // selected student id
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => (s == null ? '' : String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
+const fmtDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString() : '';
+const hours = (min) => (Number(min || 0) / 60);
+
+function toast(msg, ok = true) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.style.background = ok ? '#15803d' : '#b91c1c';
+  t.classList.remove('hidden');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.add('hidden'), 3200);
+}
+
+// ---------- Boot ----------
+(async function init() {
+  let cfg;
+  try {
+    cfg = await fetch('/api/config').then(r => r.json());
+  } catch (e) {
+    cfg = { configured: false };
+  }
+  if (!cfg.configured) { $('setupNotice').classList.remove('hidden'); return; }
+
+  sb = supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) { await onSignedIn(); }
+  else { $('loginView').classList.remove('hidden'); }
+
+  sb.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_OUT') location.reload();
+  });
+})();
+
+// ---------- Auth ----------
+$('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('loginError').classList.add('hidden');
+  $('loginBtn').disabled = true;
+  $('loginBtn').textContent = 'Signing in…';
+  const { error } = await sb.auth.signInWithPassword({
+    email: $('loginEmail').value.trim(),
+    password: $('loginPassword').value
+  });
+  if (error) {
+    $('loginError').textContent = error.message;
+    $('loginError').classList.remove('hidden');
+    $('loginBtn').disabled = false;
+    $('loginBtn').textContent = 'Sign In';
+    return;
+  }
+  await onSignedIn();
+});
+
+$('logoutBtn').addEventListener('click', () => sb.auth.signOut());
+
+async function onSignedIn() {
+  const { data: { user } } = await sb.auth.getUser();
+  let { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if (!profile) profile = { id: user.id, full_name: user.email, role: 'mentor' };
+  ME = profile;
+
+  $('loginView').classList.add('hidden');
+  $('appView').classList.remove('hidden');
+  $('userName').textContent = ME.full_name || user.email;
+  const rb = $('roleBadge');
+  if (ME.role === 'admin') {
+    rb.textContent = 'ADMIN';
+    rb.style.background = 'var(--gold-soft)'; rb.style.color = 'var(--gold)';
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+  } else {
+    rb.textContent = 'MENTOR';
+    rb.style.background = 'var(--accent-soft)'; rb.style.color = 'var(--accent)';
+  }
+
+  if (ME.role === 'admin') {
+    const { data } = await sb.from('profiles').select('id, full_name, role');
+    MENTORS = data || [];
+    const sel = $('sf_mentor');
+    MENTORS.filter(m => m.role === 'mentor' || m.role === 'admin').forEach(m => {
+      const o = document.createElement('option');
+      o.value = m.id; o.textContent = m.full_name || '(unnamed)';
+      sel.appendChild(o);
+    });
+  }
+
+  await loadStudents();
+}
+
+// ---------- Tabs ----------
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const name = tab.dataset.tab;
+    ['students', 'reports', 'manage'].forEach(s => $('tab-' + s).classList.toggle('hidden', s !== name));
+    if (name === 'reports') loadReportStats();
+  });
+});
+
+// ---------- Students ----------
+async function loadStudents() {
+  const { data, error } = await sb.from('students')
+    .select('*').order('last_name', { ascending: true });
+  if (error) { toast(error.message, false); return; }
+  STUDENTS = data || [];
+  renderStudentList();
+}
+
+function mentorName(id) {
+  const m = MENTORS.find(x => x.id === id);
+  return m ? (m.full_name || '(unnamed)') : '';
+}
+
+function renderStudentList() {
+  const q = ($('studentSearch').value || '').toLowerCase();
+  const list = STUDENTS.filter(s =>
+    (s.first_name + ' ' + s.last_name).toLowerCase().includes(q));
+  $('studentCount').textContent = list.length + ' shown';
+  $('studentList').innerHTML = list.map(s => `
+    <div class="p-3 cursor-pointer row-hover ${s.id === SELECTED ? 'bg-[color:var(--accent-soft)]' : ''}" data-id="${s.id}">
+      <div class="font-semibold text-sm">${esc(s.last_name)}, ${esc(s.first_name)}</div>
+      <div class="text-xs text-gray-500">${esc(s.grade ? 'Grade ' + s.grade : '')}${s.grade && s.school ? ' · ' : ''}${esc(s.school || '')}
+        <span class="badge ml-1" style="background:${s.program_status === 'active' ? '#dcfce7' : '#f1f1f1'};color:${s.program_status === 'active' ? '#15803d' : '#777'}">${esc(s.program_status)}</span></div>
+    </div>`).join('') || '<div class="p-4 text-sm text-gray-400">No students yet.</div>';
+  $('studentList').querySelectorAll('[data-id]').forEach(el =>
+    el.addEventListener('click', () => selectStudent(el.dataset.id)));
+}
+$('studentSearch').addEventListener('input', renderStudentList);
+
+async function selectStudent(id) {
+  SELECTED = id;
+  renderStudentList();
+  $('noStudentSelected').classList.add('hidden');
+  const detail = $('studentDetail');
+  detail.classList.remove('hidden');
+  detail.innerHTML = '<div class="card p-6 text-gray-400 text-sm">Loading…</div>';
+
+  const s = STUDENTS.find(x => x.id === id);
+  const [{ data: sessions }, { data: plans }] = await Promise.all([
+    sb.from('sessions').select('*').eq('student_id', id).order('session_date', { ascending: false }),
+    sb.from('intervention_plans').select('*').eq('student_id', id).order('created_at', { ascending: false })
+  ]);
+
+  const totalHrs = (sessions || []).reduce((a, x) => a + hours(x.duration_minutes), 0);
+
+  detail.innerHTML = `
+    <div class="card p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-xl font-bold serif" style="color:var(--accent)">${esc(s.first_name)} ${esc(s.last_name)}</h2>
+          <div class="text-sm text-gray-500 mt-1">
+            ${esc(s.grade ? 'Grade ' + s.grade : '')}${s.grade && s.school ? ' · ' : ''}${esc(s.school || '')}
+            ${s.date_of_birth ? ' · DOB ' + fmtDate(s.date_of_birth) : ''}
+          </div>
+          ${s.assigned_mentor ? `<div class="text-xs text-gray-500 mt-1">Assigned mentor: ${esc(mentorName(s.assigned_mentor) || '—')}</div>` : ''}
+          ${s.guardian_name ? `<div class="text-xs text-gray-500">Guardian: ${esc(s.guardian_name)} ${s.guardian_contact ? '· ' + esc(s.guardian_contact) : ''}</div>` : ''}
+        </div>
+        <div class="text-right">
+          <div class="text-2xl font-bold" style="color:var(--gold)">${totalHrs.toFixed(1)}</div>
+          <div class="text-xs text-gray-400 uppercase tracking-wide">Contact hrs</div>
+          <div class="text-xs text-gray-400 mt-1">${(sessions || []).length} sessions</div>
+          ${ME.role === 'admin' ? `<button onclick="editStudent('${s.id}')" class="btn-ghost mt-2 text-xs">Edit student</button>` : ''}
+        </div>
+      </div>
+      ${s.background ? `<p class="text-sm mt-3 pt-3 border-t" style="border-color:var(--rule)">${esc(s.background)}</p>` : ''}
+    </div>
+
+    <!-- Log a session -->
+    <div class="card p-5">
+      <h3 class="font-bold text-sm uppercase tracking-wide mb-3" style="color:var(--accent)">Log a Session</h3>
+      <form id="sessionForm" class="grid sm:grid-cols-2 gap-3">
+        <div><label class="field-label">Date *</label><input id="se_date" type="date" class="field-input" required value="${new Date().toISOString().slice(0,10)}"></div>
+        <div><label class="field-label">Duration (minutes) *</label><input id="se_dur" type="number" min="0" class="field-input" required placeholder="60"></div>
+        <div>
+          <label class="field-label">Setting</label>
+          <select id="se_setting" class="field-input">
+            <option>In-person</option><option>Virtual</option><option>Phone</option><option>Group</option><option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Session type</label>
+          <select id="se_type" class="field-input">
+            <option>Mentoring / check-in</option><option>Academic support</option><option>Behavioral</option>
+            <option>Crisis / urgent</option><option>Family engagement</option><option>Goal setting</option><option>Other</option>
+          </select>
+        </div>
+        <div class="sm:col-span-2"><label class="field-label">Topics covered</label><input id="se_topics" class="field-input"></div>
+        <div class="sm:col-span-2"><label class="field-label">Progress notes</label><textarea id="se_notes" rows="2" class="field-input"></textarea></div>
+        <div><label class="field-label">Concerns / risk flags</label><textarea id="se_concerns" rows="2" class="field-input"></textarea></div>
+        <div><label class="field-label">Follow-up / next steps</label><textarea id="se_follow" rows="2" class="field-input"></textarea></div>
+        <div class="sm:col-span-2"><button type="submit" class="btn-primary">Save Session</button></div>
+      </form>
+    </div>
+
+    <!-- Intervention plan -->
+    <div class="card p-5">
+      <h3 class="font-bold text-sm uppercase tracking-wide mb-2" style="color:var(--accent)">AI Intervention Plan</h3>
+      <p class="text-xs text-gray-500 mb-3">Describe the youth's current presenting concerns and the goals you want to work toward. The AI builds a strengths-based plan using this plus their session history. Always review and adapt before use.</p>
+      <textarea id="ip_input" rows="3" class="field-input mb-2" placeholder="e.g. Frequent school absences and low engagement in class; wants to improve attendance and rebuild confidence. Strong interest in basketball and music."></textarea>
+      <div class="flex gap-2">
+        <button id="genPlanBtn" class="btn-primary">✨ Generate Intervention Plan</button>
+      </div>
+      <div id="planOutput" class="hidden mt-4 border-t pt-4" style="border-color:var(--rule)"></div>
+    </div>
+
+    <!-- Session history -->
+    <div class="card p-5">
+      <h3 class="font-bold text-sm uppercase tracking-wide mb-3" style="color:var(--accent)">Session History (${(sessions || []).length})</h3>
+      <div id="sessionHistory" class="space-y-2"></div>
+    </div>
+
+    <!-- Saved plans -->
+    <div class="card p-5">
+      <h3 class="font-bold text-sm uppercase tracking-wide mb-3" style="color:var(--accent)">Saved Intervention Plans (${(plans || []).length})</h3>
+      <div id="planHistory" class="space-y-2"></div>
+    </div>
+  `;
+
+  // session history
+  $('sessionHistory').innerHTML = (sessions || []).map(x => `
+    <div class="border rounded p-3 text-sm" style="border-color:var(--rule)">
+      <div class="flex justify-between">
+        <span class="font-semibold">${fmtDate(x.session_date)} · ${esc(x.session_type || '')}</span>
+        <span class="text-gray-500">${hours(x.duration_minutes).toFixed(1)} hr · ${esc(x.setting || '')}${x.mentor_id ? ' · ' + esc(mentorName(x.mentor_id)) : ''}</span>
+      </div>
+      ${x.topics ? `<div class="mt-1"><span class="text-gray-400">Topics:</span> ${esc(x.topics)}</div>` : ''}
+      ${x.progress_notes ? `<div><span class="text-gray-400">Notes:</span> ${esc(x.progress_notes)}</div>` : ''}
+      ${x.concerns ? `<div class="text-red-700"><span class="text-gray-400">Concerns:</span> ${esc(x.concerns)}</div>` : ''}
+      ${x.follow_up ? `<div><span class="text-gray-400">Follow-up:</span> ${esc(x.follow_up)}</div>` : ''}
+    </div>`).join('') || '<div class="text-sm text-gray-400">No sessions logged yet.</div>';
+
+  // plan history
+  $('planHistory').innerHTML = (plans || []).map(p => `
+    <details class="border rounded p-3 text-sm" style="border-color:var(--rule)">
+      <summary class="cursor-pointer font-semibold">${esc(p.title)} — ${fmtDate(p.created_at.slice(0,10))}
+        <span class="badge ml-1" style="background:var(--accent-soft);color:var(--accent)">${esc(p.status)}</span></summary>
+      ${p.input_summary ? `<p class="text-xs text-gray-500 mt-2"><strong>Input:</strong> ${esc(p.input_summary)}</p>` : ''}
+      <div class="plan-body mt-2">${esc(p.plan_content)}</div>
+    </details>`).join('') || '<div class="text-sm text-gray-400">No plans yet.</div>';
+
+  // wire forms
+  $('sessionForm').addEventListener('submit', saveSession);
+  $('genPlanBtn').addEventListener('click', () => generatePlan(s, sessions || []));
+}
+
+// ---------- Save session ----------
+async function saveSession(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true;
+  const payload = {
+    student_id: SELECTED,
+    mentor_id: ME.id,
+    session_date: $('se_date').value,
+    duration_minutes: parseInt($('se_dur').value || '0', 10),
+    setting: $('se_setting').value,
+    session_type: $('se_type').value,
+    topics: $('se_topics').value.trim(),
+    progress_notes: $('se_notes').value.trim(),
+    concerns: $('se_concerns').value.trim(),
+    follow_up: $('se_follow').value.trim()
+  };
+  const { error } = await sb.from('sessions').insert(payload);
+  btn.disabled = false;
+  if (error) { toast(error.message, false); return; }
+  toast('Session logged');
+  selectStudent(SELECTED);
+}
+
+// ---------- Generate intervention plan ----------
+async function generatePlan(student, sessions) {
+  const input = $('ip_input').value.trim();
+  if (!input) { toast('Add some context about the youth first', false); return; }
+  const btn = $('genPlanBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Generating…';
+  const out = $('planOutput');
+  out.classList.remove('hidden');
+  out.innerHTML = '<div class="text-sm text-gray-400">Building plan…</div>';
+
+  const recent = sessions.slice(0, 8).map(x =>
+    `- ${x.session_date} (${x.session_type || 'session'}, ${hours(x.duration_minutes).toFixed(1)}h): ${[x.topics, x.progress_notes, x.concerns && 'Concern: ' + x.concerns].filter(Boolean).join('; ')}`
+  ).join('\n') || 'No prior sessions logged.';
+
+  const age = student.date_of_birth ? Math.floor((Date.now() - new Date(student.date_of_birth)) / 31557600000) : null;
+
+  const system = `You are an experienced youth-development specialist and licensed clinical social worker who writes intervention plans for youth mentors. Your plans are strengths-based, trauma-informed, culturally responsive, and grounded in positive youth development. You write in clear, warm, practical language a mentor can act on. You never diagnose; you flag when professional referral is warranted. Always include a safety note when concerns suggest risk.`;
+
+  const prompt = `Create an individualized intervention plan for a youth in a mentoring program.
+
+YOUTH PROFILE
+- Name: ${student.first_name} ${student.last_name}
+${age ? `- Approx. age: ${age}` : ''}
+- Grade: ${student.grade || 'n/a'} | School: ${student.school || 'n/a'}
+- Program status: ${student.program_status}
+${student.background ? `- Background: ${student.background}` : ''}
+
+MENTOR'S CURRENT INPUT (presenting concerns + goals)
+${input}
+
+RECENT SESSION HISTORY
+${recent}
+
+Write the plan with these clearly labeled sections:
+1. Summary & Strengths
+2. Identified Needs / Areas of Focus
+3. Protective & Risk Factors
+4. SMART Goals (2–4, each measurable with a target timeframe)
+5. Strategies & Mentor Actions (concrete, session-by-session friendly)
+6. Supports & Referrals (school, family, community, professional — note when to escalate)
+7. Progress Indicators (how to know it's working)
+8. Review Date & Next Steps
+
+Keep it concise and usable. Use plain headings (no markdown symbols needed).`;
+
+  try {
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system, messages: [{ role: 'user', content: prompt }], max_tokens: 3000 })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Generation failed');
+    const text = (data.content || []).map(b => b.text || '').join('\n').trim();
+
+    out.innerHTML = `
+      <div class="plan-body">${esc(text)}</div>
+      <div class="flex gap-2 mt-4">
+        <button id="savePlanBtn" class="btn-primary">Save to Student Record</button>
+        <button id="copyPlanBtn" class="btn-ghost">Copy</button>
+      </div>`;
+    $('copyPlanBtn').addEventListener('click', () => { navigator.clipboard.writeText(text); toast('Copied'); });
+    $('savePlanBtn').addEventListener('click', async (ev) => {
+      ev.target.disabled = true;
+      const { error } = await sb.from('intervention_plans').insert({
+        student_id: SELECTED, created_by: ME.id, input_summary: input, plan_content: text,
+        title: 'Intervention Plan — ' + new Date().toLocaleDateString()
+      });
+      if (error) { toast(error.message, false); ev.target.disabled = false; return; }
+      toast('Plan saved');
+      selectStudent(SELECTED);
+    });
+  } catch (err) {
+    out.innerHTML = `<div class="text-sm text-red-600">${esc(err.message)}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Generate Intervention Plan';
+  }
+}
+
+// ---------- Manage students (admin) ----------
+$('studentForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const payload = {
+    first_name: $('sf_first').value.trim(),
+    last_name: $('sf_last').value.trim(),
+    date_of_birth: $('sf_dob').value || null,
+    grade: $('sf_grade').value.trim() || null,
+    school: $('sf_school').value.trim() || null,
+    guardian_name: $('sf_guardian').value.trim() || null,
+    guardian_contact: $('sf_guardiancontact').value.trim() || null,
+    program_status: $('sf_status').value,
+    assigned_mentor: $('sf_mentor').value || null,
+    background: $('sf_background').value.trim() || null
+  };
+  const id = $('sf_id').value;
+  let error;
+  if (id) {
+    ({ error } = await sb.from('students').update(payload).eq('id', id));
+  } else {
+    payload.created_by = ME.id;
+    ({ error } = await sb.from('students').insert(payload));
+  }
+  if (error) { toast(error.message, false); return; }
+  toast(id ? 'Student updated' : 'Student added');
+  resetStudentForm();
+  await loadStudents();
+});
+
+function resetStudentForm() {
+  $('studentForm').reset();
+  $('sf_id').value = '';
+  $('manageTitle').textContent = 'Add a Student';
+  $('cancelEditBtn').classList.add('hidden');
+}
+$('cancelEditBtn').addEventListener('click', resetStudentForm);
+
+// Allow admins to edit a student from the detail view
+function editStudent(id) {
+  const s = STUDENTS.find(x => x.id === id); if (!s) return;
+  document.querySelector('.tab[data-tab=manage]').click();
+  $('sf_id').value = s.id;
+  $('sf_first').value = s.first_name || '';
+  $('sf_last').value = s.last_name || '';
+  $('sf_dob').value = s.date_of_birth || '';
+  $('sf_grade').value = s.grade || '';
+  $('sf_school').value = s.school || '';
+  $('sf_guardian').value = s.guardian_name || '';
+  $('sf_guardiancontact').value = s.guardian_contact || '';
+  $('sf_status').value = s.program_status || 'active';
+  $('sf_mentor').value = s.assigned_mentor || '';
+  $('sf_background').value = s.background || '';
+  $('manageTitle').textContent = 'Edit Student';
+  $('cancelEditBtn').classList.remove('hidden');
+}
+window.editStudent = editStudent;
+
+// ---------- Reports (admin) ----------
+async function loadReportStats() {
+  const [{ data: sessions }, { data: plans }] = await Promise.all([
+    sb.from('sessions').select('duration_minutes, mentor_id'),
+    sb.from('intervention_plans').select('id')
+  ]);
+  const totalHrs = (sessions || []).reduce((a, x) => a + hours(x.duration_minutes), 0);
+  const stat = (label, val) => `
+    <div class="card p-4 text-center">
+      <div class="text-2xl font-bold" style="color:var(--accent)">${val}</div>
+      <div class="text-xs text-gray-400 uppercase tracking-wide mt-1">${label}</div>
+    </div>`;
+  $('reportStats').innerHTML =
+    stat('Students', STUDENTS.length) +
+    stat('Sessions', (sessions || []).length) +
+    stat('Contact hours', totalHrs.toFixed(1)) +
+    stat('Intervention plans', (plans || []).length);
+}
+
+$('downloadReportBtn').addEventListener('click', async () => {
+  const btn = $('downloadReportBtn');
+  btn.disabled = true; btn.textContent = 'Building…';
+  try {
+    const from = $('repFrom').value, to = $('repTo').value;
+    let sQ = sb.from('sessions').select('*');
+    if (from) sQ = sQ.gte('session_date', from);
+    if (to) sQ = sQ.lte('session_date', to);
+    const [{ data: sessions }, { data: plans }] = await Promise.all([
+      sQ.order('session_date', { ascending: false }),
+      sb.from('intervention_plans').select('*').order('created_at', { ascending: false })
+    ]);
+    const studentById = Object.fromEntries(STUDENTS.map(s => [s.id, s]));
+    const sName = (id) => { const s = studentById[id]; return s ? `${s.last_name}, ${s.first_name}` : '(unknown)'; };
+
+    // Sheet 1: Caseload roster
+    const roster = STUDENTS.map(s => ({
+      'Last name': s.last_name, 'First name': s.first_name, 'DOB': s.date_of_birth || '',
+      'Grade': s.grade || '', 'School': s.school || '', 'Status': s.program_status,
+      'Assigned mentor': mentorName(s.assigned_mentor) || '', 'Guardian': s.guardian_name || '',
+      'Guardian contact': s.guardian_contact || '', 'Background': s.background || ''
+    }));
+
+    // Sheet 2: Sessions log
+    const sessRows = (sessions || []).map(x => ({
+      'Date': x.session_date, 'Student': sName(x.student_id), 'Mentor': mentorName(x.mentor_id) || '',
+      'Type': x.session_type || '', 'Setting': x.setting || '',
+      'Duration (min)': x.duration_minutes, 'Contact hours': hours(x.duration_minutes).toFixed(2),
+      'Topics': x.topics || '', 'Progress notes': x.progress_notes || '',
+      'Concerns': x.concerns || '', 'Follow-up': x.follow_up || ''
+    }));
+
+    // Sheet 3: Contact hours by student
+    const byStudent = {};
+    (sessions || []).forEach(x => {
+      const k = sName(x.student_id);
+      byStudent[k] = byStudent[k] || { sessions: 0, min: 0 };
+      byStudent[k].sessions++; byStudent[k].min += Number(x.duration_minutes || 0);
+    });
+    const hrsByStudent = Object.entries(byStudent).map(([k, v]) => ({
+      'Student': k, 'Sessions': v.sessions, 'Total minutes': v.min, 'Contact hours': (v.min / 60).toFixed(2)
+    }));
+
+    // Sheet 4: Contact hours by mentor
+    const byMentor = {};
+    (sessions || []).forEach(x => {
+      const k = mentorName(x.mentor_id) || '(unknown)';
+      byMentor[k] = byMentor[k] || { sessions: 0, min: 0 };
+      byMentor[k].sessions++; byMentor[k].min += Number(x.duration_minutes || 0);
+    });
+    const hrsByMentor = Object.entries(byMentor).map(([k, v]) => ({
+      'Mentor': k, 'Sessions': v.sessions, 'Total minutes': v.min, 'Contact hours': (v.min / 60).toFixed(2)
+    }));
+
+    // Sheet 5: Intervention plans
+    const planRows = (plans || []).map(p => ({
+      'Created': p.created_at.slice(0, 10), 'Student': sName(p.student_id),
+      'Author': mentorName(p.created_by) || '', 'Title': p.title, 'Status': p.status,
+      'Input': p.input_summary || '', 'Plan': p.plan_content
+    }));
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(roster), 'Caseload');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sessRows), 'Sessions');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(hrsByStudent), 'Hours by Student');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(hrsByMentor), 'Hours by Mentor');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(planRows), 'Intervention Plans');
+
+    const stamp = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `mentorship-report-${stamp}.xlsx`);
+    toast('Report downloaded');
+  } catch (err) {
+    toast(err.message, false);
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Download Excel Report';
+  }
+});
+</script>
+</body>
+</html>

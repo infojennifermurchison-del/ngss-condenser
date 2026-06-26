@@ -3,6 +3,7 @@
   "buildCommand": null,
   "outputDirectory": "public",
   "rewrites": [
-    { "source": "/", "destination": "/index.html" }
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/mentor", "destination": "/mentor-portal.html" }
   ]
 }
