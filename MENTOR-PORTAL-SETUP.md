@@ -93,8 +93,10 @@ Live URL once deployed: `https://YOUR-PROJECT.vercel.app/mentor`
 
 **Intake → Approval (how a youth joins the caseload)**
 - Any staff member/mentor opens the **New Intake** tab and fills out **Form A — Student
-  Intake & Enrollment** (all 10 sections), plus records which consents (Forms B–E) are on
-  file. Signatures stay on paper; the app tracks status and key selections.
+  Intake & Enrollment** (all 10 sections), plus Forms B–E, which the parent/guardian
+  **signs electronically right in the app** (drawn signature + typed name). No paper
+  double-handling. Any saved intake can be **printed or saved as a PDF** (with the
+  signatures) from the student's profile or the Approvals queue.
 - Submitting creates the student as **Pending approval** — they do NOT appear in the active
   caseload yet.
 - The **admin** opens the **Approvals** tab, reviews each intake, and clicks **Approve for
@@ -120,6 +122,30 @@ Live URL once deployed: `https://YOUR-PROJECT.vercel.app/mentor`
   5. **Intervention Plans** — every saved AI plan
 
 ---
+
+## FERPA & data privacy (please read)
+
+This app stores **education records** about minors (names, DOB, attendance,
+grades, discipline, 504/IEP, counseling notes). That makes it FERPA-relevant
+**whether or not** Social Security numbers are collected — FERPA protects the
+records, not just SSNs. The app is built to support compliance, but compliance is
+mostly about *how your organization runs it*, not the software alone. Key points:
+
+- **Your legal basis to hold records** is the signed **Form C (FERPA release)**.
+  Keep those signatures on file (the app now captures them electronically).
+- **Safeguards already in place:** individual logins, role-based access (mentors
+  vs admin), encryption in transit (HTTPS) and at rest (Supabase AES-256), and
+  the data is only used to deliver/report the program.
+- **What you should do:** use strong passwords; turn on **multi-factor
+  authentication** in Supabase; only create accounts for people who need them;
+  set a **data-retention/destruction** schedule; and keep signed
+  **data-processing agreements** with your vendors (Supabase, Vercel, Anthropic).
+- **AI & third parties:** generating an intervention plan sends a **de-identified**
+  summary to Anthropic's API — first name, age, grade, and needs only; never the
+  full name, school, address, IDs, or guardian details. For extra protection you
+  can enable zero-data-retention on your Anthropic account.
+- **Not legal advice.** Before entering real student data, get sign-off from your
+  district/LEA and the Houston Health Department on this data-handling approach.
 
 ## Notes & safety
 

@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Attendance Matters — Mentor Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -20,7 +23,13 @@
     --rule: #E1E5EC;        /* light borders */
   }
   body { background: var(--paper); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
-  .serif { font-family: Georgia, 'Times New Roman', serif; }
+  /* Bold display font to echo the logo wordmark. (.serif kept as the class name used by headings.) */
+  .serif { font-family: 'Montserrat', 'Arial Black', 'Helvetica Neue', Arial, sans-serif; font-weight: 800; letter-spacing: -0.01em; }
+  .brand-title { font-family: 'Montserrat', 'Arial Black', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: 0.02em; }
+  /* Signature pads */
+  .sig-wrap { position: relative; display: inline-block; width: 100%; max-width: 460px; }
+  canvas.sigpad { width: 100%; height: 110px; background: #fff; border: 1px dashed var(--gray); border-radius: 4px; touch-action: none; cursor: crosshair; display: block; }
+  .sig-clear { position: absolute; top: 4px; right: 6px; font-size: 11px; color: var(--gray); background: #fff; border: 1px solid var(--rule); border-radius: 3px; padding: 1px 6px; cursor: pointer; }
   .field-label { display:block; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:5px; color:var(--accent); }
   .field-input { width:100%; padding:9px 11px; background:white; border:1px solid #D6D3D1; border-radius:3px; color:#1C1917; font-size:14px; outline:none; box-sizing:border-box; transition:border-color .15s, box-shadow .15s; }
   .field-input:focus { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
@@ -65,7 +74,7 @@
     <div class="text-center mb-6">
       <img src="/attendance-matters-logo.png" alt="Attendance Matters" onerror="this.style.display='none'" style="width:120px;height:120px;object-fit:contain;margin:0 auto 8px" />
       <div class="badge" style="background:var(--gold-soft); color:var(--gold)">ATTENDANCE MATTERS</div>
-      <h1 class="text-2xl font-bold serif mt-3" style="color:var(--accent)">Mentor Portal</h1>
+      <h1 class="text-2xl brand-title mt-3" style="color:var(--accent)">Mentor Portal</h1>
       <p class="text-sm text-gray-500 mt-1">A Truancy Prevention Project · Sign in to continue</p>
     </div>
     <form id="loginForm" class="space-y-4">
@@ -91,7 +100,7 @@
       <div class="flex items-center gap-3">
         <img src="/attendance-matters-logo.png" alt="Attendance Matters" onerror="this.style.display='none'" style="width:36px;height:36px;object-fit:contain" />
         <div class="leading-tight">
-          <span class="font-bold serif text-lg block" style="color:var(--accent)">Attendance Matters</span>
+          <span class="brand-title text-lg block" style="color:var(--accent)">Attendance Matters</span>
           <span class="text-xs" style="color:var(--gray)">Mentor Portal</span>
         </div>
         <span id="roleBadge" class="badge"></span>
@@ -312,9 +321,12 @@
             </div>
           </details>
 
-          <details class="card" style="background:var(--gold-soft)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">Consent &amp; Authorizations on file (Forms B–E)</summary>
-            <div class="p-4 pt-0 space-y-4">
-              <p class="text-xs" style="color:var(--gray)">Record what was signed on paper. The wet signatures live on the printed forms; this just tracks status and key selections.</p>
+          <details class="card" style="background:var(--gold-soft)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">Consent &amp; Authorizations (Forms B–E) — signed here</summary>
+            <div class="p-4 pt-0 space-y-5">
+              <label class="flex gap-2 items-start text-sm p-2 rounded" style="background:#fff;border:1px solid var(--rule)">
+                <input type="checkbox" data-f="esign.consent" class="mt-1">
+                <span>The parent/guardian agrees to review and sign these forms <strong>electronically</strong>. A typed name and the signature drawn below have the same effect as a handwritten signature, and a copy can be provided on request.</span>
+              </label>
 
               <div>
                 <div class="field-label">Form B — Program Consent &amp; Voluntary Participation</div>
@@ -324,11 +336,12 @@
                   <label class="flex gap-2 items-center"><input type="checkbox" data-f="consentB.init_voluntary">Initialed: participation is voluntary, may withdraw</label>
                   <label class="flex gap-2 items-center"><input type="checkbox" data-f="consentB.init_confidentiality">Initialed: understands limits to confidentiality</label>
                 </div>
-                <div class="grid sm:grid-cols-3 gap-3 mt-2">
-                  <div><label class="field-label">Guardian signed?</label><select data-f="consentB.signed" class="field-input"><option value="">—</option><option>Yes</option><option>No</option></select></div>
-                  <div><label class="field-label">Date signed</label><input type="date" data-f="consentB.date" class="field-input"></div>
+                <div class="grid sm:grid-cols-2 gap-3 mt-2">
+                  <div><label class="field-label">Guardian printed name</label><input data-f="consentB.signed_name" class="field-input"></div>
                   <div><label class="field-label">Student willing?</label><select data-f="consentB.student_willing" class="field-input"><option value="">—</option><option>Yes</option><option>Unsure</option><option>No</option></select></div>
                 </div>
+                <label class="field-label mt-2">Guardian signature</label>
+                <div class="sig-wrap"><canvas class="sigpad" data-sig="consentB.signature"></canvas><button type="button" class="sig-clear">Clear</button></div>
               </div>
 
               <div>
@@ -343,8 +356,10 @@
                 <div class="grid sm:grid-cols-3 gap-3 mt-2">
                   <div><label class="field-label">Assigned counselor</label><input data-f="consentC.counselor_name" class="field-input"></div>
                   <div><label class="field-label">Authorization expires (optional)</label><input type="date" data-f="consentC.expires" class="field-input"></div>
-                  <div><label class="field-label">Signed?</label><select data-f="consentC.signed" class="field-input"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+                  <div><label class="field-label">Guardian printed name</label><input data-f="consentC.signed_name" class="field-input"></div>
                 </div>
+                <label class="field-label mt-2">Guardian signature</label>
+                <div class="sig-wrap"><canvas class="sigpad" data-sig="consentC.signature"></canvas><button type="button" class="sig-clear">Clear</button></div>
               </div>
 
               <div>
@@ -357,8 +372,10 @@
                 </select>
                 <div class="grid sm:grid-cols-2 gap-3 mt-2">
                   <div><label class="field-label">Community partner activities?</label><select data-f="consentD.community_partner" class="field-input"><option value="">—</option><option>Yes</option><option>No</option></select></div>
-                  <div><label class="field-label">Date signed</label><input type="date" data-f="consentD.date" class="field-input"></div>
+                  <div><label class="field-label">Guardian printed name</label><input data-f="consentD.signed_name" class="field-input"></div>
                 </div>
+                <label class="field-label mt-2">Guardian signature</label>
+                <div class="sig-wrap"><canvas class="sigpad" data-sig="consentD.signature"></canvas><button type="button" class="sig-clear">Clear</button></div>
               </div>
 
               <div>
@@ -375,11 +392,21 @@
                   <label class="flex gap-1 items-center"><input type="checkbox" data-multi="consentE.days" value="Thu">Thu</label>
                   <label class="flex gap-1 items-center"><input type="checkbox" data-multi="consentE.days" value="Fri">Fri</label>
                 </div>
+                <div class="grid sm:grid-cols-1 gap-3 mt-2">
+                  <div><label class="field-label">Guardian printed name</label><input data-f="consentE.signed_name" class="field-input"></div>
+                </div>
+                <label class="field-label mt-2">Guardian signature</label>
+                <div class="sig-wrap"><canvas class="sigpad" data-sig="consentE.signature"></canvas><button type="button" class="sig-clear">Clear</button></div>
+              </div>
+
+              <div class="pt-2 border-t" style="border-color:var(--rule)">
+                <div class="field-label">Staff completing intake — signature</div>
+                <div class="sig-wrap"><canvas class="sigpad" data-sig="intake_meta.staff_signature"></canvas><button type="button" class="sig-clear">Clear</button></div>
               </div>
             </div>
           </details>
 
-          <div class="flex gap-2 pt-2">
+          <div class="flex gap-2 pt-2 flex-wrap">
             <button type="submit" class="btn-primary">Submit Intake (Pending Approval)</button>
             <button type="button" id="intakeResetBtn" class="btn-ghost">Clear form</button>
           </div>
@@ -735,7 +762,7 @@ document.querySelectorAll('.tab').forEach(tab => {
     ['students', 'intake', 'approvals', 'reports', 'manage'].forEach(s => $('tab-' + s).classList.toggle('hidden', s !== name));
     if (name === 'reports') loadReportStats();
     if (name === 'approvals') loadApprovals();
-    if (name === 'intake') buildNeedsRows();
+    if (name === 'intake') { buildNeedsRows(); initSigPads(); }
   });
 });
 
@@ -821,7 +848,8 @@ async function selectStudent(id) {
         </div>
       </div>
       ${s.background ? `<p class="text-sm mt-3 pt-3 border-t" style="border-color:var(--rule)">${esc(s.background)}</p>` : ''}
-      ${s.intake ? `<div class="mt-3 pt-3 border-t" style="border-color:var(--rule)">${intakeSummaryHTML(s)}</div>` : ''}
+      ${s.intake ? `<div class="mt-3 pt-3 border-t" style="border-color:var(--rule)">${intakeSummaryHTML(s)}
+        <button onclick="printIntake('${s.id}')" class="btn-ghost mt-2 text-xs">🖨 Print / Save intake as PDF</button></div>` : ''}
     </div>
 
     <!-- Log a session -->
@@ -963,13 +991,14 @@ async function generatePlan(student, sessions) {
 
   const system = `You are an experienced youth-development specialist and licensed clinical social worker who writes intervention plans for youth mentors in a school-attendance / truancy-prevention program. Your plans are strengths-based, trauma-informed, culturally responsive, and grounded in positive youth development. You write in clear, warm, practical language a mentor can act on. You never diagnose; you flag when professional referral is warranted. Always include a safety note when concerns suggest risk.`;
 
+  // FERPA note: send only minimal, de-identified context to the AI — first name + age +
+  // grade, never the full name, school, address, IDs, or guardian details.
   const prompt = `Create an individualized intervention plan for a youth in a truancy-prevention mentoring program.
 
-YOUTH PROFILE
-- Name: ${student.first_name} ${student.last_name}
+YOUTH PROFILE (de-identified)
+- First name: ${student.first_name}
 ${age ? `- Approx. age: ${age}` : ''}
-- Grade: ${student.grade || 'n/a'} | School: ${student.school || 'n/a'}
-- Program status: ${student.program_status}
+- Grade: ${student.grade || 'n/a'}
 ${student.background ? `- Background: ${student.background}` : ''}
 ${intakeBlock}
 MENTOR'S CURRENT INPUT (presenting concerns + goals)
@@ -1047,27 +1076,81 @@ function buildNeedsRows() {
   needsBuilt = true;
 }
 
-// Generic collector: reads every [data-f] and [data-multi] into a nested object.
+// Set a nested path like "consentB.signature" on an object.
+function setObjPath(obj, path, val) {
+  const ks = path.split('.'); let o = obj;
+  ks.forEach((k, i) => { if (i === ks.length - 1) o[k] = val; else o = (o[k] = o[k] || {}); });
+}
+
+// Generic collector: reads every [data-f], [data-multi], and signature pad into a nested object.
 function collectIntake(root) {
   const obj = {};
-  const setPath = (path, val) => {
-    const ks = path.split('.'); let o = obj;
-    ks.forEach((k, i) => { if (i === ks.length - 1) o[k] = val; else o = (o[k] = o[k] || {}); });
-  };
   root.querySelectorAll('[data-f]').forEach(el => {
-    if (el.type === 'checkbox') setPath(el.dataset.f, el.checked);
-    else if (el.type === 'radio') { if (el.checked) setPath(el.dataset.f, el.value); }
-    else { const v = (el.value || '').trim(); if (v) setPath(el.dataset.f, v); }
+    if (el.type === 'checkbox') setObjPath(obj, el.dataset.f, el.checked);
+    else if (el.type === 'radio') { if (el.checked) setObjPath(obj, el.dataset.f, el.value); }
+    else { const v = (el.value || '').trim(); if (v) setObjPath(obj, el.dataset.f, v); }
   });
   const groups = {};
   root.querySelectorAll('[data-multi]').forEach(el => {
     const g = el.dataset.multi; (groups[g] = groups[g] || []); if (el.checked) groups[g].push(el.value);
   });
-  Object.entries(groups).forEach(([g, arr]) => { if (arr.length) setPath(g, arr); });
+  Object.entries(groups).forEach(([g, arr]) => { if (arr.length) setObjPath(obj, g, arr); });
+
+  // Signatures: store the drawn image, the printed name, an electronic-signature timestamp,
+  // and mark the corresponding consent as signed.
+  const now = new Date().toISOString();
+  root.querySelectorAll('canvas.sigpad').forEach(cv => {
+    if (cv.dataset.dirty === '1') {
+      const path = cv.dataset.sig;               // e.g. consentB.signature
+      setObjPath(obj, path, cv.toDataURL('image/png'));
+      const form = path.split('.')[0];           // consentB
+      if (/^consent[BCD]$/.test(form)) setObjPath(obj, form + '.signed', 'Yes');
+      setObjPath(obj, form + '.signed_at', now);
+    }
+  });
   return obj;
 }
 
-$('intakeResetBtn').addEventListener('click', () => $('intakeForm').reset());
+// ---- Signature pad: make every <canvas class="sigpad"> drawable (mouse + touch) ----
+function initSigPads(root) {
+  (root || document).querySelectorAll('canvas.sigpad').forEach(cv => {
+    if (cv.dataset.init === '1') return;
+    cv.dataset.init = '1';
+    // size the drawing buffer to the displayed size for crisp lines
+    const rect = cv.getBoundingClientRect();
+    cv.width = Math.max(300, Math.round(rect.width || 460));
+    cv.height = 110;
+    const ctx = cv.getContext('2d');
+    ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#15284C';
+    let drawing = false, last = null;
+    const pt = e => {
+      const r = cv.getBoundingClientRect();
+      const s = e.touches ? e.touches[0] : e;
+      return { x: (s.clientX - r.left) * (cv.width / r.width), y: (s.clientY - r.top) * (cv.height / r.height) };
+    };
+    const down = e => { drawing = true; last = pt(e); cv.dataset.dirty = '1'; e.preventDefault(); };
+    const move = e => { if (!drawing) return; const p = pt(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p; e.preventDefault(); };
+    const up = () => { drawing = false; };
+    cv.addEventListener('mousedown', down); cv.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+    cv.addEventListener('touchstart', down, { passive: false }); cv.addEventListener('touchmove', move, { passive: false }); cv.addEventListener('touchend', up);
+  });
+}
+function clearSigPad(cv) {
+  cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
+  cv.dataset.dirty = '';
+}
+// "Clear" buttons next to each pad
+document.addEventListener('click', e => {
+  if (e.target.classList && e.target.classList.contains('sig-clear')) {
+    const cv = e.target.parentElement.querySelector('canvas.sigpad');
+    if (cv) clearSigPad(cv);
+  }
+});
+function clearAllSigPads(root) { (root || document).querySelectorAll('canvas.sigpad').forEach(clearSigPad); }
+
+initSigPads();
+
+$('intakeResetBtn').addEventListener('click', () => { $('intakeForm').reset(); clearAllSigPads($('intakeForm')); });
 
 $('intakeForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -1094,6 +1177,7 @@ $('intakeForm').addEventListener('submit', async (e) => {
   btn.disabled = false;
   if (error) { toast(error.message, false); return; }
   form.reset();
+  clearAllSigPads(form);
   toast('Intake submitted — pending approval');
   await loadStudents();
   // Jump the admin to the approvals queue; mentors back to students.
@@ -1126,6 +1210,7 @@ function approvalCard(s) {
       <div class="flex gap-2 shrink-0">
         <button data-approve class="btn-primary" style="padding:8px 14px">✓ Approve for Service</button>
         <button data-decline class="btn-ghost">Decline</button>
+        <button onclick="printIntake('${s.id}')" class="btn-ghost">🖨 Print</button>
       </div>
     </div>
     ${intakeSummaryHTML(s)}
@@ -1178,6 +1263,88 @@ function intakeSummaryHTML(s) {
       ${i.intake_meta?.staff_name ? `<div class="sm:col-span-2 text-xs text-gray-400 mt-1">Intake by ${esc(i.intake_meta.staff_name)}${i.intake_meta.date ? ' on ' + fmtDate(i.intake_meta.date) : ''}</div>` : ''}
     </div></details>`;
 }
+
+// ---------- Print / Save intake as PDF ----------
+function printIntake(id) {
+  const s = STUDENTS.find(x => x.id === id);
+  if (!s) { toast('Student not found', false); return; }
+  const i = s.intake || {};
+  const r = (l, v) => v ? `<tr><td class="l">${esc(l)}</td><td>${esc(v)}</td></tr>` : '';
+  const ar = (l, a) => (a && a.length) ? `<tr><td class="l">${esc(l)}</td><td>${esc(a.join(', '))}</td></tr>` : '';
+  const sec = (title, rows) => rows.trim() ? `<h2>${esc(title)}</h2><table>${rows}</table>` : '';
+  const sig = (label, c) => (c && (c.signature || c.signed_name)) ? `<div class="sig"><div class="sl">${esc(label)}</div>${c.signature ? `<img src="${c.signature}">` : '<div class="sigline"></div>'}<div class="sn">${esc(c.signed_name || '')}${c.signed_at ? ' — signed electronically ' + fmtDate(c.signed_at.slice(0, 10)) : ''}</div></div>` : '';
+  const needs = Object.entries(i.needs || {}).filter(([k, v]) => v && typeof v === 'object' && (v.identified || v.referral || v.notes))
+    .map(([k, v]) => `<tr><td class="l">${esc((NEED_ROWS.find(n => n[0] === k) || [k, k])[1])}</td><td>${v.identified ? 'Identified' : ''}${v.referral ? ' · referral made' : ''}${v.notes ? ' — ' + esc(v.notes) : ''}</td></tr>`).join('');
+
+  const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Intake — ${esc(s.first_name)} ${esc(s.last_name)}</title>
+  <style>
+    @page { margin: 1in; }
+    body { font-family: Arial, Helvetica, sans-serif; color:#1A2335; font-size:12px; line-height:1.45; }
+    .hdr { display:flex; align-items:center; gap:12px; border-bottom:3px solid #15284C; padding-bottom:8px; margin-bottom:14px; }
+    .hdr img { width:60px; height:60px; object-fit:contain; }
+    .hdr h1 { margin:0; font-size:18px; color:#15284C; text-transform:uppercase; letter-spacing:.5px; }
+    .hdr .sub { color:#E97625; font-weight:bold; font-size:11px; }
+    h2 { background:#15284C; color:#fff; font-size:12px; padding:4px 8px; margin:14px 0 4px; text-transform:uppercase; letter-spacing:.4px; }
+    table { width:100%; border-collapse:collapse; margin-bottom:6px; }
+    td { border:1px solid #D9DEE6; padding:4px 7px; vertical-align:top; }
+    td.l { width:34%; color:#5b6472; font-weight:bold; background:#F5F7FA; }
+    .sigrow { display:flex; flex-wrap:wrap; gap:18px; margin-top:6px; }
+    .sig { flex:1; min-width:240px; }
+    .sig .sl { font-weight:bold; color:#5b6472; font-size:10px; text-transform:uppercase; }
+    .sig img { display:block; max-height:70px; border-bottom:1px solid #333; }
+    .sig .sigline { border-bottom:1px solid #333; height:36px; }
+    .sig .sn { font-size:11px; color:#333; margin-top:2px; }
+    .foot { margin-top:18px; font-size:9px; color:#888; border-top:1px solid #ccc; padding-top:6px; }
+  </style></head><body onload="window.focus()">
+    <div class="hdr">
+      <img src="/attendance-matters-logo.png" onerror="this.style.display='none'">
+      <div><h1>Form A — Student Intake &amp; Enrollment</h1>
+      <div class="sub">Attendance Matters · Safe Schools, Safer Families Truancy Program</div></div>
+    </div>
+    ${sec('1. Student Information',
+      r('Name', `${s.first_name} ${s.last_name}`) + r('Date of birth', i.a?.dob ? fmtDate(i.a.dob) : '') +
+      r('Grade', i.a?.grade) + r('Student ID', i.a?.student_id) + r('Home address', [i.a?.home_address, i.a?.city, i.a?.zip].filter(Boolean).join(', ')) +
+      r('Primary language', i.a?.primary_language) + ar('Race / ethnicity', i.a?.race) + r('Other', i.a?.race_other))}
+    ${sec('2. School & District', r('School / campus', i.school?.campus) + r('District', i.school?.district) + r('Counselor', i.school?.counselor) + r('School phone', i.school?.phone))}
+    ${sec('3. Parent / Guardian', r('Name', i.guardian?.name) + r('Relationship', i.guardian?.relationship) + r('Mobile', i.guardian?.mobile) + r('Alt phone', i.guardian?.alt_phone) + r('Email', i.guardian?.email) + r('Preferred contact', i.guardian?.preferred_contact) + r('Preferred language', i.guardian?.preferred_language))}
+    ${sec('4. Emergency Contact', r('Name', i.emergency?.name) + r('Relationship', i.emergency?.relationship) + r('Phone', i.emergency?.phone))}
+    ${sec('5. Referral & Eligibility', r('Referral source', [i.referral?.source, i.referral?.source_other].filter(Boolean).join(' — ')) + r('Referrer', i.referral?.referrer_name) + ar('Eligibility indicators', i.eligibility) + r('504 / IEP', i.referral?.iep) + r('Behavioral goals', i.referral?.behavioral_goals))}
+    ${sec('6. Attendance & Academic', r('Attendance rate', i.attendance?.rate ? i.attendance.rate + '%' : '') + r('Total absences', i.attendance?.total_absences) + r('Unexcused', i.attendance?.unexcused) + ar('Reasons for absences', i.attendance_reasons) + r('Reasons (other)', i.attendance?.reasons_other) + r('Attendance barrier notes', i.attendance?.barriers_notes) + r('Grades / GPA', i.academic?.grades_gpa) + r('Subjects of concern', i.academic?.subjects_concern) + ar('Academic flags', i.academic?.flags) + r('Academic notes', i.academic?.notes))}
+    ${sec('7. Health, Safety & Support', r('Allergies / medical', i.health?.allergies) + r('Behavioral-health provider', i.health?.bh_provider) + r('Accommodations', i.health?.accommodations))}
+    ${needs ? `<h2>8. Barriers &amp; Basic Needs</h2><table>${needs}</table>` : ''}
+    ${sec('9. Forms Completed at Intake', ar('Forms completed', i.forms_done) + r('Staff completing intake', i.intake_meta?.staff_name) + r('Date', i.intake_meta?.date ? fmtDate(i.intake_meta.date) : ''))}
+
+    <h2>Consent &amp; Authorizations (Forms B–E)</h2>
+    <table>
+      ${r('Electronic signature consent', i.esign?.consent ? 'Agreed' : '')}
+      ${r('Form B — Program Consent', i.consentB?.signed === 'Yes' ? 'Signed' + (i.consentB?.student_willing ? ' · student willing: ' + i.consentB.student_willing : '') : '')}
+      ${ar('Form C — FERPA records released', i.consentC?.records)}
+      ${r('Form C — Assigned counselor', i.consentC?.counselor_name)}
+      ${r('Form D — Photo/Media', i.consentD?.permission)}
+      ${r('Form D — Community partner', i.consentD?.community_partner)}
+      ${r('Form E — Release from class', i.consentE?.authorized)}
+      ${ar('Form E — Preferred days', i.consentE?.days)}
+    </table>
+    <div class="sigrow">
+      ${sig('Form B — Guardian', i.consentB)}
+      ${sig('Form C — Guardian (FERPA)', i.consentC)}
+    </div>
+    <div class="sigrow">
+      ${sig('Form D — Guardian (Media)', i.consentD)}
+      ${sig('Form E — Guardian (Release)', i.consentE)}
+    </div>
+    <div class="sigrow">
+      ${(i.intake_meta?.staff_signature) ? `<div class="sig"><div class="sl">Staff completing intake</div><img src="${i.intake_meta.staff_signature}"><div class="sn">${esc(i.intake_meta?.staff_name || '')}</div></div>` : ''}
+    </div>
+    <div class="foot">Generated by the Attendance Matters Mentor Portal on ${fmtDate(new Date().toISOString().slice(0, 10))}. Electronic signatures captured at intake under ESIGN/UETA. Confidential — contains education records protected under FERPA.</div>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  if (!w) { toast('Allow pop-ups to print', false); return; }
+  w.document.write(doc); w.document.close();
+  setTimeout(() => { try { w.print(); } catch (e) {} }, 500);
+}
+window.printIntake = printIntake;
 
 // ---------- Manage students (admin) ----------
 $('studentForm').addEventListener('submit', async (e) => {
