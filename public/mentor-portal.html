@@ -3,19 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Youth Mentorship Portal</title>
+<title>Attendance Matters — Mentor Portal</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
   :root {
-    --accent: #0F4C5C;
-    --accent-soft: #E8F1F2;
-    --gold: #C99700;
-    --gold-soft: #FFF8E7;
-    --paper: #FAF7F2;
-    --ink: #1A1A1A;
-    --rule: #D9D2C5;
+    /* Attendance Matters brand palette (from the program logo) */
+    --accent: #15284C;      /* navy */
+    --accent-soft: #E7EBF3; /* light navy */
+    --gold: #E97625;        /* orange (kept var name so all buttons re-skin) */
+    --gold-soft: #FDEEE2;   /* light orange */
+    --gray: #87898C;        /* logo gray */
+    --paper: #F5F7FA;       /* clean off-white page */
+    --ink: #1A2335;         /* dark navy text */
+    --rule: #E1E5EC;        /* light borders */
   }
   body { background: var(--paper); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
   .serif { font-family: Georgia, 'Times New Roman', serif; }
@@ -61,9 +63,10 @@
 <div id="loginView" class="hidden min-h-screen flex items-center justify-center px-4">
   <div class="card w-full max-w-sm p-8">
     <div class="text-center mb-6">
-      <div class="badge" style="background:var(--gold-soft); color:var(--gold)">YOUTH MENTORSHIP</div>
+      <img src="/attendance-matters-logo.png" alt="Attendance Matters" onerror="this.style.display='none'" style="width:120px;height:120px;object-fit:contain;margin:0 auto 8px" />
+      <div class="badge" style="background:var(--gold-soft); color:var(--gold)">ATTENDANCE MATTERS</div>
       <h1 class="text-2xl font-bold serif mt-3" style="color:var(--accent)">Mentor Portal</h1>
-      <p class="text-sm text-gray-500 mt-1">Sign in to continue</p>
+      <p class="text-sm text-gray-500 mt-1">A Truancy Prevention Project · Sign in to continue</p>
     </div>
     <form id="loginForm" class="space-y-4">
       <div>
@@ -86,7 +89,11 @@
   <header class="bg-white border-b" style="border-color:var(--rule)">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <span class="font-bold serif text-lg" style="color:var(--accent)">Mentor Portal</span>
+        <img src="/attendance-matters-logo.png" alt="Attendance Matters" onerror="this.style.display='none'" style="width:36px;height:36px;object-fit:contain" />
+        <div class="leading-tight">
+          <span class="font-bold serif text-lg block" style="color:var(--accent)">Attendance Matters</span>
+          <span class="text-xs" style="color:var(--gray)">Mentor Portal</span>
+        </div>
         <span id="roleBadge" class="badge"></span>
       </div>
       <div class="flex items-center gap-3">
