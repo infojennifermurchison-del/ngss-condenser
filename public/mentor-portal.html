@@ -213,8 +213,173 @@ function toast(msg, ok = true) {
   t._t = setTimeout(() => t.classList.add('hidden'), 3200);
 }
 
+// =========================================================================
+// DEMO MODE — a self-contained mock of Supabase + the AI endpoint so anyone
+// can click through the full interface with sample data and zero setup.
+// Activated by ?demo=1 (admin) or ?demo=1&as=mentor. Nothing is persisted.
+// =========================================================================
+let demoSeq = 0;
+
+function demoStore() {
+  const P = {  // profiles (1 admin + 4 mentors)
+    admin: { id: 'u-admin', full_name: 'Jordan Ellis', role: 'admin', email: 'admin@demo.org' },
+    maya:  { id: 'u-maya',  full_name: 'Maya Thompson', role: 'mentor', email: 'maya@demo.org' },
+    devon: { id: 'u-devon', full_name: 'Devon Carter', role: 'mentor', email: 'devon@demo.org' },
+    aisha: { id: 'u-aisha', full_name: 'Aisha Rahman', role: 'mentor', email: 'aisha@demo.org' },
+    luis:  { id: 'u-luis',  full_name: 'Luis Moreno', role: 'mentor', email: 'luis@demo.org' }
+  };
+  const profiles = Object.values(P);
+  const students = [
+    { id: 's1', first_name: 'Aaliyah', last_name: 'Brooks', date_of_birth: '2010-04-12', grade: '8', school: 'Lincoln Middle', guardian_name: 'Renee Brooks', guardian_contact: '(860) 555-0142', program_status: 'active', assigned_mentor: 'u-maya', background: 'Joined the program in the fall. Bright and creative; loses motivation when overwhelmed. Loves drawing and graphic design.', created_by: 'u-admin', created_at: '2025-09-15T12:00:00Z' },
+    { id: 's2', first_name: 'Marcus', last_name: 'Johnson', date_of_birth: '2008-11-03', grade: '10', school: 'Central High', guardian_name: 'Denise Johnson', guardian_contact: '(860) 555-0188', program_status: 'active', assigned_mentor: 'u-devon', background: 'Referred by school counselor for attendance concerns. Strong athlete — plays on the basketball team.', created_by: 'u-admin', created_at: '2025-09-20T12:00:00Z' },
+    { id: 's3', first_name: 'Sofia', last_name: 'Reyes', date_of_birth: '2011-02-27', grade: '7', school: 'Lincoln Middle', guardian_name: 'Carmen Reyes', guardian_contact: '(860) 555-0173', program_status: 'active', assigned_mentor: 'u-aisha', background: 'New to the district this year. Quiet, working on building peer connections. Interested in science and animals.', created_by: 'u-admin', created_at: '2025-10-02T12:00:00Z' },
+    { id: 's4', first_name: 'Tyrone', last_name: 'Walker', date_of_birth: '2009-07-19', grade: '9', school: 'Central High', guardian_name: 'Patricia Walker', guardian_contact: '(860) 555-0156', program_status: 'active', assigned_mentor: 'u-luis', background: 'Transitioning to high school. Goal is to improve organization and study habits. Enjoys music production.', created_by: 'u-admin', created_at: '2025-10-10T12:00:00Z' },
+    { id: 's5', first_name: 'Emma', last_name: 'Nguyen', date_of_birth: '2010-12-05', grade: '8', school: 'Lincoln Middle', guardian_name: 'Linh Nguyen', guardian_contact: '(860) 555-0199', program_status: 'inactive', assigned_mentor: 'u-maya', background: 'Completed first cycle of the program. Re-engaging after a family move.', created_by: 'u-admin', created_at: '2025-08-28T12:00:00Z' }
+  ];
+  const sessions = [
+    { id: 'se1', student_id: 's1', mentor_id: 'u-maya', session_date: '2026-06-18', duration_minutes: 60, setting: 'In-person', session_type: 'Mentoring / check-in', topics: 'Weekly check-in, upcoming art project', progress_notes: 'Engaged and upbeat. Shared portfolio she has been building.', concerns: '', follow_up: 'Help research summer art programs.', created_at: '2026-06-18T16:00:00Z' },
+    { id: 'se2', student_id: 's1', mentor_id: 'u-maya', session_date: '2026-06-11', duration_minutes: 45, setting: 'Virtual', session_type: 'Academic support', topics: 'Math homework, test prep', progress_notes: 'Frustrated with algebra. Broke problems into smaller steps together.', concerns: 'Low confidence in math.', follow_up: 'Practice 3 problems before next session.', created_at: '2026-06-11T16:00:00Z' },
+    { id: 'se3', student_id: 's2', mentor_id: 'u-devon', session_date: '2026-06-17', duration_minutes: 90, setting: 'In-person', session_type: 'Goal setting', topics: 'Attendance plan, semester goals', progress_notes: 'Set a goal to miss no more than one day per month. Made a morning routine chart.', concerns: 'Missed 6 days last month.', follow_up: 'Check in with attendance counselor.', created_at: '2026-06-17T15:00:00Z' },
+    { id: 'se4', student_id: 's2', mentor_id: 'u-devon', session_date: '2026-06-03', duration_minutes: 60, setting: 'Phone', session_type: 'Behavioral', topics: 'Conflict with teammate', progress_notes: 'Talked through the situation; practiced a calm-down strategy.', concerns: 'Quick to anger when frustrated.', follow_up: 'Role-play hard conversations next time.', created_at: '2026-06-03T15:00:00Z' },
+    { id: 'se5', student_id: 's3', mentor_id: 'u-aisha', session_date: '2026-06-16', duration_minutes: 45, setting: 'In-person', session_type: 'Mentoring / check-in', topics: 'Making friends, joining science club', progress_notes: 'Agreed to attend one club meeting this week. Visibly nervous but willing.', concerns: 'Social isolation.', follow_up: 'Follow up after the club meeting.', created_at: '2026-06-16T14:00:00Z' },
+    { id: 'se6', student_id: 's4', mentor_id: 'u-luis', session_date: '2026-06-15', duration_minutes: 60, setting: 'In-person', session_type: 'Academic support', topics: 'Organization system, planner setup', progress_notes: 'Set up a color-coded planner and a backpack clean-out routine.', concerns: 'Missing assignments due to disorganization.', follow_up: 'Review planner use next week.', created_at: '2026-06-15T17:00:00Z' },
+    { id: 'se7', student_id: 's4', mentor_id: 'u-luis', session_date: '2026-06-08', duration_minutes: 30, setting: 'Virtual', session_type: 'Mentoring / check-in', topics: 'Music project, weekend recap', progress_notes: 'Shared a track he produced. Used it to talk about goal follow-through.', concerns: '', follow_up: '', created_at: '2026-06-08T17:00:00Z' }
+  ];
+  const intervention_plans = [
+    { id: 'p1', student_id: 's2', created_by: 'u-devon', title: 'Intervention Plan — 6/3/2026', status: 'active', input_summary: 'Chronic absenteeism (6 days last month) and low class engagement; wants to stay eligible for basketball. Strong athlete, responds well to clear goals.', plan_content: 'SUMMARY & STRENGTHS\nMarcus is a motivated athlete who responds well to structure and clear, short-term goals. His commitment to basketball is a powerful lever for engagement.\n\nIDENTIFIED NEEDS / AREAS OF FOCUS\n- Improve school attendance and arrive on time\n- Rebuild classroom engagement and assignment completion\n- Strengthen emotional regulation when frustrated\n\nSMART GOALS\n1. Reduce unexcused absences to no more than one per month over the next 8 weeks.\n2. Turn in at least 90% of assignments each week this marking period.\n\nSTRATEGIES & MENTOR ACTIONS\n- Co-create a morning routine chart and review it weekly.\n- Connect attendance to basketball eligibility as natural motivation.\n- Practice a calm-down strategy and role-play hard conversations.\n\nSUPPORTS & REFERRALS\n- Coordinate with the school attendance counselor and his coach.\n- Loop in guardian for morning routine support.\n\nPROGRESS INDICATORS\n- Weekly attendance and assignment-completion data trending up.\n\nREVIEW DATE & NEXT STEPS\n- Review in 4 weeks; adjust goals based on attendance data.', created_at: '2026-06-03T16:00:00Z' }
+  ];
+  return { profiles, students, sessions, intervention_plans };
+}
+
+function makeDemoClient(store, role) {
+  const user = store.profiles.find(p => p.role === role) || store.profiles[0];
+  const applyFilters = (rows, filters) => rows.filter(r => filters.every(f =>
+    f.op === 'eq'  ? r[f.col] === f.val :
+    f.op === 'gte' ? String(r[f.col]) >= String(f.val) :
+    f.op === 'lte' ? String(r[f.col]) <= String(f.val) : true));
+
+  function run(st) {
+    try {
+      const rows = store[st.table] || [];
+      if (st.op === 'insert') {
+        const item = { id: 'demo-' + (++demoSeq), created_at: new Date().toISOString(), ...st.payload };
+        rows.push(item);
+        return { data: [item], error: null };
+      }
+      if (st.op === 'update') {
+        const hit = applyFilters(rows, st.filters);
+        hit.forEach(r => Object.assign(r, st.payload));
+        return { data: hit, error: null };
+      }
+      let res = applyFilters(rows, st.filters);
+      if (st.orderBy) {
+        const { col, asc } = st.orderBy;
+        res = [...res].sort((a, b) => (a[col] > b[col] ? 1 : a[col] < b[col] ? -1 : 0) * (asc ? 1 : -1));
+      }
+      return st.single ? { data: res[0] || null, error: null } : { data: res, error: null };
+    } catch (e) { return { data: null, error: { message: e.message } }; }
+  }
+  function builder(table, op, payload) {
+    const st = { table, op, payload, filters: [], orderBy: null, single: false };
+    const api = {
+      select() { return api; },
+      eq(col, val)  { st.filters.push({ op: 'eq',  col, val }); return api; },
+      gte(col, val) { st.filters.push({ op: 'gte', col, val }); return api; },
+      lte(col, val) { st.filters.push({ op: 'lte', col, val }); return api; },
+      order(col, opts) { st.orderBy = { col, asc: opts ? opts.ascending : true }; return api; },
+      single() { st.single = true; return api; },
+      then(resolve) { resolve(run(st)); }
+    };
+    return api;
+  }
+  return {
+    auth: {
+      getSession: async () => ({ data: { session: { user: { id: user.id } } } }),
+      getUser:    async () => ({ data: { user: { id: user.id, email: user.email } } }),
+      signOut:    async () => { location.href = location.pathname; },
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } })
+    },
+    from(table) {
+      return {
+        select() { return builder(table, 'select'); },
+        insert(payload) { return builder(table, 'insert', payload); },
+        update(payload) { return builder(table, 'update', payload); }
+      };
+    }
+  };
+}
+
+function startDemo(role) {
+  const store = demoStore();
+  sb = makeDemoClient(store, role);
+
+  // Mock the AI endpoint so "Generate Intervention Plan" works offline.
+  const realFetch = window.fetch.bind(window);
+  window.fetch = async (url, opts) => {
+    if (typeof url === 'string' && url.includes('/api/claude')) {
+      await new Promise(r => setTimeout(r, 1100));
+      const input = (() => { try { return JSON.parse(opts.body).messages[0].content; } catch { return ''; } })();
+      const m = (input.match(/MENTOR'S CURRENT INPUT[^\n]*\n([\s\S]*?)\n\nRECENT/) || [])[1] || 'the concerns you described';
+      return { ok: true, json: async () => ({ content: [{ text: demoPlan(m.trim()) }] }) };
+    }
+    return realFetch(url, opts);
+  };
+
+  // Demo banner with a role switcher.
+  const bar = document.createElement('div');
+  bar.style.cssText = 'background:var(--gold);color:#fff;padding:8px 16px;font-size:13px;display:flex;justify-content:center;gap:14px;align-items:center;flex-wrap:wrap';
+  bar.innerHTML = `<strong>DEMO MODE</strong> — sample data, nothing is saved. ` +
+    `Viewing as <strong>${role === 'admin' ? 'Admin' : 'Mentor'}</strong>.` +
+    `<a href="${location.pathname}?demo=1" style="color:#fff;text-decoration:underline">View as Admin</a>` +
+    `<a href="${location.pathname}?demo=1&as=mentor" style="color:#fff;text-decoration:underline">View as Mentor</a>`;
+  document.body.prepend(bar);
+
+  onSignedIn();
+}
+
+function demoPlan(concern) {
+  return `SUMMARY & STRENGTHS
+This youth shows real strengths to build on — curiosity, and a positive response to consistent one-on-one attention. The mentoring relationship is a key protective factor.
+
+IDENTIFIED NEEDS / AREAS OF FOCUS
+Based on what you shared — "${concern}" — the priorities are to address the presenting concern directly while reinforcing existing strengths and supportive relationships.
+
+PROTECTIVE & RISK FACTORS
+- Protective: engaged guardian, willingness to meet, identified interests/talents.
+- Risk: the concern above may affect school engagement and confidence if unaddressed.
+
+SMART GOALS
+1. Within 6 weeks, show measurable improvement in the focus area, tracked at each session.
+2. Within 4 weeks, identify and use two coping or organizational strategies independently.
+
+STRATEGIES & MENTOR ACTIONS
+- Open each session with a brief strengths-based check-in.
+- Break the goal into small, weekly, achievable steps.
+- Use the youth's interests as motivation and connection points.
+- Model and rehearse the target skill together.
+
+SUPPORTS & REFERRALS
+- Coordinate with school staff and the guardian on shared goals.
+- Escalate to a counselor or clinician if safety concerns or signs of distress emerge.
+
+PROGRESS INDICATORS
+- Session-to-session trend in the focus area, self-reported confidence, and follow-through on weekly steps.
+
+REVIEW DATE & NEXT STEPS
+- Review this plan in 4 weeks and adjust goals based on progress.
+
+(Demo plan — the live app generates a tailored plan from the youth's real profile and session history.)`;
+}
+
 // ---------- Boot ----------
 (async function init() {
+  // Demo mode: /mentor?demo=1  (no Supabase, no login — sample data, nothing persisted)
+  const params = new URLSearchParams(location.search);
+  if (params.has('demo')) {
+    startDemo(params.get('as') === 'mentor' ? 'mentor' : 'admin');
+    return;
+  }
+
   let cfg;
   try {
     cfg = await fetch('/api/config').then(r => r.json());

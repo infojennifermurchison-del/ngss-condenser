@@ -12,6 +12,12 @@ It runs on the same free Vercel setup as the rest of this project, plus a free
 
 Live URL once deployed: `https://YOUR-PROJECT.vercel.app/mentor`
 
+> **Just want to look around first?** Add `?demo=1` to the URL
+> (`…/mentor?demo=1`) for a no-login **demo** with sample students, sessions, and
+> a working AI-plan generator. Nothing is saved, no database or login needed —
+> it's only for previewing the interface. Switch between the admin and mentor
+> views with the links in the demo banner.
+
 ---
 
 ## What you'll need (all free to start)
