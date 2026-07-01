@@ -92,6 +92,30 @@
   </div>
 </div>
 
+<!-- ===================== CHANGE PASSWORD ===================== -->
+<div id="changePwView" class="hidden min-h-screen flex items-center justify-center px-4">
+  <div class="card w-full max-w-sm p-8">
+    <div class="text-center mb-4">
+      <div class="badge" style="background:var(--gold-soft); color:var(--gold)">ATTENDANCE MATTERS</div>
+      <h1 class="text-xl brand-title mt-3" style="color:var(--accent)">Set Your Password</h1>
+      <p id="cpForced" class="text-sm text-gray-500 mt-1">For security, please choose your own password before continuing.</p>
+    </div>
+    <form id="changePwForm" class="space-y-4">
+      <div>
+        <label class="field-label">New password</label>
+        <input id="cpNew" type="password" class="field-input" autocomplete="new-password" minlength="8" required />
+      </div>
+      <div>
+        <label class="field-label">Confirm new password</label>
+        <input id="cpConfirm" type="password" class="field-input" autocomplete="new-password" minlength="8" required />
+      </div>
+      <p id="cpError" class="hidden text-sm text-red-600"></p>
+      <button type="submit" id="cpSubmit" class="btn-primary w-full">Update Password</button>
+      <button type="button" id="cpCancel" class="btn-ghost w-full hidden">Cancel</button>
+    </form>
+  </div>
+</div>
+
 <!-- ===================== APP ===================== -->
 <div id="appView" class="hidden">
   <!-- Header -->
@@ -107,6 +131,7 @@
       </div>
       <div class="flex items-center gap-3">
         <span id="userName" class="text-sm text-gray-600"></span>
+        <button id="changePwBtn" class="btn-ghost">Change Password</button>
         <button id="logoutBtn" class="btn-ghost">Sign Out</button>
       </div>
     </div>
@@ -578,6 +603,7 @@ let MENTORS = [];         // profiles list (admin)
 let STUDENTS = [];        // cached students
 let SELECTED = null;      // selected student id
 let DEMO = false;         // true in ?demo mode (no real backend)
+let ME_EMAIL = '';        // current user's email
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => (s == null ? '' : String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
@@ -811,13 +837,21 @@ $('logoutBtn').addEventListener('click', () => sb.auth.signOut());
 
 async function onSignedIn() {
   const { data: { user } } = await sb.auth.getUser();
+  ME_EMAIL = user.email;
   let { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
   if (!profile) profile = { id: user.id, full_name: user.email, role: 'mentor' };
   ME = profile;
 
+  // First-login (or admin-required) password change must happen before entering the app.
+  if (!DEMO && ME.must_change_password) { showChangePassword(true); return; }
+  await enterApp();
+}
+
+async function enterApp() {
   $('loginView').classList.add('hidden');
+  $('changePwView').classList.add('hidden');
   $('appView').classList.remove('hidden');
-  $('userName').textContent = ME.full_name || user.email;
+  $('userName').textContent = ME.full_name || ME_EMAIL;
   const rb = $('roleBadge');
   if (ME.role === 'admin') {
     rb.textContent = 'ADMIN';
@@ -827,11 +861,42 @@ async function onSignedIn() {
     rb.textContent = 'MENTOR';
     rb.style.background = 'var(--accent-soft)'; rb.style.color = 'var(--accent)';
   }
-
   if (ME.role === 'admin') await refreshMentors();
-
   await loadStudents();
 }
+
+// ---------- Change password (forced on first login, or voluntary from the header) ----------
+function showChangePassword(forced) {
+  $('loginView').classList.add('hidden');
+  $('appView').classList.add('hidden');
+  $('changePwView').classList.remove('hidden');
+  $('cpForced').classList.toggle('hidden', !forced);
+  $('cpCancel').classList.toggle('hidden', !!forced);
+  $('cpNew').value = ''; $('cpConfirm').value = '';
+  $('cpError').classList.add('hidden');
+}
+
+$('changePwForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pw = $('cpNew').value, pw2 = $('cpConfirm').value;
+  const err = $('cpError');
+  if (pw.length < 8) { err.textContent = 'Password must be at least 8 characters.'; err.classList.remove('hidden'); return; }
+  if (pw !== pw2) { err.textContent = 'The two passwords do not match.'; err.classList.remove('hidden'); return; }
+  if (DEMO) { toast('Demo mode — password changes only work in the live app', false); return; }
+  const btn = $('cpSubmit'); btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const { error } = await sb.auth.updateUser({ password: pw });
+    if (error) throw new Error(error.message);
+    await sb.from('profiles').update({ must_change_password: false }).eq('id', ME.id);
+    ME.must_change_password = false;
+    toast('Password updated');
+    await enterApp();
+  } catch (ex) {
+    err.textContent = ex.message; err.classList.remove('hidden');
+  } finally { btn.disabled = false; btn.textContent = 'Update Password'; }
+});
+$('cpCancel').addEventListener('click', () => enterApp());
+$('changePwBtn').addEventListener('click', () => showChangePassword(false));
 
 // (Re)load the list of mentors/admins and repopulate the "assigned mentor" dropdown.
 async function refreshMentors() {
@@ -1091,18 +1156,9 @@ async function saveSession(e) {
   selectStudent(SELECTED);
 }
 
-// ---------- Generate intervention plan ----------
-async function generatePlan(student, sessions) {
-  const input = $('ip_input').value.trim();
-  if (!input) { toast('Add some context about the youth first', false); return; }
-  const btn = $('genPlanBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Generating…';
-  const out = $('planOutput');
-  out.classList.remove('hidden');
-  out.innerHTML = '<div class="text-sm text-gray-400">Building plan…</div>';
-
-  const recent = sessions.slice(0, 8).map(x =>
+// ---------- Build an intervention plan from a student's profile/intake (+ optional sessions) ----------
+async function requestPlanText(student, sessions, input) {
+  const recent = (sessions || []).slice(0, 8).map(x =>
     `- ${x.session_date} (${x.session_type || 'session'}, ${hours(x.duration_minutes).toFixed(1)}h): ${[x.topics, x.progress_notes, x.concerns && 'Concern: ' + x.concerns].filter(Boolean).join('; ')}`
   ).join('\n') || 'No prior sessions logged.';
 
@@ -1156,15 +1212,50 @@ Write the plan with these clearly labeled sections:
 
 Keep it concise and usable. Use plain headings (no markdown symbols needed).`;
 
+  const resp = await fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ system, messages: [{ role: 'user', content: prompt }], max_tokens: 3000 })
+  });
+  const data = await resp.json();
+  if (!resp.ok) throw new Error(data.error || 'Generation failed');
+  return (data.content || []).map(b => b.text || '').join('\n').trim();
+}
+
+// Auto-draft an intervention plan straight from a submitted intake (best-effort).
+async function autoPlanFromIntake(student, newId) {
   try {
-    const resp = await fetch('/api/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system, messages: [{ role: 'user', content: prompt }], max_tokens: 3000 })
+    const i = student.intake || {};
+    const bits = [];
+    if (i.eligibility?.length) bits.push('Eligibility: ' + i.eligibility.join('; '));
+    if (i.attendance_reasons?.length) bits.push('Reasons for absences: ' + i.attendance_reasons.join('; '));
+    if (i.attendance?.barriers_notes) bits.push(i.attendance.barriers_notes);
+    if (i.academic?.subjects_concern) bits.push('Academic concern: ' + i.academic.subjects_concern);
+    if (i.health?.accommodations) bits.push('Accommodations: ' + i.health.accommodations);
+    const input = bits.join('. ') || 'New enrollee — build an initial plan from the intake profile.';
+    const text = await requestPlanText(student, [], input);
+    if (!text) return false;
+    await sb.from('intervention_plans').insert({
+      student_id: newId, created_by: ME.id, input_summary: input, plan_content: text,
+      title: 'Intake Intervention Plan — ' + new Date().toLocaleDateString(), status: 'draft'
     });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || 'Generation failed');
-    const text = (data.content || []).map(b => b.text || '').join('\n').trim();
+    return true;
+  } catch (e) { console.error('intake plan failed:', e); return false; }
+}
+
+// ---------- Generate intervention plan (from the student detail view) ----------
+async function generatePlan(student, sessions) {
+  const input = $('ip_input').value.trim();
+  if (!input) { toast('Add some context about the youth first', false); return; }
+  const btn = $('genPlanBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Generating…';
+  const out = $('planOutput');
+  out.classList.remove('hidden');
+  out.innerHTML = '<div class="text-sm text-gray-400">Building plan…</div>';
+
+  try {
+    const text = await requestPlanText(student, sessions, input);
 
     out.innerHTML = `
       <div class="plan-body">${esc(text)}</div>
@@ -1321,13 +1412,18 @@ $('intakeForm').addEventListener('submit', async (e) => {
     intake_completed_at: new Date().toISOString(),
     created_by: ME.id
   };
-  const { error } = await sb.from('students').insert(payload);
-  btn.disabled = false;
-  if (error) { toast(error.message, false); return; }
+  const { data: inserted, error } = await sb.from('students').insert(payload).select();
+  if (error) { btn.disabled = false; toast(error.message, false); return; }
+  const newId = inserted && inserted[0] && inserted[0].id;
   form.reset();
   clearAllSigPads(form);
   hideBehalfDetails(form);
-  toast('Intake submitted — pending approval');
+  // Auto-draft an AI intervention plan from the intake (best-effort; won't block the intake).
+  btn.innerHTML = '<span class="spinner"></span> Drafting plan…';
+  const planned = newId ? await autoPlanFromIntake({ ...payload }, newId) : false;
+  btn.disabled = false;
+  btn.textContent = 'Submit Intake (Pending Approval)';
+  toast(planned ? 'Intake submitted — AI plan drafted, pending approval' : 'Intake submitted — pending approval');
   await loadStudents();
   // Jump the admin to the approvals queue; mentors back to students.
   document.querySelector(ME.role === 'admin' ? '.tab[data-tab=approvals]' : '.tab[data-tab=students]').click();

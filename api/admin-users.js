@@ -43,8 +43,8 @@ export default async function handler(req, res) {
       });
       const data = await r.json();
       if (!r.ok) return res.status(r.status).json({ error: data.msg || data.error_description || data.error || 'Could not create the user.' });
-      // Enforce profile fields (the trigger sets them, but make sure):
-      await fetch(`${URL_}/rest/v1/profiles?id=eq.${data.id}`, { method: 'PATCH', headers: svc, body: JSON.stringify({ full_name: full_name || '', email, role: safeRole }) });
+      // Enforce profile fields and require a password change on first login.
+      await fetch(`${URL_}/rest/v1/profiles?id=eq.${data.id}`, { method: 'PATCH', headers: svc, body: JSON.stringify({ full_name: full_name || '', email, role: safeRole, must_change_password: true }) });
       return res.status(200).json({ ok: true, id: data.id });
     }
 

@@ -13,11 +13,13 @@ create table if not exists public.profiles (
   full_name   text not null default '',
   email       text,   -- copied from the auth user; used by the reminder emails
   role        text not null default 'mentor' check (role in ('admin', 'mentor')),
+  must_change_password boolean not null default false, -- true for admin-created logins
   created_at  timestamptz not null default now()
 );
 
 -- If upgrading an existing install (safe to re-run):
 alter table public.profiles add column if not exists email text;
+alter table public.profiles add column if not exists must_change_password boolean not null default false;
 
 -- Helper: read the current app user's role WITHOUT triggering RLS recursion.
 -- SECURITY DEFINER lets it bypass RLS when reading profiles. (Named app_user_role
