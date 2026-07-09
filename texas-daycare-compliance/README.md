@@ -54,6 +54,29 @@ App Tokens) can be added to `APP_TOKEN` to avoid rate limiting.
 | `ANCHOR` | `"auto"` | `"auto"` anchors to the newest activity date in the feed (the state data lags the calendar); `"today"` uses the real calendar date. |
 | `STRICT_HOURS_ONLY` | `False` | `True` keeps only hour-count violations and drops generic orientation/CPR training rows. |
 
+## Automated weekly agent → GoHighLevel
+
+For the hands-off version, the same data logic is packaged as a weekly agent
+that loads cited daycares straight into GoHighLevel:
+
+| File | Purpose |
+|---|---|
+| `tx_ccl.py` | Reusable data module (`fetch_training_citations(...)`) — the notebook logic as a function. |
+| `ghl.py` | Minimal GoHighLevel API v2 client (upsert contact, tag, note, enroll in workflow). |
+| `weekly_agent.py` | Orchestrator: pull the week's citations → upsert each daycare → tag `director-training` / `orientation-training` → enroll in the matching nurture workflow. Runs in **DRY-RUN** if no GHL token is set. |
+| `../.github/workflows/tx-daycare-ghl-weekly.yml` | GitHub Actions cron that runs the agent every Monday. |
+| `GOHIGHLEVEL_SETUP.md` | Step-by-step: API token, tags, the two nurture workflows, and the native booked-call / no-show branching. |
+
+The agent handles the weekly load + tag + enroll; the **booked-call** and
+**no-show** transitions are handled by native GHL workflow triggers (real-time),
+as described in `GOHIGHLEVEL_SETUP.md`. Quick start:
+
+```bash
+cd texas-daycare-compliance
+python weekly_agent.py          # DRY-RUN: prints what it would push
+# then set GHL_TOKEN, GHL_LOCATION_ID, WF_DIRECTOR_NURTURE, WF_ORIENTATION_NURTURE
+```
+
 ## Note on data freshness
 
 Texas refreshes these open datasets on the **20th of each month**, and the
