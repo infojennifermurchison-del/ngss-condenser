@@ -6,19 +6,30 @@ compliance data and returns the daycares cited in the **last 7 days** for
 
 ## What it does
 
-1. Reads the **HHSC CCL Non-Compliance Data** feed (`tqgd-mf4x`) from the
-   [Texas Open Data Portal](https://data.texas.gov/See-Category-Tile/HHSC-CCL-Non-Compliance-Data/tqgd-mf4x) —
-   the same deficiency records shown on the public
-   [Search Texas Child Care](https://childcare.hhs.texas.gov/) site.
-2. Filters to the last week of activity.
-3. Keeps only citations about **training hours** — the Chapter 746 (centers)
-   and 747 (homes) professional-development standards in the `746.13xx` /
-   `747.13xx` range (annual clock hours, pre-service training, orientation).
-   See [26 TAC §746.1309](https://www.law.cornell.edu/regulations/texas/26-Tex-Admin-Code-SS-746-1309)
+It joins **three** Texas HHS [Search Texas Child Care](https://childcare.hhs.texas.gov/)
+open datasets on the [Texas Open Data Portal](https://data.texas.gov/), because
+the citation, its date, and the facility's details live in separate tables:
+
+| Dataset | ID | Provides | Join key |
+|---|---|---|---|
+| [Inspection/Investigation](https://data.texas.gov/See-Category-Tile/HHSC-CCL-Inspection-Investigation-Assessment-Data/m5q4-3y3d) | `m5q4-3y3d` | **when** (`activity_date`) | `activity_id` |
+| [Non-Compliance](https://data.texas.gov/See-Category-Tile/HHSC-CCL-Non-Compliance-Data/tqgd-mf4x) | `tqgd-mf4x` | **what standard** was cited | `activity_id` → `operation_id` |
+| [Operations](https://data.texas.gov/See-Category-Tile/HHSC-CCL-Daycare-and-Residential-Operations-Data/bc5r-88dy) | `bc5r-88dy` | **who / where** (name, city, county) | `operation_id` |
+
+> The Non-Compliance table has **no citation date** of its own (only correction
+> dates), which is why the inspection date has to come from `m5q4-3y3d`.
+
+Steps:
+
+1. Pull inspections in the last 7-day window → the recent `activity_id`s.
+2. Pull the deficiencies for those activities and keep only **training-hour**
+   citations — Chapter 746 (centers) / 747 (homes) professional-development
+   standards in the `746.13xx` / `747.13xx` range (annual clock hours,
+   pre-service training, orientation). See
+   [26 TAC §746.1309](https://www.law.cornell.edu/regulations/texas/26-Tex-Admin-Code-SS-746-1309)
    — Texas requires **24 annual training clock hours** per caregiver.
-4. Enriches each hit with operation name / address / city / county from the
-   **HHSC CCL Operations** dataset (`bc5r-88dy`).
-5. Prints a unique-daycare summary + citation detail and saves/downloads a CSV.
+3. Attach the activity date, then enrich with name / address / city / county.
+4. Print a unique-daycare summary + citation detail and save/download a CSV.
 
 ## How to run
 
