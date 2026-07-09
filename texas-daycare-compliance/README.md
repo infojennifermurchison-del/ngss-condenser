@@ -66,6 +66,7 @@ that loads cited daycares straight into GoHighLevel:
 | `weekly_agent.py` | Orchestrator: pull the week's citations → upsert each daycare → tag `director-training` / `orientation-training` → enroll in the matching nurture workflow. Runs in **DRY-RUN** if no GHL token is set. |
 | `../.github/workflows/tx-daycare-ghl-weekly.yml` | GitHub Actions cron that runs the agent every Monday. |
 | `GOHIGHLEVEL_SETUP.md` | Step-by-step: API token, tags, the two nurture workflows, and the native booked-call / no-show branching. |
+| `CLAY_ENRICHMENT.md` | Optional: enrich daycares missing an email via a Clay table (name+city → website → director → email → GHL). |
 
 The agent handles the weekly load + tag + enroll; the **booked-call** and
 **no-show** transitions are handled by native GHL workflow triggers (real-time),

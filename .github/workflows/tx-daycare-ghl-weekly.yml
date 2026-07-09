@@ -30,6 +30,7 @@ jobs:
           WF_DIRECTOR_NURTURE:    ${{ secrets.WF_DIRECTOR_NURTURE }}
           WF_ORIENTATION_NURTURE: ${{ secrets.WF_ORIENTATION_NURTURE }}
           TX_APP_TOKEN:           ${{ secrets.TX_APP_TOKEN }}
+          CLAY_WEBHOOK_URL:       ${{ secrets.CLAY_WEBHOOK_URL }}
           # Optional overrides (safe to omit -> defaults in weekly_agent.py):
           # TAG_DIRECTOR, TAG_ORIENTATION, TAG_BASE, DAYS_BACK, ANCHOR, PRIORITY
         run: python weekly_agent.py

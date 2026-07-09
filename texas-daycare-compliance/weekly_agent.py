@@ -46,6 +46,14 @@ TAG_ORIENTATION = os.environ.get("TAG_ORIENTATION", "orientation-training")
 DAYS_BACK = int(os.environ.get("DAYS_BACK", "7"))
 ANCHOR    = os.environ.get("ANCHOR", "auto")
 
+# Clay enrichment (optional). If set, daycares that have NO email in the open
+# data are POSTed to a Clay table webhook. Clay resolves name+city -> website ->
+# director/owner -> email, then writes the finished contact into GoHighLevel
+# (with the program tag + workflow) via Clay's native GHL action. See
+# CLAY_ENRICHMENT.md. Facilities that already have an email skip Clay and are
+# loaded straight to GHL by this agent.
+CLAY_WEBHOOK_URL = os.environ.get("CLAY_WEBHOOK_URL", "").strip()
+
 # When a facility has BOTH orientation and other training deficiencies, which
 # program wins the (single) enrollment. Tags for both are still applied.
 # Order = priority.
@@ -76,6 +84,36 @@ def pick_primary(programs):
 def clean_phone(v):
     s = "".join(ch for ch in str(v) if ch.isdigit())
     return s or None
+
+
+def clay_payload(op_id, rows, primary, tags):
+    """Flat record for the Clay table webhook. Clay enriches (website -> owner ->
+    email) and writes to GHL, so we hand it everything needed to create/route
+    the contact even if enrichment finds nothing extra."""
+    r0 = rows[0]
+    return {
+        "operation_id": op_id,
+        "business_name": r0["operation_name"] or f"Operation {op_id}",
+        "address": r0["location_address"],
+        "city": r0["city"],
+        "state": "TX",
+        "postal_code": str(r0["zip"]),
+        "county": r0["county"],
+        "phone": clean_phone(r0["phone"]) or "",
+        "email": r0["email"] or "",           # usually blank -> Clay fills it
+        "program": primary,                    # "director" | "orientation"
+        "tags": ",".join(tags),
+        "violation_types": ", ".join(sorted({r["violation_type"] for r in rows})),
+        "cited_date": r0["activity_date"][:10],
+        "compliance_page": r0["compliance_page"],
+    }
+
+
+def post_to_clay(payload):
+    import requests
+    r = requests.post(CLAY_WEBHOOK_URL, json=payload, timeout=30)
+    if not r.ok:
+        raise RuntimeError(f"Clay webhook {r.status_code}: {r.text[:200]}")
 
 
 def build_note(rows):
@@ -115,7 +153,7 @@ def main():
         from ghl import GHL
         ghl = GHL(GHL_TOKEN, GHL_LOCATION_ID)
 
-    loaded = skipped = 0
+    loaded = skipped = enriched = 0
     for op_id, rows in facilities.items():
         r0 = rows[0]
         programs = {program_for(r["violation_type"]) for r in rows}
@@ -125,11 +163,24 @@ def main():
 
         wf = PROGRAM_WF[primary]
         vt = ", ".join(sorted({r["violation_type"] for r in rows}))
+        # Route: no email + Clay configured -> enrich via Clay (which writes to
+        # GHL). Otherwise this agent loads GHL directly.
+        via_clay = CLAY_WEBHOOK_URL and not r0["email"]
+        dest = "Clay->GHL (enrich)" if via_clay else "GHL direct"
         print(f"- {name} ({r0['city']}, {r0['county']}) "
-              f"-> primary: {primary} | tags: {tags} | types: {vt}")
+              f"-> {dest} | primary: {primary} | tags: {tags} | types: {vt}")
 
         if DRY_RUN:
-            loaded += 1
+            if via_clay:
+                enriched += 1
+            else:
+                loaded += 1
+            continue
+
+        if via_clay:
+            post_to_clay(clay_payload(op_id, rows, primary, tags))
+            print("    sent to Clay for enrichment (Clay will write to GHL)")
+            enriched += 1
             continue
 
         contact_id, existing = ghl.upsert_contact(
@@ -153,9 +204,11 @@ def main():
             print(f"    (!) no workflow id set for '{primary}' -- tagged only")
         loaded += 1
 
-    print(f"\nDone. {loaded} loaded/updated, {skipped} skipped (already enrolled).")
+    print(f"\nDone. {loaded} loaded to GHL directly, {enriched} sent to Clay "
+          f"for enrichment, {skipped} skipped (already enrolled).")
     if DRY_RUN:
-        print("Set GHL_TOKEN and GHL_LOCATION_ID to run live.")
+        print("Set GHL_TOKEN and GHL_LOCATION_ID to run live"
+              + (" (and CLAY_WEBHOOK_URL to enrich)." if not CLAY_WEBHOOK_URL else "."))
 
 
 if __name__ == "__main__":
