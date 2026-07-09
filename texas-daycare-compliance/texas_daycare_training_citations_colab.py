@@ -43,8 +43,9 @@ DAYS_BACK = 7        # "last week"
 ANCHOR    = "auto"   # "auto" = newest date in feed (recommended); "today" = calendar date
 
 # Only include child-care *day cares* (drops residential/GRO facilities) when the
-# operations table exposes an operation type. Set False to keep everything.
-DAYCARE_ONLY = True
+# operations table exposes an operation type. Left False by default so nothing is
+# ever silently dropped; flip True once you've seen the operation-type values.
+DAYCARE_ONLY = False
 
 # TRAINING-HOUR standards. Chapter 746 = centers, 747 = child-care homes; the
 # professional-development / training divisions sit in the 746.13xx / 747.13xx
@@ -137,8 +138,19 @@ def chunked(seq, n):
         yield seq[i:i + n]
 
 
-def quote_in(values):
-    return ",".join("'" + str(v).replace("'", "''") + "'" for v in values)
+def col_is_numeric(sample_row, name):
+    """Was this column returned as a JSON number? (Socrata number columns must be
+    filtered WITHOUT quotes, or `col in ('123')` matches nothing.)"""
+    v = sample_row.get(name)
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def in_clause(col, values, numeric):
+    if numeric:
+        vals = ",".join(str(int(float(v))) for v in values)   # ids are integers
+    else:
+        vals = ",".join("'" + str(v).replace("'", "''") + "'" for v in values)
+    return f"{col} in ({vals})"
 
 
 # ------------------------------------------------------------------------------
@@ -199,13 +211,15 @@ NC_STD = pick(nc_cols, ["standard_number_description", "standard_number"],
 NC_TXT = pick(nc_cols, ["narrative", "standard_description"],
               ["narrative", "description", "text"])
 NC_RISK = pick(nc_cols, ["standard_risk_level"], ["risk"])
+NC_ACT_NUM = col_is_numeric(nc_sample[0], NC_ACT)
 
 frames = []
 for batch in chunked(act_ids, 200):
     frames.append(soda_get_all(NONCOMPLIANCE_ID,
-                               where=f"{NC_ACT} in ({quote_in(batch)})"))
+                               where=in_clause(NC_ACT, batch, NC_ACT_NUM)))
 nc = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
-print(f"Deficiencies tied to those activities: {len(nc)}")
+print(f"Deficiencies tied to those activities: {len(nc)} "
+      f"({NC_ACT} treated as {'number' if NC_ACT_NUM else 'text'})")
 if nc.empty:
     raise SystemExit("No deficiencies recorded for activities in this window.")
 
@@ -220,8 +234,16 @@ if STRICT_HOURS_ONLY:
 training = nc[mask].copy()
 print(f"Training-hour citations in window: {len(training)}\n")
 if training.empty:
-    raise SystemExit("No TRAINING-HOUR citations in this window. "
-                     "Try a larger DAYS_BACK or set STRICT_HOURS_ONLY=False.")
+    # Diagnostics: show what standards actually WERE cited so we can calibrate.
+    print("No training-hour matches. Most-cited standards in this window were:")
+    if NC_STD:
+        top = std_num.value_counts().head(25)
+        for name, cnt in top.items():
+            print(f"  {cnt:>4}  {name}")
+    print("\nIf any of the above are training-related, add their number/keyword to "
+          "TRAINING_STANDARD_REGEX / TRAINING_KEYWORDS and re-run. You can also "
+          "increase DAYS_BACK.")
+    raise SystemExit()
 
 # attach the activity date from the inspections table
 insp_dates = insp[[INSP_ACT, INSP_DATE]].drop_duplicates(INSP_ACT)
@@ -237,6 +259,7 @@ if op_ids:
     op_sample = soda_get(OPERATIONS_ID, {"$limit": 1})
     op_cols = list(op_sample[0].keys()) if op_sample else []
     OP_JOIN = pick(op_cols, ["operation_id", "operation_number"], ["operation"])
+    OP_JOIN_NUM = col_is_numeric(op_sample[0], OP_JOIN)
     wanted = [c for c in op_cols if c.lower() in (
         "operation_name", "operation_type", "type", "location_address",
         "address", "city", "county", "zip", "phone", "email_address",
@@ -244,7 +267,7 @@ if op_ids:
     frames = []
     for batch in chunked(op_ids, 200):
         frames.append(soda_get_all(OPERATIONS_ID,
-                                   where=f"{OP_JOIN} in ({quote_in(batch)})"))
+                                   where=in_clause(OP_JOIN, batch, OP_JOIN_NUM)))
     ops = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
     if not ops.empty:
         keep = list(dict.fromkeys([OP_JOIN] + [c for c in wanted if c in ops.columns]))
