@@ -320,8 +320,27 @@ def col(*names):
 
 name_c, city_c, county_c = col("operation_name"), col("city"), col("county")
 addr_c = col("location_address", "address")
-show = [c for c in [name_c, addr_c, city_c, county_c, INSP_DATE,
-                    "violation_type", NC_STD, NC_RISK, NC_TXT] if c]
+phone_c = col("phone", "phone_number")
+email_c = col("email_address", "email")
+type_link_c = col("operation_type", "type")
+
+# Link to each facility's page on the public Search Texas Child Care site, which
+# shows the director/contact name, phone, and email. operationId == operation_id.
+if NC_OP and NC_OP in training.columns:
+    def build_url(row):
+        opid = re.sub(r"\.0$", "", str(row[NC_OP]))     # guard against 1500739.0
+        res = "false"
+        if type_link_c:
+            t = str(row.get(type_link_c, ""))
+            if re.search(r"residential|general residential|gro|child-placing", t, re.I):
+                res = "true"                             # residential ops use the RC flag
+        return ("https://childcare.hhs.texas.gov/Public/OperationDetails"
+                f"?operationId={opid}&resCareFlag={res}")
+    training["compliance_page"] = training.apply(build_url, axis=1)
+
+show = [c for c in [name_c, addr_c, city_c, county_c, phone_c, email_c, INSP_DATE,
+                    "violation_type", NC_STD, NC_RISK, NC_TXT,
+                    col("compliance_page")] if c]
 report = training[show].sort_values(INSP_DATE, ascending=False) if show else training
 
 pd.set_option("display.max_colwidth", 90)

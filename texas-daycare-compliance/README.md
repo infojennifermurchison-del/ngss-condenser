@@ -28,8 +28,13 @@ Steps:
    pre-service training, orientation). See
    [26 TAC §746.1309](https://www.law.cornell.edu/regulations/texas/26-Tex-Admin-Code-SS-746-1309)
    — Texas requires **24 annual training clock hours** per caregiver.
-3. Attach the activity date, then enrich with name / address / city / county.
-4. Print a unique-daycare summary + citation detail and save/download a CSV.
+3. Attach the activity date, then enrich with name / address / city / county /
+   phone / email.
+4. Add a `compliance_page` link to each facility's page on the public
+   [Search Texas Child Care](https://childcare.hhs.texas.gov/) site
+   (`.../Public/OperationDetails?operationId=<id>`), where the director/contact
+   name, phone, and email are listed.
+5. Tag each row with a `violation_type`, print a summary, and save/download a CSV.
 
 ## How to run
 
