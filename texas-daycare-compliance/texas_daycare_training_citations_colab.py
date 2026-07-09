@@ -284,7 +284,32 @@ if op_ids:
                 case=False, regex=True)]
 
 # ------------------------------------------------------------------------------
-# 6) Report + CSV
+# 6) Classify each citation by training-violation type
+# ------------------------------------------------------------------------------
+def classify(std, txt):
+    """Bucket a citation. Order matters: the more specific carve-outs (CPR,
+    pre-service, orientation) are tested before the annual-hours catch-all so a
+    standard like 746.1305 (pre-service) isn't mislabeled as annual hours."""
+    s = f"{std} {txt}".lower()
+    if any(k in s for k in ("cpr", "first aid", "first-aid", "rescue breathing")):
+        return "Pediatric CPR / First Aid"
+    if ("pre-service" in s or "preservice" in s or "pre service" in s
+            or re.search(r"7(?:46|47)\.1305", s)):
+        return "Pre-service training"
+    if "orientation" in s:
+        return "Orientation"
+    if re.search(r"7(?:46|47)\.1309|7(?:46|47)\.1311|\(a\)\(5\)", s) or \
+       any(k in s for k in ("annual training", "clock hour", "hours of training",
+                            "24 annual", "leadership", "management training")):
+        return "Annual training hours"
+    return "Other training"
+
+_std_all = training[NC_STD].fillna("").astype(str) if NC_STD else pd.Series("", index=training.index)
+_txt_all = training[NC_TXT].fillna("").astype(str) if NC_TXT else pd.Series("", index=training.index)
+training["violation_type"] = [classify(a, b) for a, b in zip(_std_all, _txt_all)]
+
+# ------------------------------------------------------------------------------
+# 7) Report + CSV
 # ------------------------------------------------------------------------------
 def col(*names):
     for n in names:
@@ -296,7 +321,7 @@ def col(*names):
 name_c, city_c, county_c = col("operation_name"), col("city"), col("county")
 addr_c = col("location_address", "address")
 show = [c for c in [name_c, addr_c, city_c, county_c, INSP_DATE,
-                    NC_STD, NC_RISK, NC_TXT] if c]
+                    "violation_type", NC_STD, NC_RISK, NC_TXT] if c]
 report = training[show].sort_values(INSP_DATE, ascending=False) if show else training
 
 pd.set_option("display.max_colwidth", 90)
@@ -306,6 +331,9 @@ print(f"TEXAS DAYCARES CITED FOR TRAINING-HOUR VIOLATIONS "
       f"({start.date()} to {anchor_date.date()})")
 print("=" * 92)
 
+print("\nCitations by violation type:")
+print(training["violation_type"].value_counts().to_string())
+
 group_key = name_c or (NC_OP if NC_OP in training.columns else INSP_DATE)
 uniq = (training.groupby(group_key).size().sort_values(ascending=False)
         .rename("training_citations").reset_index())
@@ -314,6 +342,7 @@ print(uniq.to_string(index=False))
 print("\n--- Citation detail ---\n")
 print(report.to_string(index=False))
 
+# --- 8) Save + download CSV ---------------------------------------------------
 out = f"tx_daycare_training_citations_{anchor_date.date()}.csv"
 report.to_csv(out, index=False)
 print(f"\nSaved: {out}")
