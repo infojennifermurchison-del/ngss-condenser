@@ -50,7 +50,8 @@ class GHL:
     # -- contacts -----------------------------------------------------------
     def upsert_contact(self, *, name=None, phone=None, email=None, address=None,
                        city=None, state=None, postal_code=None, source=None,
-                       tags=None, custom_fields=None, company_name=None):
+                       tags=None, custom_fields=None, company_name=None,
+                       website=None):
         """Create or update a contact (dedupes by email/phone within the location).
         Returns (contact_id, existing_tags)."""
         body = {"locationId": self.location_id}
@@ -62,6 +63,7 @@ class GHL:
         if city:         body["city"] = city
         if state:        body["state"] = state
         if postal_code:  body["postalCode"] = str(postal_code)
+        if website:      body["website"] = website
         if source:       body["source"] = source
         if tags:         body["tags"] = tags
         if custom_fields:body["customFields"] = custom_fields
@@ -82,3 +84,22 @@ class GHL:
         return self._req("POST",
                          f"/contacts/{contact_id}/workflow/{workflow_id}",
                          json={})
+
+    # -- reading ------------------------------------------------------------
+    def list_contacts(self, limit=100, max_pages=200):
+        """Return all contacts in the location (paginated). Each dict includes
+        tags, email, phone, dateAdded, etc."""
+        out = []
+        params = {"locationId": self.location_id, "limit": limit}
+        for _ in range(max_pages):
+            data = self._req("GET", "/contacts/", params=params)
+            batch = data.get("contacts", []) or []
+            out.extend(batch)
+            meta = data.get("meta", {}) or {}
+            start_after_id = meta.get("startAfterId")
+            start_after = meta.get("startAfter")
+            if not batch or not start_after_id:
+                break
+            params = {"locationId": self.location_id, "limit": limit,
+                      "startAfterId": start_after_id, "startAfter": start_after}
+        return out

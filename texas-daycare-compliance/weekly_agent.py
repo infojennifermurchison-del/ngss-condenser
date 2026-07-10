@@ -187,7 +187,8 @@ def main():
             name=name, company_name=name,
             phone=clean_phone(r0["phone"]), email=(r0["email"] or None),
             address=r0["location_address"], city=r0["city"], state="TX",
-            postal_code=r0["zip"], source="TX CCR weekly", tags=tags)
+            postal_code=r0["zip"], source="TX CCR weekly", tags=tags,
+            website=r0["compliance_page"])   # stored so the weekly digest can link it
 
         # already in this program? skip enrollment + note (no double-touch)
         program_tag = PROGRAM_TAG[primary]

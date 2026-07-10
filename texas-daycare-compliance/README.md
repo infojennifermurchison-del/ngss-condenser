@@ -67,6 +67,21 @@ that loads cited daycares straight into GoHighLevel:
 | `../.github/workflows/tx-daycare-ghl-weekly.yml` | GitHub Actions cron that runs the agent every Monday. |
 | `GOHIGHLEVEL_SETUP.md` | Step-by-step: API token, tags, the two nurture workflows, and the native booked-call / no-show branching. |
 | `CLAY_ENRICHMENT.md` | Optional: enrich daycares missing an email via a Clay table (name+city → website → director → email → GHL). |
+| `weekly_digest.py` | Reads GHL a couple days after the load and **emails you the daycares still missing an email** — the ones to enrich by hand. |
+| `../.github/workflows/tx-daycare-digest-weekly.yml` | GitHub Actions cron (Wednesdays) that sends the digest. |
+
+### Weekly "enrich by hand" email
+
+Because Clay enriches asynchronously and writes back into GHL, the accurate list
+of who's *still* missing an email only exists in GHL after Clay runs. So a
+second job runs **Wednesday** (≈2 days after the Monday load), finds the week's
+`tx-ccl-cited` contacts with no email, and emails you the list + a CSV, each with
+its phone and compliance-page link so you can fill in the director/email by hand.
+
+Email goes over SMTP (a Gmail app password works). Add these repo secrets:
+`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `DIGEST_TO` (recipient).
+With no SMTP secrets set, `weekly_digest.py` runs in DRY-RUN and just prints the
+digest.
 
 The agent handles the weekly load + tag + enroll; the **booked-call** and
 **no-show** transitions are handled by native GHL workflow triggers (real-time),

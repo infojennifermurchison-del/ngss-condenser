@@ -73,8 +73,11 @@ not "email for every row."
    - Enroll in workflow: either add the workflow step here keyed off `program`,
      or let your existing GHL "tag added" trigger start the nurture (see
      `GOHIGHLEVEL_SETUP.md`). Using the tag trigger keeps one source of truth.
-   - Put `compliance_page`, `violation_types`, and `cited_date` into custom
-     fields or the contact notes so your sequences can reference them.
+   - Map `compliance_page` → the GHL **Website** field. The weekly
+     "enrich by hand" digest (`weekly_digest.py`) reads the link from there, so
+     any daycare Clay can't complete still arrives with a clickable page link.
+   - Put `violation_types` and `cited_date` into custom fields or the contact
+     notes so your sequences can reference them.
 
 6. **Run mode.** Set the table to auto-run on new rows so weekly POSTs enrich and
    sync without manual clicks.
