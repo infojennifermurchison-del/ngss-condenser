@@ -56,6 +56,11 @@ App Tokens) can be added to `APP_TOKEN` to avoid rate limiting.
 
 ## Automated weekly agent → GoHighLevel
 
+> **Setting it up? Follow [`SETUP.md`](SETUP.md)** — one ordered, click-by-click
+> guide covering the whole system (GitHub, GoHighLevel, Clay, and the digest
+> email). The files below are the reference detail behind it.
+
+
 For the hands-off version, the same data logic is packaged as a weekly agent
 that loads cited daycares straight into GoHighLevel:
 
