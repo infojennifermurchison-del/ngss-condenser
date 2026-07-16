@@ -80,7 +80,7 @@ export default async function handler(req, res) {
 
     // ---- Pull data ----
     const [students, metrics, profiles] = await Promise.all([
-      rest('students?select=id,first_name,last_name,assigned_mentor&program_status=eq.active'),
+      rest('students?select=id,first_name,last_name,assigned_mentor,assigned_mentor_2&program_status=eq.active'),
       rest(`sessions?select=student_id&session_type=eq.${encodeURIComponent('Metrics check')}&session_date=gte.${from}&session_date=lte.${to}`),
       rest('profiles?select=id,full_name,email,role')
     ]);
@@ -93,8 +93,9 @@ export default async function handler(req, res) {
     const byMentor = {};
     const unassigned = [];
     uncovered.forEach(s => {
-      if (s.assigned_mentor && profById[s.assigned_mentor]) {
-        (byMentor[s.assigned_mentor] = byMentor[s.assigned_mentor] || []).push(s);
+      const mentors = [s.assigned_mentor, s.assigned_mentor_2].filter(m => m && profById[m]);
+      if (mentors.length) {
+        mentors.forEach(m => { (byMentor[m] = byMentor[m] || []).push(s); });
       } else { unassigned.push(s); }
     });
 

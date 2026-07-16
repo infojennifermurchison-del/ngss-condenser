@@ -318,9 +318,9 @@
 
           <details class="card" style="background:var(--paper)"><summary class="cursor-pointer font-bold text-sm uppercase tracking-wide p-3" style="color:var(--accent)">7. Health, Safety &amp; Support</summary>
             <div class="grid gap-3 p-4 pt-0">
-              <div><label class="field-label">Allergies / medical conditions relevant to participation</label><input data-f="health.allergies" class="field-input"></div>
-              <div><label class="field-label">Current behavioral-health support / provider (optional)</label><input data-f="health.bh_provider" class="field-input"></div>
-              <div><label class="field-label">Accommodations the student needs</label><input data-f="health.accommodations" class="field-input"></div>
+              <div><label class="field-label">Allergies / medical conditions relevant to participation</label><textarea data-f="health.allergies" rows="2" class="field-input"></textarea></div>
+              <div><label class="field-label">Current behavioral-health support / provider (optional)</label><textarea data-f="health.bh_provider" rows="2" class="field-input"></textarea></div>
+              <div><label class="field-label">Accommodations the student needs</label><textarea data-f="health.accommodations" rows="2" class="field-input"></textarea></div>
             </div>
           </details>
 
@@ -553,9 +553,13 @@
           </div>
           <div><label class="field-label">Guardian name</label><input id="sf_guardian" class="field-input" /></div>
           <div><label class="field-label">Guardian contact</label><input id="sf_guardiancontact" class="field-input" /></div>
-          <div class="sm:col-span-2">
+          <div>
             <label class="field-label">Assigned mentor</label>
             <select id="sf_mentor" class="field-input"><option value="">— Unassigned —</option></select>
+          </div>
+          <div>
+            <label class="field-label">Assigned mentor 2 (optional)</label>
+            <select id="sf_mentor2" class="field-input"><option value="">— None —</option></select>
           </div>
           <div class="sm:col-span-2">
             <label class="field-label">Background / notes</label>
@@ -641,7 +645,7 @@ function demoStore() {
   const profiles = Object.values(P);
   const students = [
     { id: 's1', first_name: 'Aaliyah', last_name: 'Brooks', date_of_birth: '2010-04-12', grade: '8', school: 'Lincoln Middle', guardian_name: 'Renee Brooks', guardian_contact: '(860) 555-0142', program_status: 'active', assigned_mentor: 'u-maya', background: 'Joined the program in the fall. Bright and creative; loses motivation when overwhelmed. Loves drawing and graphic design.', created_by: 'u-admin', created_at: '2025-09-15T12:00:00Z' },
-    { id: 's2', first_name: 'Marcus', last_name: 'Johnson', date_of_birth: '2008-11-03', grade: '10', school: 'Central High', guardian_name: 'Denise Johnson', guardian_contact: '(860) 555-0188', program_status: 'active', assigned_mentor: 'u-devon', background: 'Referred by school counselor for attendance concerns. Strong athlete — plays on the basketball team.', created_by: 'u-admin', created_at: '2025-09-20T12:00:00Z',
+    { id: 's2', first_name: 'Marcus', last_name: 'Johnson', date_of_birth: '2008-11-03', grade: '10', school: 'Central High', guardian_name: 'Denise Johnson', guardian_contact: '(860) 555-0188', program_status: 'active', assigned_mentor: 'u-devon', assigned_mentor_2: 'u-maya', background: 'Referred by school counselor for attendance concerns. Strong athlete — plays on the basketball team.', created_by: 'u-admin', created_at: '2025-09-20T12:00:00Z',
       intake: { a:{first_name:'Marcus',last_name:'Johnson',dob:'2008-11-03',grade:'10',primary_language:'English',race:['Black or African American']}, school:{campus:'Central High',district:'Houston ISD',counselor:'Ms. Pérez'}, guardian:{name:'Denise Johnson',relationship:'Mother',mobile:'(860) 555-0188'}, referral:{source:'School / counselor',iep:'No'}, eligibility:['Chronic absenteeism (≥10% of instructional days)','Truancy (10+ unexcused absences in 6 months)'], attendance:{rate:'82',total_absences:'18',unexcused:'12',barriers_notes:'Misses first period; transportation after late nights.'}, attendance_reasons:['Transportation','School avoidance / disengagement'], academic:{grades_gpa:'2.1 GPA',subjects_concern:'Algebra, English'}, needs:{transportation:{identified:true,referral:true,notes:'Bus pass requested'}}, consentB:{signed:'Yes',student_willing:'Yes'}, consentC:{signed:'Yes',records:['Attendance records','Disciplinary records']}, consentD:{permission:'GRANT — program activities only (no public/promotional)'}, consentE:{authorized:'Yes',days:['Tue','Thu']}, intake_meta:{staff_name:'Devon Carter',date:'2025-09-20'} } },
     { id: 's3', first_name: 'Sofia', last_name: 'Reyes', date_of_birth: '2011-02-27', grade: '7', school: 'Lincoln Middle', guardian_name: 'Carmen Reyes', guardian_contact: '(860) 555-0173', program_status: 'active', assigned_mentor: 'u-aisha', background: 'New to the district this year. Quiet, working on building peer connections. Interested in science and animals.', created_by: 'u-admin', created_at: '2025-10-02T12:00:00Z' },
     { id: 's4', first_name: 'Tyrone', last_name: 'Walker', date_of_birth: '2009-07-19', grade: '9', school: 'Central High', guardian_name: 'Patricia Walker', guardian_contact: '(860) 555-0156', program_status: 'active', assigned_mentor: 'u-luis', background: 'Transitioning to high school. Goal is to improve organization and study habits. Enjoys music production.', created_by: 'u-admin', created_at: '2025-10-10T12:00:00Z' },
@@ -902,19 +906,21 @@ $('changePwForm').addEventListener('submit', async (e) => {
 $('cpCancel').addEventListener('click', () => enterApp());
 $('changePwBtn').addEventListener('click', () => showChangePassword(false));
 
-// (Re)load the list of mentors/admins and repopulate the "assigned mentor" dropdown.
+// (Re)load the list of mentors/admins and repopulate the "assigned mentor" dropdowns.
 async function refreshMentors() {
   const { data } = await sb.from('profiles').select('id, full_name, role');
   MENTORS = data || [];
-  const sel = $('sf_mentor');
-  if (sel) {
-    sel.innerHTML = '<option value="">— Unassigned —</option>';
+  const fill = (sel, firstLabel) => {
+    if (!sel) return;
+    sel.innerHTML = `<option value="">${firstLabel}</option>`;
     MENTORS.filter(m => m.role === 'mentor' || m.role === 'admin').forEach(m => {
       const o = document.createElement('option');
       o.value = m.id; o.textContent = m.full_name || '(unnamed)';
       sel.appendChild(o);
     });
-  }
+  };
+  fill($('sf_mentor'), '— Unassigned —');
+  fill($('sf_mentor2'), '— None —');
 }
 
 // ---------- Tabs ----------
@@ -1002,7 +1008,7 @@ async function selectStudent(id) {
             ${esc(s.grade ? 'Grade ' + s.grade : '')}${s.grade && s.school ? ' · ' : ''}${esc(s.school || '')}
             ${s.date_of_birth ? ' · DOB ' + fmtDate(s.date_of_birth) : ''}
           </div>
-          ${s.assigned_mentor ? `<div class="text-xs text-gray-500 mt-1">Assigned mentor: ${esc(mentorName(s.assigned_mentor) || '—')}</div>` : ''}
+          ${s.assigned_mentor ? `<div class="text-xs text-gray-500 mt-1">Assigned mentor${s.assigned_mentor_2 ? 's' : ''}: ${esc([mentorName(s.assigned_mentor), mentorName(s.assigned_mentor_2)].filter(Boolean).join(' & '))}</div>` : ''}
           ${s.guardian_name ? `<div class="text-xs text-gray-500">Guardian: ${esc(s.guardian_name)} ${s.guardian_contact ? '· ' + esc(s.guardian_contact) : ''}</div>` : ''}
         </div>
         <div class="text-right">
@@ -1625,16 +1631,27 @@ function approvalCard(s) {
       <button onclick="printIntake('${s.id}')" class="btn-ghost shrink-0">🖨 Print</button>
     </div>
     ${intakeSummaryHTML(s)}
-    <div class="mt-3 pt-3 border-t flex flex-wrap items-end gap-2" style="border-color:var(--rule)">
-      <div class="grow" style="min-width:200px">
-        <label class="field-label">Assign a mentor (required to approve)</label>
-        <select id="appr-mentor-${s.id}" class="field-input">
-          <option value="">— Select mentor —</option>
-          ${MENTORS.filter(m => m.role === 'mentor' || m.role === 'admin').map(m => `<option value="${m.id}">${esc(m.full_name || m.email || '(unnamed)')}</option>`).join('')}
-        </select>
+    <div class="mt-3 pt-3 border-t" style="border-color:var(--rule)">
+      <div class="grid sm:grid-cols-2 gap-2 mb-2">
+        <div>
+          <label class="field-label">Assign a mentor (required)</label>
+          <select id="appr-mentor-${s.id}" class="field-input">
+            <option value="">— Select mentor —</option>
+            ${MENTORS.filter(m => m.role === 'mentor' || m.role === 'admin').map(m => `<option value="${m.id}">${esc(m.full_name || m.email || '(unnamed)')}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Assign a 2nd mentor (optional)</label>
+          <select id="appr-mentor2-${s.id}" class="field-input">
+            <option value="">— None —</option>
+            ${MENTORS.filter(m => m.role === 'mentor' || m.role === 'admin').map(m => `<option value="${m.id}">${esc(m.full_name || m.email || '(unnamed)')}</option>`).join('')}
+          </select>
+        </div>
       </div>
-      <button data-approve class="btn-primary" style="padding:10px 16px">✓ Approve for Service</button>
-      <button data-decline class="btn-ghost">Decline</button>
+      <div class="flex gap-2">
+        <button data-approve class="btn-primary" style="padding:10px 16px">✓ Approve for Service</button>
+        <button data-decline class="btn-ghost">Decline</button>
+      </div>
     </div>
   </div>`;
 }
@@ -1643,9 +1660,11 @@ async function decideStudent(id, status) {
   const student = STUDENTS.find(x => x.id === id);
   if (status === 'active') {
     const mentorId = document.getElementById('appr-mentor-' + id)?.value;
+    const mentorId2 = document.getElementById('appr-mentor2-' + id)?.value || null;
     if (!mentorId) { toast('Assign a mentor before approving', false); return; }
+    if (mentorId2 && mentorId2 === mentorId) { toast('The two mentors must be different', false); return; }
     const { error } = await sb.from('students').update({
-      program_status: 'active', assigned_mentor: mentorId, approved_by: ME.id, approved_at: new Date().toISOString()
+      program_status: 'active', assigned_mentor: mentorId, assigned_mentor_2: mentorId2, approved_by: ME.id, approved_at: new Date().toISOString()
     }).eq('id', id);
     if (error) { toast(error.message, false); return; }
     toast('Approved — attaching plan…');
@@ -1866,6 +1885,7 @@ $('studentForm').addEventListener('submit', async (e) => {
     guardian_contact: $('sf_guardiancontact').value.trim() || null,
     program_status: $('sf_status').value,
     assigned_mentor: $('sf_mentor').value || null,
+    assigned_mentor_2: $('sf_mentor2').value || null,
     background: $('sf_background').value.trim() || null
   };
   const id = $('sf_id').value;
@@ -1904,6 +1924,7 @@ function editStudent(id) {
   $('sf_guardiancontact').value = s.guardian_contact || '';
   $('sf_status').value = s.program_status || 'active';
   $('sf_mentor').value = s.assigned_mentor || '';
+  $('sf_mentor2').value = s.assigned_mentor_2 || '';
   $('sf_background').value = s.background || '';
   $('manageTitle').textContent = 'Edit Student';
   $('cancelEditBtn').classList.remove('hidden');
@@ -1954,7 +1975,7 @@ $('downloadReportBtn').addEventListener('click', async () => {
         'Last name': s.last_name, 'First name': s.first_name, 'DOB': s.date_of_birth || '',
         'Grade': s.grade || '', 'School': s.school || '', 'District': i.school?.district || '',
         'Status': s.program_status,
-        'Assigned mentor': mentorName(s.assigned_mentor) || '', 'Guardian': s.guardian_name || '',
+        'Assigned mentor': mentorName(s.assigned_mentor) || '', 'Assigned mentor 2': mentorName(s.assigned_mentor_2) || '', 'Guardian': s.guardian_name || '',
         'Guardian contact': s.guardian_contact || '',
         'Referral source': [i.referral?.source, i.referral?.source_other].filter(Boolean).join(' — '),
         'Eligibility': (i.eligibility || []).join('; '),

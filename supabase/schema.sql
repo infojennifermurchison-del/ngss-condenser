@@ -91,6 +91,7 @@ create table if not exists public.students (
   program_status    text not null default 'active'
                     check (program_status in ('pending', 'active', 'inactive', 'completed', 'declined')),
   assigned_mentor   uuid references public.profiles (id) on delete set null,
+  assigned_mentor_2 uuid references public.profiles (id) on delete set null,
   background        text,
   -- Full Form A + B/C/D/E intake captured as structured data (see app).
   intake            jsonb,
@@ -102,6 +103,7 @@ create table if not exists public.students (
 );
 
 -- If upgrading an existing install, add the new columns (safe to re-run):
+alter table public.students add column if not exists assigned_mentor_2 uuid references public.profiles (id) on delete set null;
 alter table public.students add column if not exists intake jsonb;
 alter table public.students add column if not exists intake_completed_at timestamptz;
 alter table public.students add column if not exists approved_by uuid references public.profiles (id) on delete set null;
