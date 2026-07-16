@@ -1070,8 +1070,9 @@ async function selectStudent(id) {
       <h3 class="font-bold text-sm uppercase tracking-wide mb-2" style="color:var(--accent)">AI Intervention Plan</h3>
       <p class="text-xs text-gray-500 mb-3">Describe the youth's current presenting concerns and the goals you want to work toward. The AI builds a strengths-based plan using this plus their session history. Always review and adapt before use.</p>
       <textarea id="ip_input" rows="3" class="field-input mb-2" placeholder="e.g. Frequent school absences and low engagement in class; wants to improve attendance and rebuild confidence. Strong interest in basketball and music."></textarea>
-      <div class="flex gap-2">
+      <div class="flex gap-2 flex-wrap">
         <button id="genPlanBtn" class="btn-primary">✨ Generate Intervention Plan</button>
+        ${s.intake ? '<button id="regenPlanBtn" class="btn-ghost">↻ Regenerate from intake</button>' : ''}
       </div>
       <div id="planOutput" class="hidden mt-4 border-t pt-4" style="border-color:var(--rule)"></div>
     </div>
@@ -1128,6 +1129,8 @@ async function selectStudent(id) {
   // wire forms
   $('sessionForm').addEventListener('submit', saveSession);
   $('genPlanBtn').addEventListener('click', () => generatePlan(s, sessions || []));
+  const regen = $('regenPlanBtn');
+  if (regen) regen.addEventListener('click', () => { $('ip_input').value = intakeToInput(s.intake); generatePlan(s, sessions || []); });
   toggleMetrics();
   loadStudentFiles(id);
   const up = $('docUpload');
@@ -1384,17 +1387,22 @@ async function attachPlanPdf(student) {
   } catch (e) { console.error('attachPlanPdf:', e); }
 }
 
+// Build the "presenting concerns" input string straight from a student's intake.
+function intakeToInput(intake) {
+  const i = intake || {};
+  const bits = [];
+  if (i.eligibility?.length) bits.push('Eligibility: ' + i.eligibility.join('; '));
+  if (i.attendance_reasons?.length) bits.push('Reasons for absences: ' + i.attendance_reasons.join('; '));
+  if (i.attendance?.barriers_notes) bits.push(i.attendance.barriers_notes);
+  if (i.academic?.subjects_concern) bits.push('Academic concern: ' + i.academic.subjects_concern);
+  if (i.health?.accommodations) bits.push('Accommodations: ' + i.health.accommodations);
+  return bits.join('. ') || 'New enrollee — build an initial plan from the intake profile.';
+}
+
 // Auto-draft an intervention plan straight from a submitted intake (best-effort).
 async function autoPlanFromIntake(student, newId) {
   try {
-    const i = student.intake || {};
-    const bits = [];
-    if (i.eligibility?.length) bits.push('Eligibility: ' + i.eligibility.join('; '));
-    if (i.attendance_reasons?.length) bits.push('Reasons for absences: ' + i.attendance_reasons.join('; '));
-    if (i.attendance?.barriers_notes) bits.push(i.attendance.barriers_notes);
-    if (i.academic?.subjects_concern) bits.push('Academic concern: ' + i.academic.subjects_concern);
-    if (i.health?.accommodations) bits.push('Accommodations: ' + i.health.accommodations);
-    const input = bits.join('. ') || 'New enrollee — build an initial plan from the intake profile.';
+    const input = intakeToInput(student.intake);
     const text = await requestPlanText(student, [], input);
     if (!text) return false;
     await sb.from('intervention_plans').insert({
