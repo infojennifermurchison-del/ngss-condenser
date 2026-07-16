@@ -249,6 +249,29 @@ create policy plans_delete on public.intervention_plans
   for delete using (auth.uid() = created_by or public.is_admin());
 
 -- =============================================================================
+-- STORAGE — student file attachments (intervention-plan PDFs + uploaded documents)
+-- =============================================================================
+insert into storage.buckets (id, name, public)
+values ('student-files', 'student-files', false)
+on conflict (id) do nothing;
+
+drop policy if exists studentfiles_read on storage.objects;
+create policy studentfiles_read on storage.objects
+  for select using (bucket_id = 'student-files' and auth.role() = 'authenticated');
+
+drop policy if exists studentfiles_insert on storage.objects;
+create policy studentfiles_insert on storage.objects
+  for insert with check (bucket_id = 'student-files' and auth.role() = 'authenticated');
+
+drop policy if exists studentfiles_update on storage.objects;
+create policy studentfiles_update on storage.objects
+  for update using (bucket_id = 'student-files' and public.is_admin());
+
+drop policy if exists studentfiles_delete on storage.objects;
+create policy studentfiles_delete on storage.objects
+  for delete using (bucket_id = 'student-files' and public.is_admin());
+
+-- =============================================================================
 -- AFTER RUNNING THIS:
 --  1. Create your 5 users in Dashboard → Authentication → Users → Add user
 --     (1 admin + 4 mentors). Use email + password, and tick "Auto Confirm".
