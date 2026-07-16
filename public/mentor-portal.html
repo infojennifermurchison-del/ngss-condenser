@@ -1262,14 +1262,28 @@ Write the plan with these clearly labeled sections:
 
 Keep it concise and usable. Use plain headings (no markdown symbols needed).`;
 
-  const resp = await fetch('/api/claude', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ system, messages: [{ role: 'user', content: prompt }], max_tokens: 8000 })
-  });
-  const data = await resp.json();
-  if (!resp.ok) throw new Error(data.error || 'Generation failed');
-  return (data.content || []).map(b => b.text || '').join('\n').trim();
+  // Auto-continue: if the model hits the token limit mid-plan, ask it to continue
+  // and stitch the pieces together so the plan is never truncated.
+  let convo = [{ role: 'user', content: prompt }];
+  let full = '';
+  for (let iter = 0; iter < 5; iter++) {
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system, messages: convo, max_tokens: 8000 })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Generation failed');
+    const chunk = (data.content || []).map(b => b.text || '').join('');
+    full += chunk;
+    if (data.stop_reason !== 'max_tokens') break;   // finished naturally
+    convo = [
+      { role: 'user', content: prompt },
+      { role: 'assistant', content: full },
+      { role: 'user', content: 'Continue the plan exactly where you left off. Do not repeat any text you already wrote; just keep going.' }
+    ];
+  }
+  return full.trim();
 }
 
 // ---------- PDF generation + Supabase Storage (student file attachments) ----------
