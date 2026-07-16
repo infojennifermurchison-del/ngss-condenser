@@ -605,6 +605,8 @@ let STUDENTS = [];        // cached students
 let SELECTED = null;      // selected student id
 let DEMO = false;         // true in ?demo mode (no real backend)
 let ME_EMAIL = '';        // current user's email
+let CUR_STUDENT = null;   // currently open student (detail view)
+let CUR_PLANS = [];       // that student's saved plans
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => (s == null ? '' : String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
@@ -1113,12 +1115,14 @@ async function selectStudent(id) {
     </div>`).join('') || '<div class="text-sm text-gray-400">No sessions logged yet.</div>';
 
   // plan history
+  CUR_STUDENT = s; CUR_PLANS = plans || [];
   $('planHistory').innerHTML = (plans || []).map(p => `
     <details class="border rounded p-3 text-sm" style="border-color:var(--rule)">
       <summary class="cursor-pointer font-semibold">${esc(p.title)} — ${fmtDate(p.created_at.slice(0,10))}
         <span class="badge ml-1" style="background:var(--accent-soft);color:var(--accent)">${esc(p.status)}</span></summary>
       ${p.input_summary ? `<p class="text-xs text-gray-500 mt-2"><strong>Input:</strong> ${esc(p.input_summary)}</p>` : ''}
       <div class="plan-body mt-2">${esc(mdClean(p.plan_content))}</div>
+      <button onclick="savePlanPdf('${p.id}')" class="btn-ghost text-xs mt-2">📎 Save as PDF to file</button>
     </details>`).join('') || '<div class="text-sm text-gray-400">No plans yet.</div>';
 
   // wire forms
@@ -1154,6 +1158,23 @@ async function openStudentFile(studentId, name) {
   window.open(data.signedUrl, '_blank');
 }
 window.openStudentFile = openStudentFile;
+
+// Save a specific saved plan as a PDF into the student's file (e.g. after regenerating).
+async function savePlanPdf(planId) {
+  if (DEMO) { toast('Attachments work in the live app', false); return; }
+  const plan = CUR_PLANS.find(p => p.id === planId);
+  if (!plan || !CUR_STUDENT) { toast('Plan not found', false); return; }
+  toast('Saving PDF…');
+  try {
+    const blob = planPdfBlob(CUR_STUDENT, plan.plan_content);
+    const stamp = (plan.created_at || new Date().toISOString()).slice(0, 10);
+    const { error } = await uploadStudentFile(CUR_STUDENT.id, `intervention-plan-${stamp}.pdf`, blob, 'application/pdf');
+    if (error) { toast(error.message, false); return; }
+    toast('Plan saved to file as PDF');
+    loadStudentFiles(CUR_STUDENT.id);
+  } catch (e) { toast(e.message, false); }
+}
+window.savePlanPdf = savePlanPdf;
 
 async function uploadDocument(studentId, file) {
   if (!file) return;
@@ -1234,9 +1255,26 @@ async function requestPlanText(student, sessions, input) {
 
   const system = `You are an experienced youth-development specialist and licensed clinical social worker who writes intervention plans for youth mentors in a school-attendance / truancy-prevention program. Your plans are strengths-based, trauma-informed, culturally responsive, and grounded in positive youth development. You write in clear, warm, practical language a mentor can act on. You never diagnose; you flag when professional referral is warranted. Always include a safety note when concerns suggest risk.`;
 
+  // Real calendar dates so the model fills them in (never leaves [placeholders]).
+  const _today = new Date();
+  const _fmt = (d) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const _plus = (n) => { const d = new Date(_today); d.setDate(d.getDate() + n); return _fmt(d); };
+  const dateBlock = `TODAY'S DATE: ${_fmt(_today)}
+Use these real calendar dates (do NOT output bracketed placeholders like [Insert Date]):
+- Plan date: ${_fmt(_today)}
+- 2 weeks from today: ${_plus(14)}
+- 30 days from today: ${_plus(30)}
+- 6 weeks from today: ${_plus(42)}
+- 8 weeks from today: ${_plus(56)}
+- 10 weeks from today: ${_plus(70)}
+- 60-day review date: ${_plus(60)}
+- 90 days from today: ${_plus(90)}`;
+
   // FERPA note: send only minimal, de-identified context to the AI — first name + age +
   // grade, never the full name, school, address, IDs, or guardian details.
   const prompt = `Create an individualized intervention plan for a youth in a truancy-prevention mentoring program.
+
+${dateBlock}
 
 YOUTH PROFILE (de-identified)
 - First name: ${student.first_name}
@@ -1254,12 +1292,15 @@ Write the plan with these clearly labeled sections:
 1. Summary & Strengths
 2. Identified Needs / Areas of Focus
 3. Protective & Risk Factors
-4. SMART Goals (2–4, each measurable with a target timeframe)
+4. SMART Goals (2–4, each measurable — use a REAL target date from the list above, not a timeframe)
 5. Strategies & Mentor Actions (concrete, session-by-session friendly)
 6. Supports & Referrals (school, family, community, professional — note when to escalate)
 7. Progress Indicators (how to know it's working)
-8. Review Date & Next Steps
+8. Review Date & Next Steps (state the actual review date)
 
+Fill in the Plan Date and Review Date with the real dates above. NEVER output a bracketed
+placeholder such as [Insert Date], [Enter Date], or [insert date X weeks out] — always use a
+concrete date. If a person's name is unknown, omit that line rather than writing a placeholder.
 Keep it concise and usable. Use plain headings (no markdown symbols needed).`;
 
   // Auto-continue: if the model hits the token limit mid-plan, ask it to continue
