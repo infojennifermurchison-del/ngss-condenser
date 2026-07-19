@@ -189,29 +189,35 @@ Add each of these (name on the left, value from the steps above):
 
 ## Part 6 — Test in order (before trusting the schedule)
 
-### 6.1 Dry-run the loader (no risk, touches nothing)
-On your computer or in Colab:
-```bash
-cd texas-daycare-compliance
-pip install requests pandas
-python weekly_agent.py
-```
-With no token it prints, per daycare, whether it would go `GHL direct` or
-`Clay->GHL (enrich)` and the tags. Confirm the list looks right.
+You can do all of this from the GitHub website — no coding.
 
-### 6.2 Live loader test (writes to GHL)
-1. Repo → **Actions → "TX daycare training citations → GoHighLevel (weekly)" →
-   Run workflow.**
-2. Open the run log; confirm it says contacts were loaded/enrolled.
-3. In GHL, check **Contacts** for the new tagged records and that they entered
-   the right nurture workflow.
+### 6.1 Safe preview (dry run — writes nothing)
+1. Repo → **Actions** tab.
+2. In the left sidebar click **"TX daycare training citations → GoHighLevel
+   (weekly)"**.
+3. Click **Run workflow** (right side). Leave **Dry run** ticked (the default).
+4. Click the green **Run workflow** button. Refresh; click the new run, then the
+   **load-citations** job to watch the log.
+5. Confirm it prints, per daycare, `GHL direct` or `Clay->GHL (enrich)` plus the
+   tags — and ends `Mode: DRY-RUN`. Nothing was written to GoHighLevel.
+
+### 6.2 Live loader run (writes to GHL)
+1. Same screen: **Run workflow**, but this time **untick Dry run**, then Run.
+2. Watch the log; it should end with a count of contacts loaded/enrolled and
+   `Mode: LIVE`.
+3. In GoHighLevel → **Contacts**, filter by tag `tx-ccl-cited`. Confirm the new
+   records, their `director-training` / `orientation-training` tags, the note
+   with the citation detail, and that they entered the right nurture workflow
+   (open a contact → **Automations** shows active workflows).
 
 ### 6.3 Digest test
-1. (If using Clay, give it an hour to enrich first.)
-2. Repo → **Actions → "TX daycare 'enrich by hand' digest (weekly)" → Run
-   workflow.**
-3. Confirm the email arrives with the list + CSV. If it's empty, that means
-   every daycare has an email — good news.
+1. If you set up Clay, give it ~an hour to enrich first.
+2. Actions → **"TX daycare 'enrich by hand' digest (weekly)" → Run workflow →
+   Run.**
+3. Check your inbox (`DIGEST_TO`) for the email + CSV of daycares still missing
+   an email. An empty/"nothing to enrich" message means everyone has an email —
+   good news. If it doesn't arrive, open the run log (it prints the digest even
+   when the email send fails, so you'll see the cause).
 
 ---
 
