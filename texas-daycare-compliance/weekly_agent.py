@@ -59,7 +59,10 @@ CLAY_WEBHOOK_URL = os.environ.get("CLAY_WEBHOOK_URL", "").strip()
 # Order = priority.
 PRIORITY = os.environ.get("PRIORITY", "orientation,director").split(",")
 
-DRY_RUN = not (GHL_TOKEN and GHL_LOCATION_ID)
+# DRY-RUN if there's no GHL token, OR if explicitly forced (the "dry run" toggle
+# on the GitHub Actions "Run workflow" button sets DRY_RUN_FORCE=true).
+_FORCE_DRY = os.environ.get("DRY_RUN_FORCE", "").strip().lower() in ("1", "true", "yes")
+DRY_RUN = _FORCE_DRY or not (GHL_TOKEN and GHL_LOCATION_ID)
 
 
 # ---------------------------------------------------------------------------

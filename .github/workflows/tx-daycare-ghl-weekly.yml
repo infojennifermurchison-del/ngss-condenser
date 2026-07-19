@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: "0 13 * * 1"
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (print only, do NOT write to GoHighLevel)"
+        type: boolean
+        default: true
 
 jobs:
   load-citations:
@@ -31,6 +36,9 @@ jobs:
           WF_ORIENTATION_NURTURE: ${{ secrets.WF_ORIENTATION_NURTURE }}
           TX_APP_TOKEN:           ${{ secrets.TX_APP_TOKEN }}
           CLAY_WEBHOOK_URL:       ${{ secrets.CLAY_WEBHOOK_URL }}
+          # "Run workflow" defaults this to true (safe preview). The scheduled
+          # Monday run has no input, so it is empty -> a real live run.
+          DRY_RUN_FORCE:          ${{ inputs.dry_run }}
           # Optional overrides (safe to omit -> defaults in weekly_agent.py):
           # TAG_DIRECTOR, TAG_ORIENTATION, TAG_BASE, DAYS_BACK, ANCHOR, PRIORITY
         run: python weekly_agent.py
