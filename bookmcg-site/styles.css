@@ -367,3 +367,12 @@ body {
   font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--mauve-light); font-weight: 700; margin-bottom: 5px;
 }
+
+/* Align the "Choose this door if" blocks across the row (4- and 2-up layouts) */
+@media (min-width: 541px) {
+  .door h3 { min-height: 78px; }
+  .door p:not(.door-qualifier) { min-height: 66px; }
+}
+@media (min-width: 941px) {
+  .door .door-qualifier { min-height: 132px; }
+}
