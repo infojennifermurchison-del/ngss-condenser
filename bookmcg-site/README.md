@@ -1,7 +1,7 @@
 # Book MCG — Murchison Consulting Group website
 
 A four-doors homepage. Each door opens to a service page that ends in a
-"$67 / 30-minute call" booking button (payment collected by your Google
+"$77.77 / 30-minute call" booking button (payment collected by your Google
 Calendar appointment schedule, credited toward the service chosen).
 
 ## Files
@@ -22,7 +22,7 @@ static host.
 
 ## The booking button
 
-Every "Book the call — $67" button links to the same Google Calendar
+Every "Book the call — $77.77" button links to the same Google Calendar
 appointment schedule you already use. To change it, search all four service
 pages for `calendar.google.com` and replace the URL.
 
@@ -33,4 +33,4 @@ pages for `calendar.google.com` and replace the URL.
   "who it's for" list, CTA text).
 - **Brand colors:** edit the `:root` variables at the top of `styles.css`
   (`--accent` teal, `--gold`).
-- **Price:** search for `$67` across the files if it ever changes.
+- **Price:** search for `$77.77` across the files if it ever changes.
