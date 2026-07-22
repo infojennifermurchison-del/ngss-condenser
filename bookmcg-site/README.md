@@ -25,6 +25,9 @@ Consulting Group Brand Guidelines v1.0.
 | `training.html` | Door 02 — Training |
 | `technical-writing.html` | Door 03 — Technical Writing (Licensing & Credentialing) |
 | `business-consulting.html` | Door 04 — Business Consulting |
+| `about.html` | About the firm / Jennifer Murchison bio |
+| `privacy.html` | Privacy Policy |
+| `terms.html` | Terms & Conditions |
 | `styles.css` | Shared design system |
 | `vercel.json` | Deploy config (clean URLs) |
 | `assets/` | Logo variants + headshots (see below) |
