@@ -49,10 +49,10 @@ Consulting Group Brand Guidelines v1.0.
 
 | Door | Booking link |
 |------|--------------|
-| Grant & GovCon | `https://api.leadconnectorhq.com/widget/bookings/strategy-call-mcg` |
-| Training | Google Calendar link *(placeholder — swap for its own LeadConnector link)* |
-| Technical Writing | Google Calendar link *(placeholder — swap)* |
-| Business Consulting | Google Calendar link *(placeholder — swap)* |
+| Grant & GovCon | `.../widget/bookings/strategy-call-mcg` |
+| Training | `.../widget/bookings/tecpds-support-meeting` |
+| Technical Writing | `.../widget/booking/TNnlBfgEX0l8BuX6gzAw` |
+| Business Consulting | `.../widget/booking/7NNQY5gtIhHaTiPs9yjq` |
 
 To change a link, open the matching `*.html` file and edit the `href` on the
 `.btn-book` anchor. To change the price, search all files for `$77.77`.
