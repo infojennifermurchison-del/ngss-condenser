@@ -1,36 +1,64 @@
 # Book MCG — Murchison Consulting Group website
 
 A four-doors homepage. Each door opens to a service page that ends in a
-"$77.77 / 30-minute call" booking button (payment collected by your Google
-Calendar appointment schedule, credited toward the service chosen).
+"$77.77 / 30-minute call" booking button (payment collected by the booking
+calendar, credited toward the service chosen). Built to the Murchison
+Consulting Group Brand Guidelines v1.0.
+
+## Brand system in use
+
+- **Colors** — Charcoal `#2C2C2E` (primary/text), Dusty Mauve `#A88B95`
+  (signature accent, used sparingly), Warm Gray `#8E8E93` (secondary text),
+  Light Gray `#E5E5EA` (tints). Defined as CSS variables at the top of
+  `styles.css`.
+- **Type** — Palatino Linotype for headlines and body, Georgia for italics,
+  captions, and letter-spaced labels. Both are system fonts (no licensing).
+- **Logo** — full lockup in the header, reverse (white) lockup on the charcoal
+  footer, monogram as the favicon. Photography follows the guide's usage map.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `index.html` | Homepage — the four doors |
+| `index.html` | Homepage — the four doors + environmental hero photo |
 | `grant-govcon.html` | Door 01 — Grant & Government Contracting Consulting |
 | `training.html` | Door 02 — Training |
 | `technical-writing.html` | Door 03 — Technical Writing (Licensing & Credentialing) |
 | `business-consulting.html` | Door 04 — Business Consulting |
-| `styles.css` | Shared design system (brand colors, doors, CTA cards) |
+| `styles.css` | Shared design system |
 | `vercel.json` | Deploy config (clean URLs) |
+| `assets/` | Logo variants + headshots (see below) |
 
-Everything is plain static HTML/CSS — no build step. It works by opening
-`index.html` directly, or hosting the folder on Vercel, GoHighLevel, or any
-static host.
+### Assets
 
-## The booking button
+| File | Use |
+|------|-----|
+| `mcg-logo.png` | Full-color lockup (original) |
+| `mcg-logo-transparent.png` | Header (transparent background) |
+| `mcg-logo-reverse.png` | White lockup for the charcoal footer |
+| `mcg-monogram.png` | Favicon / square applications |
+| `jennifer-environmental.png` | Homepage hero (Var 04) |
+| `jennifer-authoritative.png` | Grant & GovCon + Technical Writing (Var 01) |
+| `jennifer-engaged.png` | Training (Var 02) |
+| `jennifer-approachable.png` | Business Consulting (Var 03) |
 
-Every "Book the call — $77.77" button links to the same Google Calendar
-appointment schedule you already use. To change it, search all four service
-pages for `calendar.google.com` and replace the URL.
+## Booking buttons (the $77.77 call)
 
-## Editing content
+| Door | Booking link |
+|------|--------------|
+| Grant & GovCon | `https://api.leadconnectorhq.com/widget/bookings/strategy-call-mcg` |
+| Training | Google Calendar link *(placeholder — swap for its own LeadConnector link)* |
+| Technical Writing | Google Calendar link *(placeholder — swap)* |
+| Business Consulting | Google Calendar link *(placeholder — swap)* |
 
-- **Door names / order:** edit the four `.door` blocks in `index.html`.
-- **Service copy:** edit the matching `*.html` file (hero, feature grid,
-  "who it's for" list, CTA text).
-- **Brand colors:** edit the `:root` variables at the top of `styles.css`
-  (`--accent` teal, `--gold`).
-- **Price:** search for `$77.77` across the files if it ever changes.
+To change a link, open the matching `*.html` file and edit the `href` on the
+`.btn-book` anchor. To change the price, search all files for `$77.77`.
+
+## Editing
+
+- **Door names / order:** the four `.door` blocks in `index.html`.
+- **Service copy:** the matching `*.html` file.
+- **Brand colors / fonts:** the `:root` block at the top of `styles.css`.
+
+Plain static HTML/CSS — no build step. Open `index.html` directly, or host the
+folder on Vercel, GoHighLevel, or any static host.
