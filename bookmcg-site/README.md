@@ -1,8 +1,9 @@
 # Book MCG — Murchison Consulting Group website
 
 A four-doors homepage. Each door opens to a service page that ends in a
-"$77.77 / 30-minute call" booking button (payment collected by the booking
-calendar, credited toward the service chosen). Built to the Murchison
+45-minute call booking button (payment collected by the booking calendar,
+credited toward the service chosen). The price is not displayed on the site;
+it is set in each LeadConnector booking calendar. Built to the Murchison
 Consulting Group Brand Guidelines v1.0.
 
 ## Brand system in use
@@ -45,7 +46,7 @@ Consulting Group Brand Guidelines v1.0.
 | `jennifer-engaged.png` | Training (Var 02) |
 | `jennifer-approachable.png` | Business Consulting (Var 03) |
 
-## Booking buttons (the $77.77 call)
+## Booking buttons (the strategy call)
 
 | Door | Booking link |
 |------|--------------|
@@ -55,7 +56,7 @@ Consulting Group Brand Guidelines v1.0.
 | Business Consulting | `.../widget/booking/7NNQY5gtIhHaTiPs9yjq` |
 
 To change a link, open the matching `*.html` file and edit the `href` on the
-`.btn-book` anchor. To change the price, search all files for `$77.77`.
+`.btn-book` anchor. The price is not shown on the pages; it is configured in each booking calendar.
 
 ## Editing
 
