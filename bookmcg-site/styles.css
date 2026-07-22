@@ -368,11 +368,17 @@ body {
   color: var(--mauve-light); font-weight: 700; margin-bottom: 5px;
 }
 
-/* Align the "Choose this door if" blocks across the row (4- and 2-up layouts) */
-@media (min-width: 541px) {
-  .door h3 { min-height: 78px; }
-  .door p:not(.door-qualifier) { min-height: 66px; }
+/* The Four C's — door word, service name, definition */
+.door h3 { font-size: 28px; margin: 0 0 5px; }
+.door .door-sub {
+  font-family: var(--serif-alt); font-size: 12.5px; letter-spacing: 0.03em;
+  line-height: 1.35; color: var(--mauve-light); margin: 0 0 12px;
 }
-@media (min-width: 941px) {
-  .door .door-qualifier { min-height: 132px; }
+.door .door-def {
+  font-size: 14.5px; line-height: 1.5; color: rgba(255,255,255,0.82); margin: 0;
+}
+@media (min-width: 541px) {
+  .door h3 { min-height: 34px; }
+  .door .door-sub { min-height: 34px; }
+  .door .door-def { min-height: 88px; }
 }
