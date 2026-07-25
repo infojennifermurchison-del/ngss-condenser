@@ -382,3 +382,19 @@ body {
   .door .door-sub { min-height: 34px; }
   .door .door-def { min-height: 88px; }
 }
+
+/* Trusted by — organizations worked with */
+.trusted-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 22px 52px; }
+.trusted-name {
+  font-family: var(--serif); font-size: 23px; font-weight: 700;
+  color: var(--charcoal); letter-spacing: 0.01em; line-height: 1.2;
+  position: relative;
+}
+.trusted-name + .trusted-name::before {
+  content: ""; position: absolute; left: -27px; top: 12%; height: 76%;
+  border-left: 1px solid var(--rule);
+}
+@media (max-width: 560px) {
+  .trusted-name + .trusted-name::before { display: none; }
+  .trusted-name { font-size: 20px; }
+}
