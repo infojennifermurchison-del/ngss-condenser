@@ -384,6 +384,9 @@ body {
 }
 
 /* Trusted by — organizations worked with */
+.trusted-logos { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 30px 54px; }
+.trusted-logos img { height: 60px; width: auto; max-width: 220px; object-fit: contain; display: block; }
+@media (max-width: 560px) { .trusted-logos img { height: 46px; max-width: 150px; } }
 .trusted-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 22px 52px; }
 .trusted-name {
   font-family: var(--serif); font-size: 23px; font-weight: 700;
