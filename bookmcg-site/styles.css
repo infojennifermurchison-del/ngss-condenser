@@ -401,3 +401,34 @@ body {
   .trusted-name + .trusted-name::before { display: none; }
   .trusted-name { font-size: 20px; }
 }
+
+/* ==========================================================================
+   Masthead banner (clickable header, links home) — added redesign v3
+   ========================================================================== */
+.masthead {
+  display: block; text-decoration: none;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAF8F8 100%);
+  border-bottom: 1px solid var(--rule);
+}
+.masthead-inner {
+  max-width: 1180px; margin: 0 auto; padding: 14px 28px;
+  display: flex; align-items: center; gap: 30px; min-height: 150px;
+}
+.masthead-logo { height: 100px; width: auto; flex-shrink: 0; }
+.masthead-text { flex: 1; border-top: 2px solid var(--mauve); padding-top: 12px; }
+.masthead-title { font-family: var(--serif); font-size: 23px; font-weight: 700; color: var(--charcoal); line-height: 1.15; letter-spacing: -0.01em; }
+.masthead-cs { font-family: var(--serif); font-size: 16px; color: var(--warm-gray); margin-top: 7px; letter-spacing: 0.02em; }
+.masthead-cs .dot { color: var(--mauve); margin: 0 5px; font-weight: 700; }
+.masthead-desc { font-family: var(--serif-alt); font-style: italic; font-size: 13px; color: var(--warm-gray); margin-top: 7px; }
+.masthead-photo { height: 152px; width: auto; object-fit: cover; object-position: center 18%; flex-shrink: 0; align-self: stretch; }
+@media (max-width: 900px) {
+  .masthead-photo { display: none; }
+  .masthead-inner { min-height: 0; gap: 22px; }
+  .masthead-logo { height: 74px; }
+  .masthead-title { font-size: 20px; }
+}
+@media (max-width: 560px) {
+  .masthead-inner { flex-direction: column; text-align: center; gap: 12px; }
+  .masthead-text { border-top: none; padding-top: 0; }
+  .masthead-cs { font-size: 14px; }
+}
