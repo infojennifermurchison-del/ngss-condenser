@@ -1028,7 +1028,10 @@ async function selectStudent(id) {
       <h3 class="font-bold text-sm uppercase tracking-wide mb-3" style="color:var(--accent)">Log a Session</h3>
       <form id="sessionForm" class="grid sm:grid-cols-2 gap-3">
         <div><label class="field-label">Date *</label><input id="se_date" type="date" class="field-input" required value="${new Date().toISOString().slice(0,10)}"></div>
-        <div><label class="field-label">Duration (minutes) *</label><input id="se_dur" type="number" min="0" class="field-input" required placeholder="60"></div>
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="field-label">Start time *</label><input id="se_start" type="time" class="field-input" required></div>
+          <div><label class="field-label">End time *</label><input id="se_end" type="time" class="field-input" required></div>
+        </div>
         <div>
           <label class="field-label">Student service provided *</label>
           <select id="se_type" class="field-input" onchange="toggleMetrics()">
@@ -1110,7 +1113,7 @@ async function selectStudent(id) {
     <div class="border rounded p-3 text-sm" style="border-color:var(--rule)">
       <div class="flex justify-between">
         <span class="font-semibold">${fmtDate(x.session_date)} · ${esc(x.session_type || '')}</span>
-        <span class="text-gray-500">${hours(x.duration_minutes).toFixed(1)} hr · ${esc(x.setting || '')}${x.mentor_id ? ' · ' + esc(mentorName(x.mentor_id)) : ''}</span>
+        <span class="text-gray-500">${x.start_time && x.end_time ? esc(x.start_time) + '–' + esc(x.end_time) + ' · ' : ''}${hours(x.duration_minutes).toFixed(1)} hr · ${esc(x.setting || '')}${x.mentor_id ? ' · ' + esc(mentorName(x.mentor_id)) : ''}</span>
       </div>
       ${(x.absences_since_last != null || x.absence_reasons) ? `<div><span class="text-gray-400">Absences since last:</span> ${esc(x.absences_since_last != null ? String(x.absences_since_last) : '—')}${x.absence_reasons ? ' (' + esc(x.absence_reasons) + ')' : ''}</div>` : ''}
       ${x.topics ? `<div class="mt-1"><span class="text-gray-400">Topics:</span> ${esc(x.topics)}</div>` : ''}
@@ -1209,11 +1212,19 @@ async function saveSession(e) {
   const btn = e.target.querySelector('button[type=submit]');
   btn.disabled = true;
   const isMetrics = $('se_type').value === 'Metrics check';
+  // Require date + start/end time; compute duration from them.
+  const date = $('se_date').value, start = $('se_start').value, end = $('se_end').value;
+  if (!date || !start || !end) { toast('Date, start time, and end time are required', false); btn.disabled = false; return; }
+  const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+  const dur = toMin(end) - toMin(start);
+  if (dur <= 0) { toast('End time must be after start time', false); btn.disabled = false; return; }
   const payload = {
     student_id: SELECTED,
     mentor_id: ME.id,
-    session_date: $('se_date').value,
-    duration_minutes: parseInt($('se_dur').value || '0', 10),
+    session_date: date,
+    start_time: start,
+    end_time: end,
+    duration_minutes: dur,
     setting: $('se_setting').value,
     session_type: $('se_type').value,
     topics: $('se_topics').value.trim(),
@@ -1597,6 +1608,16 @@ $('intakeForm').addEventListener('submit', async (e) => {
   // Auto-draft an AI intervention plan from the intake (best-effort; won't block the intake).
   btn.innerHTML = '<span class="spinner"></span> Drafting plan…';
   const planned = newId ? await autoPlanFromIntake({ ...payload }, newId) : false;
+  // Alert the admin(s) by email that an intake is awaiting approval (best-effort).
+  if (!DEMO) {
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      await fetch('/api/notify-pending', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (session?.access_token || '') },
+        body: JSON.stringify({ first_name: first })
+      });
+    } catch (e) { console.error('notify-pending:', e); }
+  }
   btn.disabled = false;
   btn.textContent = 'Submit Intake (Pending Approval)';
   toast(planned ? 'Intake submitted — AI plan drafted, pending approval' : 'Intake submitted — pending approval');
@@ -1993,6 +2014,7 @@ $('downloadReportBtn').addEventListener('click', async () => {
     // Sheet 2: Sessions log
     const sessRows = (sessions || []).map(x => ({
       'Date': x.session_date, 'Student': sName(x.student_id), 'Mentor': mentorName(x.mentor_id) || '',
+      'Start': x.start_time || '', 'End': x.end_time || '',
       'Service provided': x.session_type || '', 'Setting': x.setting || '',
       'Duration (min)': x.duration_minutes, 'Contact hours': hours(x.duration_minutes).toFixed(2),
       'Absences since last': x.absences_since_last != null ? x.absences_since_last : '',

@@ -122,6 +122,8 @@ create table if not exists public.sessions (
   student_id        uuid not null references public.students (id) on delete cascade,
   mentor_id         uuid references public.profiles (id) on delete set null,
   session_date      date not null,
+  start_time        text,   -- HH:MM
+  end_time          text,   -- HH:MM
   duration_minutes  integer not null default 0 check (duration_minutes >= 0),
   setting           text,        -- in-person, virtual, phone, group, etc.
   session_type      text,        -- 'Student session' or 'Metrics check' (service provided)
@@ -143,6 +145,8 @@ create table if not exists public.sessions (
 );
 
 -- If upgrading an existing install (safe to re-run):
+alter table public.sessions add column if not exists start_time text;
+alter table public.sessions add column if not exists end_time text;
 alter table public.sessions add column if not exists absences_since_last integer;
 alter table public.sessions add column if not exists absence_reasons text;
 alter table public.sessions add column if not exists currently_truant text;
