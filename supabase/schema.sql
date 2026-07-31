@@ -141,6 +141,7 @@ create table if not exists public.sessions (
   no_longer_truant    text,      -- Yes / No — no longer considered truant
   quarter_grades      text,      -- grades / GPA (end of quarter)
   discipline          text,      -- discipline incidents (end of quarter)
+  auto_generated      boolean not null default false, -- AI-drafted month-end metrics
   created_at        timestamptz not null default now()
 );
 
@@ -155,6 +156,7 @@ alter table public.sessions add column if not exists referred_to_court text;
 alter table public.sessions add column if not exists no_longer_truant text;
 alter table public.sessions add column if not exists quarter_grades text;
 alter table public.sessions add column if not exists discipline text;
+alter table public.sessions add column if not exists auto_generated boolean not null default false;
 
 create index if not exists sessions_student_idx on public.sessions (student_id);
 create index if not exists sessions_mentor_idx  on public.sessions (mentor_id);

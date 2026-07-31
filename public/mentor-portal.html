@@ -1129,7 +1129,7 @@ async function selectStudent(id) {
       ${x.progress_notes ? `<div><span class="text-gray-400">Notes:</span> ${esc(x.progress_notes)}</div>` : ''}
       ${x.concerns ? `<div class="text-red-700"><span class="text-gray-400">Concerns:</span> ${esc(x.concerns)}</div>` : ''}
       ${x.follow_up ? `<div><span class="text-gray-400">Follow-up:</span> ${esc(x.follow_up)}</div>` : ''}
-      ${x.session_type === 'Metrics check' ? `<div class="mt-1 pt-1 border-t" style="border-color:var(--rule)"><span class="badge" style="background:var(--gold-soft);color:var(--gold)">METRICS</span>
+      ${x.session_type === 'Metrics check' ? `<div class="mt-1 pt-1 border-t" style="border-color:var(--rule)"><span class="badge" style="background:var(--gold-soft);color:var(--gold)">METRICS</span>${x.auto_generated ? '<span class="badge ml-1" style="background:#FEF3C7;color:#92400E">AUTO — review</span>' : ''}
         ${[x.currently_truant ? 'Truant: ' + x.currently_truant : '', x.referred_to_court ? 'Court: ' + x.referred_to_court : '', x.no_longer_truant ? 'No longer truant: ' + x.no_longer_truant : '', x.quarter_grades ? 'Grades: ' + x.quarter_grades : '', x.discipline ? 'Discipline: ' + x.discipline : ''].filter(Boolean).map(esc).join(' · ')}</div>` : ''}
     </div>`).join('') || '<div class="text-sm text-gray-400">No sessions logged yet.</div>';
 
