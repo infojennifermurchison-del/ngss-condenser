@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monthly Metrics Check In</title>
+<style>
+  :root {
+    --charcoal: #2C2C2E;
+    --mauve: #A88B95;
+    --mauve-deep: #8d6f7a;
+    --warm-gray: #8E8E93;
+    --stripe: #F4F4F6;
+    --border: #C9C9CE;
+    --error: #b3261e;
+    --ok: #2f7d4f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: transparent;
+    color: var(--charcoal);
+    font-family: "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 8px 16px 40px; }
+
+  .masthead { text-align: center; padding: 8px 0 18px; }
+  .masthead .name { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  .masthead .sub {
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--warm-gray); margin-top: 2px;
+  }
+  .rule { height: 2px; background: var(--mauve); border: 0; margin: 12px auto 0; max-width: 120px; }
+
+  .lead { text-align: center; margin: 18px 0 6px; }
+  .lead h1 { font-size: 20px; margin: 0 0 6px; font-weight: 700; }
+  .lead p { margin: 0; color: var(--warm-gray); font-family: Georgia, serif; font-style: italic; font-size: 14px; }
+
+  .reporting {
+    text-align: center; font-size: 13px; color: var(--mauve-deep);
+    background: var(--stripe); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; margin: 16px 0 6px;
+  }
+
+  fieldset {
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 16px 6px; margin: 18px 0 0;
+  }
+  legend {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.4px;
+    text-transform: uppercase; color: var(--mauve-deep);
+    padding: 0 8px;
+  }
+  .hint { font-size: 12.5px; color: var(--warm-gray); margin: 2px 0 14px; font-family: Georgia, serif; font-style: italic; }
+
+  .field { margin: 0 0 16px; }
+  label.q { display: block; font-size: 15px; font-weight: 600; margin: 0 0 6px; }
+  .req { color: var(--mauve-deep); }
+
+  input[type="text"], input[type="email"], input[type="tel"], input[type="number"], select {
+    width: 100%; font-family: inherit; font-size: 16px; color: var(--charcoal);
+    padding: 11px 12px; border: 1px solid var(--border); border-radius: 8px;
+    background: #fff; outline: none;
+  }
+  input:focus, select:focus { border-color: var(--mauve); box-shadow: 0 0 0 3px rgba(168,139,149,0.18); }
+  input.invalid, select.invalid { border-color: var(--error); box-shadow: 0 0 0 3px rgba(179,38,30,0.12); }
+
+  .goalrow { display: flex; gap: 10px; align-items: center; }
+  .goalrow input[type="number"] { flex: 1; }
+  .na {
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+    font-size: 14px; color: var(--charcoal); cursor: pointer; user-select: none;
+    padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--stripe);
+  }
+  .na input { width: 16px; height: 16px; accent-color: var(--mauve-deep); }
+
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .checks.stack { grid-template-columns: 1fr; }
+  .row2 { display: flex; gap: 10px; }
+  .row2 > select { flex: 1; }
+  .check {
+    display: flex; align-items: center; gap: 8px; font-size: 15px;
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; background: #fff; cursor: pointer;
+  }
+  .check input { width: 17px; height: 17px; accent-color: var(--mauve-deep); }
+
+  .err { display: none; color: var(--error); font-size: 13px; margin-top: 5px; font-family: Georgia, serif; }
+  .err.show { display: block; }
+
+  .submit {
+    width: 100%; margin-top: 22px; padding: 15px 18px; font-family: inherit;
+    font-size: 17px; font-weight: 700; letter-spacing: 0.3px; color: #fff;
+    background: var(--mauve-deep); border: 0; border-radius: 10px; cursor: pointer;
+  }
+  .submit:hover { filter: brightness(1.05); }
+  .submit:disabled { opacity: 0.6; cursor: default; }
+
+  .footnote { text-align: center; font-size: 12px; color: var(--warm-gray); margin-top: 14px; font-family: Georgia, serif; }
+
+  .done { text-align: center; padding: 40px 10px; display: none; }
+  .done h2 { font-size: 22px; margin: 0 0 8px; }
+  .done p { color: var(--warm-gray); font-size: 15px; }
+
+  @media (max-width: 460px) {
+    .checks { grid-template-columns: 1fr; }
+    .goalrow { flex-wrap: wrap; }
+    .na { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="name">MURCHISON</div>
+    <div class="sub">Consulting Group</div>
+    <hr class="rule" />
+  </div>
+
+  <form id="metricsForm" novalidate>
+    <div class="lead">
+      <h1>Monthly Metrics Check In</h1>
+      <p>Bring your real numbers. We coach to the movement, not the perfect month.</p>
+    </div>
+
+    <div class="reporting" id="reporting"></div>
+
+    <!-- REPORTING PERIOD -->
+    <fieldset>
+      <legend>The month you are reporting</legend>
+      <p class="hint">Pick the month your numbers below are for.</p>
+
+      <div class="field">
+        <label class="q" for="reporting_month">Reporting month and year <span class="req">*</span></label>
+        <div class="row2">
+          <select id="reporting_month" name="reporting_month" aria-label="Reporting month"></select>
+          <select id="reporting_year" name="reporting_year" aria-label="Reporting year"></select>
+        </div>
+        <div class="err" data-for="reporting_month">Please choose the month and year you are reporting.</div>
+      </div>
+    </fieldset>
+
+    <!-- WHO -->
+    <fieldset>
+      <legend>Your details</legend>
+      <p class="hint">So your numbers attach to your file and we can confirm your session.</p>
+
+      <div class="field">
+        <label class="q" for="full_name">Full name <span class="req">*</span></label>
+        <input type="text" id="full_name" name="full_name" autocomplete="name" />
+        <div class="err" data-for="full_name">Please enter your name.</div>
+      </div>
+
+      <div class="field">
+        <label class="q" for="email">Email <span class="req">*</span></label>
+        <input type="email" id="email" name="email" autocomplete="email" />
+        <div class="err" data-for="email">Please enter a valid email.</div>
+      </div>
+
+      <div class="field">
+        <label class="q" for="phone">Phone</label>
+        <input type="tel" id="phone" name="phone" autocomplete="tel" />
+      </div>
+    </fieldset>
+
+    <!-- REPORTING MONTH ACTUALS -->
+    <fieldset>
+      <legend>Your results for that month</legend>
+      <p class="hint">These are your real results for the month you picked above. Zero is allowed here. Tell the truth so we can move it.</p>
+
+      <div class="field">
+        <label class="q" for="revenue_last_month">Revenue that month (US dollars) <span class="req">*</span></label>
+        <input type="number" id="revenue_last_month" name="revenue_last_month" min="0" step="1" inputmode="numeric" placeholder="0 or more" />
+        <div class="err" data-for="revenue_last_month">Enter a number. Use 0 if there was none.</div>
+      </div>
+
+      <div class="field">
+        <label class="q" for="leads_last_month">Leads that month <span class="req">*</span></label>
+        <input type="number" id="leads_last_month" name="leads_last_month" min="0" step="1" inputmode="numeric" placeholder="0 or more" />
+        <div class="err" data-for="leads_last_month">Enter a number. Use 0 if there was none.</div>
+      </div>
+
+      <div class="field">
+        <label class="q" for="total_views">Total views that month <span class="req">*</span></label>
+        <input type="number" id="total_views" name="total_views" min="0" step="1" inputmode="numeric" placeholder="across your platforms" />
+        <div class="err" data-for="total_views">Enter a number. Use 0 if there was none.</div>
+      </div>
+
+      <div class="field">
+        <label class="q">Where did those views come from <span class="req">*</span></label>
+        <div class="checks" id="platforms">
+          <label class="check"><input type="checkbox" name="platform" value="TikTok" /> TikTok</label>
+          <label class="check"><input type="checkbox" name="platform" value="Instagram" /> Instagram</label>
+          <label class="check"><input type="checkbox" name="platform" value="Facebook" /> Facebook</label>
+          <label class="check"><input type="checkbox" name="platform" value="YouTube" /> YouTube</label>
+          <label class="check"><input type="checkbox" name="platform" value="Email" /> Email or newsletter</label>
+          <label class="check"><input type="checkbox" name="platform" value="Other" /> Other</label>
+        </div>
+        <div class="err" data-for="platforms">Pick at least one.</div>
+      </div>
+    </fieldset>
+
+    <!-- THIS MONTH GOALS -->
+    <fieldset>
+      <legend>This month, what you are going for</legend>
+      <p class="hint">No zeros on goals. If a goal does not apply this month, mark NA.</p>
+
+      <div class="field">
+        <label class="q" for="revenue_goal">Revenue goal this month (US dollars) <span class="req">*</span></label>
+        <div class="goalrow">
+          <input type="number" id="revenue_goal" name="revenue_goal" min="1" step="1" inputmode="numeric" placeholder="a real target above zero" />
+          <label class="na"><input type="checkbox" id="revenue_goal_na" data-na="revenue_goal" /> NA</label>
+        </div>
+        <div class="err" data-for="revenue_goal">Enter a target above zero, or check NA.</div>
+      </div>
+
+      <div class="field">
+        <label class="q" for="leads_goal">Leads goal this month <span class="req">*</span></label>
+        <div class="goalrow">
+          <input type="number" id="leads_goal" name="leads_goal" min="1" step="1" inputmode="numeric" placeholder="a real target above zero" />
+          <label class="na"><input type="checkbox" id="leads_goal_na" data-na="leads_goal" /> NA</label>
+        </div>
+        <div class="err" data-for="leads_goal">Enter a target above zero, or check NA.</div>
+      </div>
+    </fieldset>
+
+    <!-- STAGE -->
+    <fieldset>
+      <legend>Your stage of business development</legend>
+      <p class="hint">Where your business actually is right now. Pick the closest one.</p>
+
+      <div class="field">
+        <label class="q" for="business_stage">Stage <span class="req">*</span></label>
+        <select id="business_stage" name="business_stage">
+          <option value="" selected disabled>Select your stage</option>
+          <option value="Idea or pre launch">Idea or pre launch. Building the offer, not selling yet.</option>
+          <option value="Just launched">Just launched. First sales, still inconsistent.</option>
+          <option value="Gaining traction">Gaining traction. Some repeat revenue, finding what works.</option>
+          <option value="Consistent revenue">Consistent revenue. Repeatable and ready to grow.</option>
+          <option value="Scaling">Scaling. Systems, capacity, and leverage.</option>
+          <option value="NA">NA or not sure</option>
+        </select>
+        <div class="err" data-for="business_stage">Please choose a stage.</div>
+      </div>
+    </fieldset>
+
+    <!-- MONTH AND CADENCE -->
+    <fieldset>
+      <legend>The month you are booking for</legend>
+      <p class="hint">Pick the month these sessions belong to and how you want them spaced.</p>
+
+      <div class="field">
+        <label class="q" for="coaching_month">Month and year <span class="req">*</span></label>
+        <div class="row2">
+          <select id="coaching_month" name="coaching_month" aria-label="Booking month"></select>
+          <select id="coaching_year" name="coaching_year" aria-label="Booking year"></select>
+        </div>
+        <div class="err" data-for="coaching_month">Please choose a month and year.</div>
+      </div>
+
+      <div class="field">
+        <label class="q">Cadence for this month <span class="req">*</span></label>
+        <div class="checks stack" id="cadence">
+          <label class="check"><input type="radio" name="cadence" value="2x90" /> 2 sessions, 90 minutes each</label>
+          <label class="check"><input type="radio" name="cadence" value="3x60" /> 3 sessions, 60 minutes each</label>
+          <label class="check"><input type="radio" name="cadence" value="4x45" /> 4 sessions, 45 minutes each</label>
+        </div>
+        <div class="err" data-for="cadence">Please choose your cadence.</div>
+      </div>
+    </fieldset>
+
+    <button type="submit" class="submit" id="submitBtn">Submit and book my session</button>
+    <p class="footnote">After you submit you will go straight to the calendar to book your time.</p>
+  </form>
+
+  <div class="done" id="done">
+    <h2>Got it. Sending you to the calendar.</h2>
+    <p>If it does not move in a moment, tap the button again.</p>
+  </div>
+
+</div>
+
+<script>
+  /* ============================================================
+     SET THIS 1 of 2: your GoHighLevel Inbound Webhook URL.
+     Leave as empty string to skip capture and only redirect.
+  ============================================================ */
+  const WEBHOOK_URL = "https://services.leadconnectorhq.com/hooks/XoVf2eRwvuDDguFuYdbc/webhook-trigger/39a7557c-e13a-48d7-95f0-6bc06342de6e";
+
+  /* ============================================================
+     SET THIS 2 of 2: the calendar link clients book on after submit.
+  ============================================================ */
+  const CALENDAR_URL = "https://api.leadconnectorhq.com/widget/bookings/boardroom-monthly-coaching-appointment";
+
+  /* Optional. If each cadence books on its own GoHighLevel calendar
+     (a 90 minute calendar, a 60 minute calendar, a 45 minute calendar),
+     paste each link here. Leave a value blank to use CALENDAR_URL above. */
+  const CALENDAR_BY_CADENCE = {
+    "2x90": "",
+    "3x60": "",
+    "4x45": ""
+  };
+
+  // ---- month and year dropdowns, reporting banner ----
+  const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const YEAR_START = 2026;
+  const YEAR_END = 2038;
+
+  function fillMonths(select, defaultIndex) {
+    MONTH_NAMES.forEach(function (name, idx) {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      if (idx === defaultIndex) opt.selected = true;
+      select.appendChild(opt);
+    });
+  }
+  function fillYears(select, defaultYear) {
+    for (let y = YEAR_START; y <= YEAR_END; y++) {
+      const opt = document.createElement("option");
+      opt.value = String(y);
+      opt.textContent = String(y);
+      if (y === defaultYear) opt.selected = true;
+      select.appendChild(opt);
+    }
+  }
+
+  (function () {
+    const now = new Date();
+    const thisMonth = now.getMonth();          // 0 to 11
+    const lastMonth = (thisMonth + 11) % 12;   // previous month index
+    const thisYear = now.getFullYear();
+    const defaultYear = thisYear < YEAR_START ? YEAR_START : (thisYear > YEAR_END ? YEAR_END : thisYear);
+
+    // Reporting defaults to last month, current year.
+    fillMonths(document.getElementById("reporting_month"), lastMonth);
+    fillYears(document.getElementById("reporting_year"), defaultYear);
+
+    // Booking defaults to this month, current year.
+    fillMonths(document.getElementById("coaching_month"), thisMonth);
+    fillYears(document.getElementById("coaching_year"), defaultYear);
+
+    updateBanner();
+    document.getElementById("reporting_month").addEventListener("change", function () { updateBanner(); clearError("reporting_month"); });
+    document.getElementById("reporting_year").addEventListener("change", function () { updateBanner(); clearError("reporting_month"); });
+    document.getElementById("coaching_month").addEventListener("change", function () { clearError("coaching_month"); });
+    document.getElementById("coaching_year").addEventListener("change", function () { clearError("coaching_month"); });
+  })();
+
+  function updateBanner() {
+    const m = document.getElementById("reporting_month").value;
+    const y = document.getElementById("reporting_year").value;
+    document.getElementById("reporting").textContent =
+      "You are reporting your results for " + m + " " + y + ".";
+  }
+
+  // ---- NA toggles for goal fields ----
+  document.querySelectorAll('input[data-na]').forEach(function (na) {
+    na.addEventListener('change', function () {
+      const target = document.getElementById(na.dataset.na);
+      if (na.checked) {
+        target.value = "";
+        target.disabled = true;
+        clearError(na.dataset.na);
+      } else {
+        target.disabled = false;
+      }
+    });
+  });
+
+  function showError(key) {
+    const box = document.querySelector('.err[data-for="' + key + '"]');
+    if (box) box.classList.add('show');
+    const fld = document.getElementById(key);
+    if (fld) fld.classList.add('invalid');
+  }
+  function clearError(key) {
+    const box = document.querySelector('.err[data-for="' + key + '"]');
+    if (box) box.classList.remove('show');
+    const fld = document.getElementById(key);
+    if (fld) fld.classList.remove('invalid');
+  }
+
+  function validate() {
+    let ok = true;
+    let firstBad = null;
+    const bad = function (key) { showError(key); if (!firstBad) firstBad = document.getElementById(key) || document.querySelector('.err[data-for="' + key + '"]'); ok = false; };
+
+    // name
+    const name = document.getElementById('full_name').value.trim();
+    if (!name) bad('full_name'); else clearError('full_name');
+
+    // email
+    const email = document.getElementById('email').value.trim();
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!emailOk) bad('email'); else clearError('email');
+
+    // last month actuals: required, number, zero allowed
+    ['revenue_last_month','leads_last_month','total_views'].forEach(function (key) {
+      const v = document.getElementById(key).value.trim();
+      const n = Number(v);
+      if (v === "" || isNaN(n) || n < 0) bad(key); else clearError(key);
+    });
+
+    // platforms: at least one
+    const anyPlatform = document.querySelectorAll('input[name="platform"]:checked').length > 0;
+    if (!anyPlatform) { document.querySelector('.err[data-for="platforms"]').classList.add('show'); if (!firstBad) firstBad = document.getElementById('platforms'); ok = false; }
+    else document.querySelector('.err[data-for="platforms"]').classList.remove('show');
+
+    // goals: NA allowed, otherwise must be above zero
+    [['revenue_goal','revenue_goal_na'],['leads_goal','leads_goal_na']].forEach(function (pair) {
+      const field = document.getElementById(pair[0]);
+      const na = document.getElementById(pair[1]).checked;
+      if (na) { clearError(pair[0]); return; }
+      const v = field.value.trim();
+      const n = Number(v);
+      if (v === "" || isNaN(n) || n < 1) bad(pair[0]); else clearError(pair[0]);
+    });
+
+    // stage
+    const stage = document.getElementById('business_stage').value;
+    if (!stage) bad('business_stage'); else clearError('business_stage');
+
+    // reporting month and year
+    const reportMonth = document.getElementById('reporting_month').value;
+    const reportYear = document.getElementById('reporting_year').value;
+    if (!reportMonth || !reportYear) bad('reporting_month'); else clearError('reporting_month');
+
+    // booking month and year
+    const month = document.getElementById('coaching_month').value;
+    const year = document.getElementById('coaching_year').value;
+    if (!month || !year) bad('coaching_month'); else clearError('coaching_month');
+
+    // cadence: one option required
+    const cadencePicked = document.querySelector('input[name="cadence"]:checked');
+    if (!cadencePicked) { document.querySelector('.err[data-for="cadence"]').classList.add('show'); if (!firstBad) firstBad = document.getElementById('cadence'); ok = false; }
+    else document.querySelector('.err[data-for="cadence"]').classList.remove('show');
+
+    if (firstBad && firstBad.scrollIntoView) firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return ok;
+  }
+
+  function cadenceLabel(code) {
+    const map = { "2x90": "2 sessions, 90 minutes each", "3x60": "3 sessions, 60 minutes each", "4x45": "4 sessions, 45 minutes each" };
+    return map[code] || "";
+  }
+
+  function buildPayload() {
+    const platforms = Array.from(document.querySelectorAll('input[name="platform"]:checked')).map(function (c) { return c.value; });
+    const goalVal = function (fieldId, naId) {
+      return document.getElementById(naId).checked ? "NA" : document.getElementById(fieldId).value.trim();
+    };
+    const cadencePicked = document.querySelector('input[name="cadence"]:checked');
+    const cadenceCode = cadencePicked ? cadencePicked.value : "";
+    return {
+      full_name: document.getElementById('full_name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      revenue_last_month: document.getElementById('revenue_last_month').value.trim(),
+      leads_last_month: document.getElementById('leads_last_month').value.trim(),
+      total_views: document.getElementById('total_views').value.trim(),
+      platforms: platforms.join(", "),
+      revenue_goal: goalVal('revenue_goal','revenue_goal_na'),
+      leads_goal: goalVal('leads_goal','leads_goal_na'),
+      business_stage: document.getElementById('business_stage').value,
+      reporting_month: document.getElementById('reporting_month').value,
+      reporting_year: document.getElementById('reporting_year').value,
+      reporting_period: document.getElementById('reporting_month').value + " " + document.getElementById('reporting_year').value,
+      coaching_month: document.getElementById('coaching_month').value,
+      coaching_year: document.getElementById('coaching_year').value,
+      coaching_period: document.getElementById('coaching_month').value + " " + document.getElementById('coaching_year').value,
+      cadence: cadenceCode,
+      cadence_label: cadenceLabel(cadenceCode),
+      submitted_at: new Date().toISOString(),
+      form_source: "MCG Monthly Metrics Check In"
+    };
+  }
+
+  function goToCalendar() {
+    const picked = document.querySelector('input[name="cadence"]:checked');
+    const code = picked ? picked.value : "";
+    const perCadence = CALENDAR_BY_CADENCE[code];
+    window.location.href = (perCadence && perCadence.trim()) ? perCadence.trim() : CALENDAR_URL;
+  }
+
+  function sendThenRedirect(payload) {
+    // GoHighLevel only splits the payload into separate fields when it arrives
+    // as a real JSON body, so send Content-Type application/json with the raw JSON.
+    if (WEBHOOK_URL) {
+      try {
+        fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true
+        }).catch(function () { /* ignore network or CORS errors, still redirect */ });
+      } catch (e) { /* ignore */ }
+    }
+    // give the request a beat to fire, then send them to book
+    setTimeout(goToCalendar, 600);
+  }
+
+  document.getElementById('metricsForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!validate()) return;
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = "Saving your numbers...";
+    document.getElementById('metricsForm').style.display = 'none';
+    document.getElementById('done').style.display = 'block';
+    sendThenRedirect(buildPayload());
+  });
+
+  // clear an error as soon as the person fixes the field
+  document.querySelectorAll('input, select').forEach(function (el) {
+    el.addEventListener('input', function () {
+      if (el.id) clearError(el.id);
+    });
+  });
+
+  // cadence radios fire change, not input
+  document.querySelectorAll('input[name="cadence"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      const box = document.querySelector('.err[data-for="cadence"]');
+      if (box) box.classList.remove('show');
+    });
+  });
+</script>
+</body>
+</html>
