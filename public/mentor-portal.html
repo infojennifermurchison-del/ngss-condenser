@@ -611,6 +611,7 @@ let DEMO = false;         // true in ?demo mode (no real backend)
 let ME_EMAIL = '';        // current user's email
 let CUR_STUDENT = null;   // currently open student (detail view)
 let CUR_PLANS = [];       // that student's saved plans
+let CUR_SESSIONS = [];    // that student's sessions
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => (s == null ? '' : String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
@@ -1027,11 +1028,7 @@ async function selectStudent(id) {
     <div class="card p-5">
       <h3 class="font-bold text-sm uppercase tracking-wide mb-3" style="color:var(--accent)">Log a Session</h3>
       <form id="sessionForm" class="grid sm:grid-cols-2 gap-3">
-        <div><label class="field-label">Date *</label><input id="se_date" type="date" class="field-input" required value="${new Date().toISOString().slice(0,10)}"></div>
-        <div class="grid grid-cols-2 gap-2">
-          <div><label class="field-label">Start time *</label><input id="se_start" type="time" class="field-input" required></div>
-          <div><label class="field-label">End time *</label><input id="se_end" type="time" class="field-input" required></div>
-        </div>
+        <input type="hidden" id="se_id">
         <div>
           <label class="field-label">Student service provided *</label>
           <select id="se_type" class="field-input" onchange="toggleMetrics()">
@@ -1040,8 +1037,15 @@ async function selectStudent(id) {
             <option>Academic support</option>
             <option>Crisis / urgent</option>
             <option>Family engagement</option>
+            <option>Late cancellation (attempted)</option>
+            <option>No show (attempted)</option>
             <option>Other</option>
           </select>
+        </div>
+        <div><label class="field-label">Date *</label><input id="se_date" type="date" class="field-input" required value="${new Date().toISOString().slice(0,10)}"></div>
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="field-label">Start time</label><input id="se_start" type="time" class="field-input"></div>
+          <div><label class="field-label">End time</label><input id="se_end" type="time" class="field-input"></div>
         </div>
         <div>
           <label class="field-label">Setting</label>
@@ -1070,7 +1074,10 @@ async function selectStudent(id) {
           </div>
         </div>
 
-        <div class="sm:col-span-2"><button type="submit" class="btn-primary">Save Session</button></div>
+        <div class="sm:col-span-2 flex gap-2">
+          <button type="submit" id="se_submit" class="btn-primary">Save Session</button>
+          <button type="button" id="se_cancel" class="btn-ghost hidden">Cancel edit</button>
+        </div>
       </form>
     </div>
 
@@ -1109,11 +1116,13 @@ async function selectStudent(id) {
   `;
 
   // session history
+  CUR_SESSIONS = sessions || [];
   $('sessionHistory').innerHTML = (sessions || []).map(x => `
     <div class="border rounded p-3 text-sm" style="border-color:var(--rule)">
       <div class="flex justify-between">
         <span class="font-semibold">${fmtDate(x.session_date)} · ${esc(x.session_type || '')}</span>
-        <span class="text-gray-500">${x.start_time && x.end_time ? esc(x.start_time) + '–' + esc(x.end_time) + ' · ' : ''}${hours(x.duration_minutes).toFixed(1)} hr · ${esc(x.setting || '')}${x.mentor_id ? ' · ' + esc(mentorName(x.mentor_id)) : ''}</span>
+        <span class="text-gray-500">${x.start_time && x.end_time ? esc(x.start_time) + '–' + esc(x.end_time) + ' · ' : ''}${hours(x.duration_minutes).toFixed(1)} hr · ${esc(x.setting || '')}${x.mentor_id ? ' · ' + esc(mentorName(x.mentor_id)) : ''}
+          ${(x.mentor_id === ME.id || ME.role === 'admin') ? `<button onclick="editSession('${x.id}')" class="btn-ghost text-xs ml-2" style="padding:2px 8px">Edit</button>` : ''}</span>
       </div>
       ${(x.absences_since_last != null || x.absence_reasons) ? `<div><span class="text-gray-400">Absences since last:</span> ${esc(x.absences_since_last != null ? String(x.absences_since_last) : '—')}${x.absence_reasons ? ' (' + esc(x.absence_reasons) + ')' : ''}</div>` : ''}
       ${x.topics ? `<div class="mt-1"><span class="text-gray-400">Topics:</span> ${esc(x.topics)}</div>` : ''}
@@ -1137,6 +1146,7 @@ async function selectStudent(id) {
 
   // wire forms
   $('sessionForm').addEventListener('submit', saveSession);
+  $('se_cancel').addEventListener('click', resetSessionForm);
   $('genPlanBtn').addEventListener('click', () => generatePlan(s, sessions || []));
   const regen = $('regenPlanBtn');
   if (regen) regen.addEventListener('click', () => { $('ip_input').value = intakeToInput(s.intake); generatePlan(s, sessions || []); });
@@ -1206,27 +1216,75 @@ function toggleMetrics() {
   if (block) block.classList.toggle('hidden', !isMetrics);
 }
 
-// ---------- Save session ----------
+// A "Late cancellation" / "No show" is a logged attempt with no session time.
+const ATTEMPTED_TYPES = ['Late cancellation (attempted)', 'No show (attempted)'];
+
+function resetSessionForm() {
+  const f = $('sessionForm'); if (f) f.reset();
+  if ($('se_id')) $('se_id').value = '';
+  if ($('se_date')) $('se_date').value = new Date().toISOString().slice(0, 10);
+  if ($('se_submit')) $('se_submit').textContent = 'Save Session';
+  if ($('se_cancel')) $('se_cancel').classList.add('hidden');
+  toggleMetrics();
+}
+
+// Populate the form to edit an existing session.
+function editSession(sessionId) {
+  const x = (CUR_SESSIONS || []).find(s => s.id === sessionId); if (!x) return;
+  $('se_id').value = x.id;
+  $('se_type').value = x.session_type || 'Student session';
+  $('se_date').value = x.session_date || '';
+  $('se_start').value = x.start_time || '';
+  $('se_end').value = x.end_time || '';
+  $('se_setting').value = x.setting || 'In-person';
+  $('se_absences').value = x.absences_since_last != null ? x.absences_since_last : '';
+  $('se_absreason').value = x.absence_reasons || '';
+  $('se_topics').value = x.topics || '';
+  $('se_notes').value = x.progress_notes || '';
+  $('se_concerns').value = x.concerns || '';
+  $('se_follow').value = x.follow_up || '';
+  toggleMetrics();
+  if (x.session_type === 'Metrics check') {
+    $('mx_truant').value = x.currently_truant || '';
+    $('mx_prior').value = x.truant_prior_month || '';
+    $('mx_court').value = x.referred_to_court || '';
+    $('mx_nolonger').value = x.no_longer_truant || '';
+    $('mx_grades').value = x.quarter_grades || '';
+    $('mx_discipline').value = x.discipline || '';
+  }
+  $('se_submit').textContent = 'Update Session';
+  $('se_cancel').classList.remove('hidden');
+  $('sessionForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+window.editSession = editSession;
+
+// ---------- Save session (insert or update) ----------
 async function saveSession(e) {
   e.preventDefault();
-  const btn = e.target.querySelector('button[type=submit]');
+  const btn = $('se_submit');
   btn.disabled = true;
-  const isMetrics = $('se_type').value === 'Metrics check';
-  // Require date + start/end time; compute duration from them.
+  const type = $('se_type').value;
+  const isMetrics = type === 'Metrics check';
+  const attempted = ATTEMPTED_TYPES.includes(type);
   const date = $('se_date').value, start = $('se_start').value, end = $('se_end').value;
-  if (!date || !start || !end) { toast('Date, start time, and end time are required', false); btn.disabled = false; return; }
-  const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-  const dur = toMin(end) - toMin(start);
-  if (dur <= 0) { toast('End time must be after start time', false); btn.disabled = false; return; }
+  if (!date) { toast('Date is required', false); btn.disabled = false; return; }
+  let dur = 0;
+  if (!attempted) {
+    // A real service requires start + end time.
+    if (!start || !end) { toast('Start time and end time are required', false); btn.disabled = false; return; }
+    const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    dur = toMin(end) - toMin(start);
+    if (dur <= 0) { toast('End time must be after start time', false); btn.disabled = false; return; }
+  }
   const payload = {
     student_id: SELECTED,
     mentor_id: ME.id,
     session_date: date,
-    start_time: start,
-    end_time: end,
+    start_time: attempted ? null : start,
+    end_time: attempted ? null : end,
     duration_minutes: dur,
     setting: $('se_setting').value,
-    session_type: $('se_type').value,
+    session_type: type,
     topics: $('se_topics').value.trim(),
     progress_notes: $('se_notes').value.trim(),
     concerns: $('se_concerns').value.trim(),
@@ -1240,10 +1298,14 @@ async function saveSession(e) {
     quarter_grades: isMetrics ? ($('mx_grades').value.trim() || null) : null,
     discipline: isMetrics ? ($('mx_discipline').value.trim() || null) : null
   };
-  const { error } = await sb.from('sessions').insert(payload);
+  const editingId = $('se_id').value;
+  const { error } = editingId
+    ? await sb.from('sessions').update(payload).eq('id', editingId)
+    : await sb.from('sessions').insert(payload);
   btn.disabled = false;
   if (error) { toast(error.message, false); return; }
-  toast(isMetrics ? 'Metrics check saved' : 'Session logged');
+  toast(editingId ? 'Session updated' : (isMetrics ? 'Metrics check saved' : (attempted ? 'Attempted service logged' : 'Session logged')));
+  resetSessionForm();
   selectStudent(SELECTED);
 }
 
