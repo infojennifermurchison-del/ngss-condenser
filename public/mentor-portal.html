@@ -2167,7 +2167,8 @@ async function computeMonthEnd(ym) {
     truantPrior: metrics.filter(m => m.truant_prior_month === 'Yes').length
   };
   const missing = active.filter(s => !latestMetrics[s.id]);
-  lastMonthEnd = { ym, num, latestMetrics, missing };
+  const autoCount = metrics.filter(m => m.auto_generated).length;
+  lastMonthEnd = { ym, num, latestMetrics, missing, autoCount };
   return lastMonthEnd;
 }
 
@@ -2194,8 +2195,13 @@ function renderMonthEnd(r) {
         The truancy numbers above won't count them until a mentor completes one:
         <div class="mt-1">${r.missing.map(s => esc(s.first_name + ' ' + s.last_name)).join(', ')}</div></div>`
     : `<div class="text-sm mt-3" style="color:#15803d">✓ Every active youth has a metrics check for ${esc(monthName)}.</div>`;
+  const autoHtml = r.autoCount
+    ? `<div class="rounded p-3 mt-2 text-sm" style="background:#FEF3C7;border:1px solid #FCD34D;color:#92400E">
+        <strong>🤖 ${r.autoCount} of these metrics checks were auto-generated from notes.</strong>
+        Review the ones marked <span class="badge" style="background:#FEF3C7;color:#92400E">AUTO — review</span> on each youth (Students → open youth → Edit the metrics check) before you submit these numbers.</div>`
+    : '';
   $('meResults').innerHTML = `<div class="text-sm font-semibold mb-2" style="color:var(--gray)">${esc(monthName)}</div>
-    <div class="grid sm:grid-cols-2 gap-2">${ME_LABELS.map(([k, l]) => card(l, v(k))).join('')}</div>${missingHtml}`;
+    <div class="grid sm:grid-cols-2 gap-2">${ME_LABELS.map(([k, l]) => card(l, v(k))).join('')}</div>${missingHtml}${autoHtml}`;
 }
 
 $('meRunBtn').addEventListener('click', async () => {
@@ -2226,6 +2232,7 @@ $('meExcelBtn').addEventListener('click', async () => {
     // Sheet 2: the metrics check behind each number
     const detail = Object.values(r.latestMetrics).map(m => ({
       'Student': sName(m.student_id), 'Mentor': mentorName(m.mentor_id) || '', 'Date': m.session_date,
+      'Source': m.auto_generated ? 'AUTO (review)' : 'Mentor',
       'Currently truant': m.currently_truant || '', 'Truant prior to month': m.truant_prior_month || '',
       'Referred to court': m.referred_to_court || '', 'No longer truant': m.no_longer_truant || '',
       'Grades / GPA': m.quarter_grades || '', 'Discipline': m.discipline || ''
