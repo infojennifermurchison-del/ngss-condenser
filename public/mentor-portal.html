@@ -524,7 +524,7 @@
           <h2 class="text-lg font-bold serif" style="color:var(--accent)">Monthly Narrative</h2>
           <button id="genNarrativeBtn" class="btn-primary">✨ Generate narrative</button>
         </div>
-        <p class="text-sm text-gray-500 mb-3">An AI summary of what was noticed with the students this month, written from the mentors' case notes. Uses the <strong>Report month</strong> selected above.</p>
+        <p class="text-sm text-gray-500 mb-3">An AI summary of what was noticed with the students this month, written from the mentors' case notes. <strong>De-identified</strong> — no youth names are used (they appear as "Youth 1", "Youth 2", …). Uses the <strong>Report month</strong> selected above.</p>
         <div id="narrativeBox" class="plan-body text-sm" style="white-space:pre-wrap"></div>
       </div>
 
@@ -2323,14 +2323,17 @@ $('genNarrativeBtn').addEventListener('click', async () => {
   try {
     const sessions = await fetchMonthSessions(ym);
     const monthName = new Date(ym + '-01T00:00:00').toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-    const byId = Object.fromEntries(STUDENTS.map(s => [s.id, s]));
+    // De-identify: replace every youth with an anonymous label; no real names are sent to the AI.
+    const labelById = {}; let n = 0;
     const notes = sessions
       .filter(x => x.progress_notes || x.concerns || x.topics)
-      .map(x => `- ${byId[x.student_id]?.first_name || 'Youth'} (${x.session_date}, ${x.session_type}): ${[x.topics, x.progress_notes, x.concerns && 'Concern: ' + x.concerns, x.follow_up && 'Follow-up: ' + x.follow_up].filter(Boolean).join('; ')}`)
-      .join('\n');
+      .map(x => {
+        if (!labelById[x.student_id]) labelById[x.student_id] = 'Youth ' + (++n);
+        return `- ${labelById[x.student_id]} (${x.session_date}, ${x.session_type}): ${[x.topics, x.progress_notes, x.concerns && 'Concern: ' + x.concerns, x.follow_up && 'Follow-up: ' + x.follow_up].filter(Boolean).join('; ')}`;
+      }).join('\n');
     if (!notes) { box.textContent = 'No case notes were logged for ' + monthName + '.'; return; }
-    const system = 'You are a youth-program coordinator writing a monthly program narrative for a truancy-prevention mentoring program. Write in clear, warm, professional prose suitable for a program report. Use youth first names. Never invent facts beyond the notes.';
-    const prompt = `From the mentors' case notes below for ${monthName}, write a program narrative titled "What we noticed this month." Cover: overall themes across the youth, notable progress and wins (name specific youth), emerging concerns or risks to watch, attendance/engagement patterns, and 2–3 recommendations for next month. 350–550 words, in paragraphs with short headers.\n\nCASE NOTES (${monthName}):\n${notes}`;
+    const system = 'You are a youth-program coordinator writing a monthly program narrative for a truancy-prevention mentoring program. Write in clear, warm, professional prose suitable for a program report. This is a DE-IDENTIFIED report: never use any real names or initials. Refer to youth only by the anonymous labels provided (e.g., "Youth 2") or generically ("one student", "several youth"). Never invent facts beyond the notes.';
+    const prompt = `From the mentors' case notes below for ${monthName}, write a program narrative titled "What we noticed this month." Cover: overall themes across the youth, notable progress and wins (reference specific youth by their anonymous label only, e.g. "Youth 3"), emerging concerns or risks to watch, attendance/engagement patterns, and 2–3 recommendations for next month. 350–550 words, in paragraphs with short headers. Do NOT use any real names.\n\nCASE NOTES (${monthName}):\n${notes}`;
     const resp = await fetch('/api/claude', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ system, messages: [{ role: 'user', content: prompt }], max_tokens: 2000 }) });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error || 'Generation failed');
