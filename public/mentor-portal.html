@@ -509,6 +509,23 @@
           </div>
           <div id="reminderStatus" class="text-xs mt-1" style="color:var(--gray)"></div>
         </div>
+        <div class="mt-4 pt-4 border-t" style="border-color:var(--rule)">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="text-sm pr-3"><strong>Auto-generate metrics</strong> — fills a metrics check from each youth's notes for anyone who doesn't have one this month (runs automatically on the last day; use this to run it now).</div>
+            <button id="genMetricsBtn" class="btn-ghost">🤖 Generate this month's metrics</button>
+          </div>
+          <div id="genMetricsStatus" class="text-xs mt-1" style="color:var(--gray)"></div>
+        </div>
+      </div>
+
+      <!-- Monthly Narrative -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-1">
+          <h2 class="text-lg font-bold serif" style="color:var(--accent)">Monthly Narrative</h2>
+          <button id="genNarrativeBtn" class="btn-primary">✨ Generate narrative</button>
+        </div>
+        <p class="text-sm text-gray-500 mb-3">An AI summary of what was noticed with the students this month, written from the mentors' case notes. Uses the <strong>Report month</strong> selected above.</p>
+        <div id="narrativeBox" class="plan-body text-sm" style="white-space:pre-wrap"></div>
       </div>
 
       <!-- Full data export -->
@@ -2208,7 +2225,7 @@ $('meRunBtn').addEventListener('click', async () => {
   const ym = $('meMonth').value;
   if (!ym) { toast('Pick a report month', false); return; }
   const btn = $('meRunBtn'); btn.disabled = true; btn.textContent = 'Generating…';
-  try { renderMonthEnd(await computeMonthEnd(ym)); }
+  try { renderMonthEnd(await computeMonthEnd(ym)); await loadNarrative(ym); }
   catch (e) { toast(e.message, false); }
   finally { btn.disabled = false; btn.textContent = 'Generate'; }
 });
@@ -2269,6 +2286,63 @@ $('sendRemindersBtn').addEventListener('click', async () => {
     toast('Reminders sent');
   } catch (e) { $('reminderStatus').textContent = e.message; toast(e.message, false); }
   finally { btn.disabled = false; btn.textContent = '✉ Send reminders now'; }
+});
+
+// ---------- Auto-generate this month's metrics on demand (admin) ----------
+$('genMetricsBtn').addEventListener('click', async () => {
+  if (DEMO) { toast('Runs in the live app', false); return; }
+  if (!confirm("Generate a metrics check from notes for every active youth who doesn't have one yet this month?")) return;
+  const btn = $('genMetricsBtn'); btn.disabled = true; btn.textContent = 'Generating…';
+  $('genMetricsStatus').textContent = 'Reading notes and drafting… this can take a minute.';
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const r = await fetch('/api/auto-metrics?force=1', { method: 'POST', headers: { Authorization: 'Bearer ' + (session?.access_token || '') } });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Failed');
+    $('genMetricsStatus').textContent = `Generated ${d.generated || 0} metrics check(s) for ${d.month || 'this month'} (${d.alreadyHad || 0} youth already had one).`;
+    toast('Metrics generated');
+    if ($('meMonth').value) renderMonthEnd(await computeMonthEnd($('meMonth').value));
+  } catch (e) { $('genMetricsStatus').textContent = e.message; toast(e.message, false); }
+  finally { btn.disabled = false; btn.textContent = "🤖 Generate this month's metrics"; }
+});
+
+// ---------- Monthly narrative (AI summary of the month's case notes) ----------
+async function loadNarrative(ym) {
+  const box = $('narrativeBox'); if (!box) return;
+  if (DEMO || !ym) { box.textContent = DEMO ? 'The monthly narrative is generated in the live app from real case notes.' : ''; return; }
+  const { data } = await sb.from('monthly_narratives').select('content').eq('month', ym);
+  box.textContent = (data && data[0]) ? data[0].content : '(No narrative yet for this month — click “Generate narrative”.)';
+}
+
+$('genNarrativeBtn').addEventListener('click', async () => {
+  const ym = $('meMonth').value;
+  if (!ym) { toast('Pick a report month first', false); return; }
+  if (DEMO) { toast('Runs in the live app', false); return; }
+  const btn = $('genNarrativeBtn'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Writing…';
+  const box = $('narrativeBox'); box.textContent = 'Reading the month’s case notes…';
+  try {
+    const sessions = await fetchMonthSessions(ym);
+    const monthName = new Date(ym + '-01T00:00:00').toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    const byId = Object.fromEntries(STUDENTS.map(s => [s.id, s]));
+    const notes = sessions
+      .filter(x => x.progress_notes || x.concerns || x.topics)
+      .map(x => `- ${byId[x.student_id]?.first_name || 'Youth'} (${x.session_date}, ${x.session_type}): ${[x.topics, x.progress_notes, x.concerns && 'Concern: ' + x.concerns, x.follow_up && 'Follow-up: ' + x.follow_up].filter(Boolean).join('; ')}`)
+      .join('\n');
+    if (!notes) { box.textContent = 'No case notes were logged for ' + monthName + '.'; return; }
+    const system = 'You are a youth-program coordinator writing a monthly program narrative for a truancy-prevention mentoring program. Write in clear, warm, professional prose suitable for a program report. Use youth first names. Never invent facts beyond the notes.';
+    const prompt = `From the mentors' case notes below for ${monthName}, write a program narrative titled "What we noticed this month." Cover: overall themes across the youth, notable progress and wins (name specific youth), emerging concerns or risks to watch, attendance/engagement patterns, and 2–3 recommendations for next month. 350–550 words, in paragraphs with short headers.\n\nCASE NOTES (${monthName}):\n${notes}`;
+    const resp = await fetch('/api/claude', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ system, messages: [{ role: 'user', content: prompt }], max_tokens: 2000 }) });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Generation failed');
+    const text = (data.content || []).map(b => b.text || '').join('\n').trim();
+    box.textContent = text;
+    // save (upsert by month)
+    const { data: existing } = await sb.from('monthly_narratives').select('id').eq('month', ym);
+    if (existing && existing[0]) await sb.from('monthly_narratives').update({ content: text, created_by: ME.id }).eq('month', ym);
+    else await sb.from('monthly_narratives').insert({ month: ym, content: text, created_by: ME.id });
+    toast('Narrative generated and saved');
+  } catch (e) { box.textContent = e.message; toast(e.message, false); }
+  finally { btn.disabled = false; btn.innerHTML = '✨ Generate narrative'; }
 });
 </script>
 </body>

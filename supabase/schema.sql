@@ -256,6 +256,22 @@ drop policy if exists plans_delete on public.intervention_plans;
 create policy plans_delete on public.intervention_plans
   for delete using (auth.uid() = created_by or public.is_admin());
 
+-- ---------------------------------------------------------------------------
+-- MONTHLY NARRATIVES  (AI summary of the month's case notes, one per month)
+-- ---------------------------------------------------------------------------
+create table if not exists public.monthly_narratives (
+  id          uuid primary key default gen_random_uuid(),
+  month       text not null unique,   -- 'YYYY-MM'
+  content     text not null,
+  created_by  uuid references public.profiles (id) on delete set null,
+  created_at  timestamptz not null default now()
+);
+alter table public.monthly_narratives enable row level security;
+drop policy if exists mn_select on public.monthly_narratives;
+create policy mn_select on public.monthly_narratives for select using (auth.role() = 'authenticated');
+drop policy if exists mn_admin on public.monthly_narratives;
+create policy mn_admin on public.monthly_narratives for all using (public.is_admin()) with check (public.is_admin());
+
 -- =============================================================================
 -- STORAGE — student file attachments (intervention-plan PDFs + uploaded documents)
 -- =============================================================================
