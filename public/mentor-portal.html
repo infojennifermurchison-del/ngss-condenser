@@ -344,7 +344,9 @@
                 </div>
               </div>
               <div><label class="field-label">Staff completing intake</label><input data-f="intake_meta.staff_name" class="field-input"></div>
-              <div><label class="field-label">Date</label><input type="date" data-f="intake_meta.date" class="field-input"></div>
+              <div><label class="field-label">Intake date</label><input type="date" data-f="intake_meta.date" class="field-input"></div>
+              <div><label class="field-label">Intake start time</label><input type="time" data-f="intake_meta.start_time" class="field-input"></div>
+              <div><label class="field-label">Intake end time</label><input type="time" data-f="intake_meta.end_time" class="field-input"></div>
             </div>
           </details>
 
@@ -357,6 +359,7 @@
 
               <div>
                 <div class="field-label">Form B — Program Consent &amp; Voluntary Participation</div>
+                <div class="text-xs p-2 rounded mb-2" style="background:#EEF6FF;border-left:4px solid var(--accent)"><strong>📢 Read aloud to the parent/guardian:</strong> “This program gives your child mentoring and counseling support to help with school attendance. A mentor or counselor will meet with your child regularly during pull-out sessions, and sometimes at home, with an individual plan and at least two contacts a week. Taking part is completely voluntary — you may decline, skip any activity, or stop at any time, and it will not affect your child's standing at school. What we discuss is kept private, except when the law requires us to report suspected abuse or neglect, when someone is in serious danger, or when a court orders records. Do you understand and agree to your child taking part?”</div>
                 <div class="grid sm:grid-cols-2 gap-1 text-sm">
                   <label class="flex gap-2 items-center"><input type="checkbox" data-f="consentB.init_enroll">Initialed: consent to enrollment/participation</label>
                   <label class="flex gap-2 items-center"><input type="checkbox" data-f="consentB.init_pullout">Initialed: understands pull-out sessions / home visits</label>
@@ -382,6 +385,7 @@
 
               <div>
                 <div class="field-label">Form C — FERPA Records Release</div>
+                <div class="text-xs p-2 rounded mb-2" style="background:#EEF6FF;border-left:4px solid var(--accent)"><strong>📢 Read aloud to the parent/guardian:</strong> “To support your child, we're asking your permission for the school to share your child's records with the program — such as attendance, grades, discipline, and behavior or counseling records related to the program. This is the only way the school can legally share those records with us, they are used only to deliver and report on services, and you may cancel this permission in writing at any time. Do you give permission for the school to share these records with our program?”</div>
                 <div class="grid sm:grid-cols-2 gap-1 text-sm">
                   <label class="flex gap-2 items-center"><input type="checkbox" data-multi="consentC.records" value="Attendance records">Attendance records</label>
                   <label class="flex gap-2 items-center"><input type="checkbox" data-multi="consentC.records" value="Disciplinary records">Disciplinary records</label>
@@ -409,6 +413,7 @@
 
               <div>
                 <div class="field-label">Form D — Photography / Media (optional)</div>
+                <div class="text-xs p-2 rounded mb-2" style="background:#EEF6FF;border-left:4px solid var(--accent)"><strong>📢 Read aloud to the parent/guardian:</strong> “This part is optional, and your child can fully take part either way. Sometimes we take photos or video during activities, or partner with community groups for events and rewards. You can allow this for public and program use, allow it for our internal records only, or not allow it at all — and you can change your mind in writing at any time. Which would you prefer?”</div>
                 <select data-f="consentD.permission" class="field-input">
                   <option value="">— Select —</option>
                   <option>GRANT — full (documentation, reporting & promotional)</option>
@@ -434,6 +439,7 @@
 
               <div>
                 <div class="field-label">Form E — Authorization to Release Student from Class</div>
+                <div class="text-xs p-2 rounded mb-2" style="background:#EEF6FF;border-left:4px solid var(--accent)"><strong>📢 Read aloud to the parent/guardian:</strong> “Some sessions happen during the school day. This gives permission for your child to be taken out of class — <strong>not out of the building</strong> — for a short session, usually about 30 minutes, and then brought right back to class. The assigned mentor is the only person who will pull your child from class, and your child never leaves campus. Once you approve, we will send you a letter you can give the school so the mentor is listed on your child's registration card as allowed to take them out of class but not off campus. Do you give permission for your child to be released from class for these sessions?”</div>
                 <div class="grid sm:grid-cols-2 gap-3">
                   <div><label class="field-label">Authorized?</label><select data-f="consentE.authorized" class="field-input"><option value="">—</option><option>Yes</option><option>No</option></select></div>
                   <div><label class="field-label">Preferred time (optional)</label><input data-f="consentE.time" class="field-input"></div>
@@ -1034,6 +1040,7 @@ async function selectStudent(id) {
           <div class="text-xs text-gray-400 uppercase tracking-wide">Contact hrs</div>
           <div class="text-xs text-gray-400 mt-1">${(sessions || []).length} sessions</div>
           ${ME.role === 'admin' ? `<button onclick="editStudent('${s.id}')" class="btn-ghost mt-2 text-xs">Edit student</button>` : ''}
+          ${ME.role === 'admin' && isDupStudent(s) ? `<button onclick="deleteDupStudent('${s.id}')" class="btn-ghost mt-2 text-xs" style="color:#B42318" title="Another record has the same name">🗑 Delete duplicate</button>` : ''}
         </div>
       </div>
       ${s.background ? `<p class="text-sm mt-3 pt-3 border-t" style="border-color:var(--rule)">${esc(s.background)}</p>` : ''}
@@ -1132,14 +1139,17 @@ async function selectStudent(id) {
     </div>
   `;
 
-  // session history
+  // session history — flag exact duplicates (same date/type/time/notes) so they can be removed
   CUR_SESSIONS = sessions || [];
+  const sDupKey = (x) => [x.session_date, x.session_type, x.start_time, x.end_time, x.duration_minutes, (x.progress_notes || '').slice(0, 60)].join('|');
+  const sDupCount = {};
+  (sessions || []).forEach(x => { const k = sDupKey(x); sDupCount[k] = (sDupCount[k] || 0) + 1; });
   $('sessionHistory').innerHTML = (sessions || []).map(x => `
     <div class="border rounded p-3 text-sm" style="border-color:var(--rule)">
       <div class="flex justify-between">
         <span class="font-semibold">${fmtDate(x.session_date)} · ${esc(x.session_type || '')}</span>
         <span class="text-gray-500">${x.start_time && x.end_time ? esc(x.start_time) + '–' + esc(x.end_time) + ' · ' : ''}${hours(x.duration_minutes).toFixed(1)} hr · ${esc(x.setting || '')}${x.mentor_id ? ' · ' + esc(mentorName(x.mentor_id)) : ''}
-          ${(x.mentor_id === ME.id || ME.role === 'admin') ? `<button onclick="editSession('${x.id}')" class="btn-ghost text-xs ml-2" style="padding:2px 8px">Edit</button>` : ''}</span>
+          ${(x.mentor_id === ME.id || ME.role === 'admin') ? `<button onclick="editSession('${x.id}')" class="btn-ghost text-xs ml-2" style="padding:2px 8px">Edit</button>` : ''}${(sDupCount[sDupKey(x)] > 1 && (x.mentor_id === ME.id || ME.role === 'admin')) ? `<button onclick="deleteSession('${x.id}')" class="btn-ghost text-xs ml-1" style="padding:2px 8px;color:#b91c1c">Delete duplicate</button>` : ''}</span>
       </div>
       ${(x.absences_since_last != null || x.absence_reasons) ? `<div><span class="text-gray-400">Absences since last:</span> ${esc(x.absences_since_last != null ? String(x.absences_since_last) : '—')}${x.absence_reasons ? ' (' + esc(x.absence_reasons) + ')' : ''}</div>` : ''}
       ${x.topics ? `<div class="mt-1"><span class="text-gray-400">Topics:</span> ${esc(x.topics)}</div>` : ''}
@@ -1274,6 +1284,37 @@ function editSession(sessionId) {
   $('sessionForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 window.editSession = editSession;
+
+// A student record is a "duplicate" if another record has the same first + last name.
+function isDupStudent(s) {
+  return STUDENTS.some(o => o.id !== s.id &&
+    (o.first_name || '').trim().toLowerCase() === (s.first_name || '').trim().toLowerCase() &&
+    (o.last_name || '').trim().toLowerCase() === (s.last_name || '').trim().toLowerCase());
+}
+// Delete a student/intake — only offered on duplicates (admin only via RLS).
+async function deleteDupStudent(id) {
+  if (DEMO) { toast('Runs in the live app', false); return; }
+  if (!confirm('Delete this duplicate intake/student record? This also removes its sessions and plans and cannot be undone.')) return;
+  const { error } = await sb.from('students').delete().eq('id', id);
+  if (error) { toast(error.message, false); return; }
+  toast('Duplicate record deleted');
+  SELECTED = null;
+  await loadStudents();
+  if (!$('tab-approvals').classList.contains('hidden')) loadApprovals();
+  else { $('studentDetail').classList.add('hidden'); $('noStudentSelected').classList.remove('hidden'); }
+}
+window.deleteDupStudent = deleteDupStudent;
+
+// Delete a session — only offered on exact duplicates.
+async function deleteSession(id) {
+  if (DEMO) { toast('Runs in the live app', false); return; }
+  if (!confirm('Delete this duplicate session? This cannot be undone.')) return;
+  const { error } = await sb.from('sessions').delete().eq('id', id);
+  if (error) { toast(error.message, false); return; }
+  toast('Duplicate deleted');
+  selectStudent(SELECTED);
+}
+window.deleteSession = deleteSession;
 
 // ---------- Save session (insert or update) ----------
 async function saveSession(e) {
@@ -1481,6 +1522,119 @@ async function attachPlanPdf(student) {
     const { error } = await uploadStudentFile(student.id, `intervention-plan-${stamp}.pdf`, blob, 'application/pdf');
     if (error && !/already exists/i.test(error.message)) console.error('plan upload:', error.message);
   } catch (e) { console.error('attachPlanPdf:', e); }
+}
+
+// ---------- School authorization letter (sent to the parent on approval) ----------
+// A letter on Murchison Consulting Group letterhead the parent gives to the school so the
+// assigned mentor is added to the student's registration card as authorized to take the
+// student OUT OF CLASS (not off campus) for short mentoring sessions.
+function schoolLetterPdfBlob(student, mentorNameStr) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight();
+  const margin = 60, width = pageW - margin * 2;
+  const i = student.intake || {};
+  const school = i.school || {}, guardian = i.guardian || {};
+  const studentName = `${student.first_name || ''} ${student.last_name || ''}`.trim();
+  const grade = student.grade || i.a?.grade || '';
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Letterhead band
+  doc.setFillColor(21, 40, 76); doc.rect(0, 0, pageW, 84, 'F');
+  doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(15);
+  doc.text('MURCHISON CONSULTING GROUP, LLC', margin, 34);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(233, 118, 37);
+  doc.text('Safe Schools, Safer Families Truancy Program  ·  “Attendance Matters”', margin, 52);
+  doc.setTextColor(210, 220, 235); doc.setFontSize(8);
+  doc.text('14150 Huffmeister Road, Suite 200, Cypress, TX 77429   ·   832-684-6697   ·   truancyproject@bookmcg.com', margin, 68);
+
+  let y = 118;
+  doc.setTextColor(26, 35, 53); doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5);
+  const line = (txt, opt = {}) => {
+    doc.setFont('helvetica', opt.bold ? 'bold' : 'normal');
+    doc.setFontSize(opt.size || 10.5);
+    for (const w of doc.splitTextToSize(txt, width)) {
+      if (y > pageH - margin) { doc.addPage(); y = margin; }
+      doc.text(w, margin, y); y += (opt.lh || 15);
+    }
+  };
+  const gap = (h) => { y += h; };
+
+  line(today); gap(8);
+  line('To: School Registrar / Front Office', { bold: true });
+  if (school.campus) line(school.campus + (school.district ? ', ' + school.district : ''));
+  gap(10);
+  line(`Re: Authorization to release ${studentName || 'the student'}${grade ? ', Grade ' + grade : ''} from class for scheduled mentoring sessions`, { bold: true });
+  gap(10);
+  line('To Whom It May Concern:'); gap(8);
+  line(`${studentName || 'The above-named student'} is enrolled in the Safe Schools, Safer Families Truancy Program (“Attendance Matters”), a mentoring and counseling program operated by Murchison Consulting Group, LLC in partnership with the City of Houston (Contract INF-2026-0147).`);
+  gap(6);
+  line(`The parent/guardian${guardian.name ? ', ' + guardian.name + ',' : ''} has enrolled the student in the program and has authorized the assigned program mentor below to take the student out of class for short mentoring sessions (typically about 30 minutes) and return the student to class immediately afterward.`);
+  gap(6);
+  line('Please add the following individual to the student’s registration card as a person authorized to take the student OUT OF CLASS — but NOT off campus or out of school:', { bold: true });
+  gap(6);
+  doc.setFillColor(238, 246, 255); doc.setDrawColor(233, 118, 37);
+  const boxY = y - 4; doc.rect(margin, boxY, width, 34, 'FD');
+  doc.setTextColor(21, 40, 76); doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+  doc.text(`Assigned Program Mentor:  ${mentorNameStr || '(assigned mentor)'}`, margin + 12, y + 16);
+  doc.setTextColor(26, 35, 53); y = boxY + 34 + 14;
+  line('The student will remain on campus at all times and will not be released from the building to this individual. This authorization applies only to removal from class for program sessions.');
+  gap(6);
+  line('Thank you for supporting this student’s success. Please contact us at 832-684-6697 or truancyproject@bookmcg.com with any questions.');
+  gap(24);
+  line('Sincerely,'); gap(6);
+  line('Murchison Consulting Group, LLC', { bold: true });
+  line('Safe Schools, Safer Families Truancy Program');
+  gap(30);
+
+  // Parent signature block
+  doc.setDrawColor(150, 160, 175);
+  doc.line(margin, y, margin + 240, y);
+  doc.line(margin + 280, y, margin + 280 + 150, y);
+  y += 13;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90, 100, 115);
+  doc.text('Parent / Guardian signature', margin, y);
+  doc.text('Date', margin + 280, y);
+
+  doc.setFontSize(8); doc.setTextColor(150, 160, 175);
+  doc.text('Confidential — contains education records (FERPA). Give this letter to your child’s school.', margin, pageH - 30);
+  return doc.output('blob');
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onloadend = () => resolve(String(r.result).split(',')[1] || '');
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
+
+// On approval: build the school letter, attach it to the student's file, and email it to
+// the parent so they can hand it to the school. Best-effort — never blocks approval.
+async function sendSchoolLetter(student, mentorNameStr) {
+  if (DEMO) return { skipped: true };
+  try {
+    const blob = schoolLetterPdfBlob(student, mentorNameStr);
+    const stamp = new Date().toISOString().slice(0, 10);
+    const filename = `school-authorization-letter-${stamp}.pdf`;
+    await uploadStudentFile(student.id, filename, blob, 'application/pdf');
+    const guardianEmail = student.intake?.guardian?.email || '';
+    if (!guardianEmail) return { attached: true, emailed: false, reason: 'no guardian email on intake' };
+    const b64 = await blobToBase64(blob);
+    const { data: { session } } = await sb.auth.getSession();
+    const r = await fetch('/api/school-letter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (session?.access_token || '') },
+      body: JSON.stringify({
+        to: guardianEmail,
+        first_name: student.first_name || '',
+        guardian_name: student.intake?.guardian?.name || '',
+        filename, pdf_base64: b64
+      })
+    });
+    return await r.json().catch(() => ({}));
+  } catch (e) { console.error('sendSchoolLetter:', e); return { error: e.message }; }
 }
 
 // Build the "presenting concerns" input string straight from a student's intake.
@@ -1728,7 +1882,10 @@ function approvalCard(s) {
         <div class="font-bold serif text-lg" style="color:var(--accent)">${esc(s.first_name)} ${esc(s.last_name)}</div>
         <div class="text-xs text-gray-500">${esc(s.grade ? 'Grade ' + s.grade : '')}${s.grade && s.school ? ' · ' : ''}${esc(s.school || '')} · submitted ${fmtDate((s.intake_completed_at||s.created_at||'').slice(0,10))}</div>
       </div>
-      <button onclick="printIntake('${s.id}')" class="btn-ghost shrink-0">🖨 Print</button>
+      <div class="flex gap-2 shrink-0">
+        <button onclick="printIntake('${s.id}')" class="btn-ghost shrink-0">🖨 Print</button>
+        ${isDupStudent(s) ? `<button onclick="deleteDupStudent('${s.id}')" class="btn-ghost shrink-0" style="color:#B42318" title="Another intake has the same name">🗑 Delete duplicate</button>` : ''}
+      </div>
     </div>
     ${intakeSummaryHTML(s)}
     <div class="mt-3 pt-3 border-t" style="border-color:var(--rule)">
@@ -1767,8 +1924,13 @@ async function decideStudent(id, status) {
       program_status: 'active', assigned_mentor: mentorId, assigned_mentor_2: mentorId2, approved_by: ME.id, approved_at: new Date().toISOString()
     }).eq('id', id);
     if (error) { toast(error.message, false); return; }
-    toast('Approved — attaching plan…');
-    if (student) await attachPlanPdf(student);
+    toast('Approved — attaching plan & school letter…');
+    if (student) {
+      await attachPlanPdf(student);
+      const res = await sendSchoolLetter(student, mentorName(mentorId));
+      if (res && res.emailed) toast('School letter emailed to the parent');
+      else if (res && res.attached) toast('School letter saved to student file — email it to the parent manually', false);
+    }
     toast('Approved for service');
   } else {
     const { error } = await sb.from('students').update({ program_status: 'declined' }).eq('id', id);
