@@ -23,7 +23,7 @@ function esc(s) {
 function wrapHtml(subject, body) {
   const paras = String(body || '').split(/\n{2,}/).map(p => `<p style="margin:0 0 12px">${esc(p).replace(/\n/g, '<br>')}</p>`).join('');
   return `<div style="font-family:Arial,sans-serif;color:#1A2335;font-size:14px;line-height:1.5">
-    <div style="background:#15284C;color:#fff;padding:12px 16px;font-weight:bold">Attendance Matters${subject ? ' — ' + esc(subject) : ''}</div>
+    <div style="background:#15284C;color:#fff;padding:12px 16px;font-weight:bold">Safe Schools, Safer Families Truancy Program${subject ? ' — ' + esc(subject) : ''}</div>
     <div style="padding:16px">${paras}</div>
     <div style="padding:12px 16px;border-top:1px solid #E0E0E0;color:#5A6473;font-size:12px">
       Murchison Consulting Group, LLC · Safe Schools, Safer Families Truancy Program<br>
@@ -65,9 +65,11 @@ export default async function handler(req, res) {
       await Promise.all(chunk.map(async (m) => {
         const to = String(m.to || '').trim();
         if (!EMAIL_RE.test(to)) { failed.push({ to, reason: 'invalid email' }); return; }
-        const cc = Array.isArray(m.cc) ? [...new Set(m.cc.map(x => String(x || '').trim()))].filter(x => EMAIL_RE.test(x) && x !== to) : [];
+        // Always CC the program inbox (plus any caller-supplied CCs, e.g. the mentor).
+        const cc = [...new Set([...(Array.isArray(m.cc) ? m.cc : []), PROGRAM_EMAIL].map(x => String(x || '').trim()))]
+          .filter(x => EMAIL_RE.test(x) && x !== to);
         const payload = {
-          from: FROM, to: [to], subject: subject || 'A message from Attendance Matters',
+          from: FROM, to: [to], subject: subject || 'A message from the Safe Schools, Safer Families Truancy Program',
           html, reply_to: PROGRAM_EMAIL
         };
         if (cc.length) payload.cc = cc;

@@ -39,10 +39,10 @@ export default async function handler(req, res) {
     const greeting = guardian_name ? String(guardian_name).slice(0, 80) : 'Parent/Guardian';
     const child = first_name ? String(first_name).slice(0, 60) : 'your child';
     const html = `<div style="font-family:Arial,sans-serif;color:#1A2335;font-size:14px">
-      <div style="background:#15284C;color:#fff;padding:12px 16px;font-weight:bold">Attendance Matters — School Authorization Letter</div>
+      <div style="background:#15284C;color:#fff;padding:12px 16px;font-weight:bold">Safe Schools, Safer Families Truancy Program — School Authorization Letter</div>
       <div style="padding:16px">
         <p>Dear ${greeting},</p>
-        <p>Thank you for enrolling ${child} in the Safe Schools, Safer Families Truancy Program (“Attendance Matters”).</p>
+        <p>Thank you for enrolling ${child} in the Safe Schools, Safer Families Truancy Program.</p>
         <p>Attached is a letter you can give directly to your child's school. It asks the school to add your child's assigned mentor to the registration card as someone authorized to take your child <strong>out of class — but not out of school</strong> — for short mentoring sessions.</p>
         <p><strong>What to do:</strong> Print the attached letter, sign and date it at the bottom, and give it to your child's front office or registrar.</p>
         <p>Questions? Call us at 832-684-6697 or reply to this email.</p>
@@ -58,7 +58,7 @@ export default async function handler(req, res) {
         to: [to],
         cc: [PROGRAM_EMAIL],          // program keeps a copy of every letter sent
         reply_to: PROGRAM_EMAIL,      // parent replies go to the program inbox
-        subject: 'Your child’s school authorization letter — Attendance Matters',
+        subject: 'Your child’s school authorization letter — Safe Schools, Safer Families Truancy Program',
         html,
         attachments: [{ filename: filename || 'school-authorization-letter.pdf', content: pdf_base64 }]
       })
