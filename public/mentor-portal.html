@@ -159,6 +159,7 @@
             <span id="studentCount" class="text-xs text-gray-400"></span>
           </div>
           <input id="studentSearch" class="field-input mb-2" placeholder="Search by name…" />
+          <div id="rosterTools" class="flex flex-wrap gap-2 mb-2"></div>
           <div id="studentList" class="card divide-y overflow-y-auto" style="max-height:70vh; border-color:var(--rule)"></div>
         </div>
 
@@ -991,11 +992,27 @@ function mentorName(id) {
   return m ? (m.full_name || '(unnamed)') : '';
 }
 
+// Guardian contact details, pulling from the intake first, then the manual guardian_contact field.
+function guardianEmail(s) {
+  const e = s.intake?.guardian?.email;
+  if (e) return e.trim();
+  return /@/.test(s.guardian_contact || '') ? (s.guardian_contact || '').trim() : '';
+}
+function guardianPhone(s) {
+  const p = s.intake?.guardian?.mobile;
+  if (p) return p.trim();
+  return (s.guardian_contact && !/@/.test(s.guardian_contact)) ? s.guardian_contact.trim() : '';
+}
+function activeStudents() {
+  return STUDENTS.filter(s => s.program_status === 'active');
+}
+
 function renderStudentList() {
   const q = ($('studentSearch').value || '').toLowerCase();
   const list = caseloadStudents().filter(s =>
     (s.first_name + ' ' + s.last_name).toLowerCase().includes(q));
-  $('studentCount').textContent = list.length + ' shown';
+  const activeCount = list.filter(s => s.program_status === 'active').length;
+  $('studentCount').textContent = activeCount + ' active' + (list.length !== activeCount ? ' · ' + list.length + ' shown' : '');
   $('studentList').innerHTML = list.map(s => `
     <div class="p-3 cursor-pointer row-hover ${s.id === SELECTED ? 'bg-[color:var(--accent-soft)]' : ''}" data-id="${s.id}">
       <div class="font-semibold text-sm">${esc(s.last_name)}, ${esc(s.first_name)}</div>
@@ -1004,8 +1021,79 @@ function renderStudentList() {
     </div>`).join('') || '<div class="p-4 text-sm text-gray-400">No students yet.</div>';
   $('studentList').querySelectorAll('[data-id]').forEach(el =>
     el.addEventListener('click', () => selectStudent(el.dataset.id)));
+  renderRosterTools();
 }
 $('studentSearch').addEventListener('input', renderStudentList);
+
+// Toolbar above the student list: roster download + one-click contact of every active parent.
+function renderRosterTools() {
+  const el = $('rosterTools');
+  if (!el) return;
+  const active = activeStudents();
+  const emails = active.map(guardianEmail).filter(Boolean);
+  const phones = active.map(guardianPhone).filter(Boolean);
+  el.innerHTML = `
+    <button onclick="downloadRoster()" class="btn-ghost text-xs" title="Excel roster of all active students and parent contacts">⬇ Download roster</button>
+    <button onclick="emailParents()" class="btn-ghost text-xs" ${emails.length ? '' : 'disabled style="opacity:.5"'} title="Opens your email with all active parents on BCC">✉ Email parents${emails.length ? ' (' + emails.length + ')' : ''}</button>
+    <button onclick="textParents()" class="btn-ghost text-xs" ${phones.length ? '' : 'disabled style="opacity:.5"'} title="Copy every active parent's phone number for a group text">💬 Text parents${phones.length ? ' (' + phones.length + ')' : ''}</button>`;
+}
+
+// Download an Excel roster of all ACTIVE students with parent contact details.
+function downloadRoster() {
+  const active = activeStudents();
+  if (!active.length) { toast('No active students to include', false); return; }
+  const rows = active.map(s => ({
+    'Last name': s.last_name || '',
+    'First name': s.first_name || '',
+    'Grade': s.grade || '',
+    'School': s.school || s.intake?.school?.campus || '',
+    'Status': s.program_status,
+    'Guardian': s.guardian_name || s.intake?.guardian?.name || '',
+    'Guardian email': guardianEmail(s),
+    'Guardian phone': guardianPhone(s),
+    'Assigned mentor': mentorName(s.assigned_mentor),
+    '2nd mentor': mentorName(s.assigned_mentor_2),
+    'Date of birth': s.date_of_birth || ''
+  }));
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{ wch: 14 }, { wch: 14 }, { wch: 6 }, { wch: 18 }, { wch: 9 }, { wch: 20 }, { wch: 26 }, { wch: 16 }, { wch: 18 }, { wch: 18 }, { wch: 12 }];
+  XLSX.utils.book_append_sheet(wb, ws, 'Active Roster');
+  const stamp = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `attendance-matters-roster-${stamp}.xlsx`);
+  toast(`Roster downloaded (${active.length} active students)`);
+}
+window.downloadRoster = downloadRoster;
+
+// Email every active parent at once — opens the admin's mail client with parents on BCC
+// (so no parent sees another's address). The admin writes the message and sends it.
+function emailParents() {
+  const emails = [...new Set(activeStudents().map(guardianEmail).filter(Boolean))];
+  if (!emails.length) { toast('No parent emails on file for active students', false); return; }
+  const missing = activeStudents().length - emails.length;
+  const subject = encodeURIComponent('A message from Attendance Matters');
+  const link = `mailto:?bcc=${encodeURIComponent(emails.join(','))}&subject=${subject}`;
+  window.location.href = link;
+  toast(`Opening your email to ${emails.length} parent${emails.length === 1 ? '' : 's'}${missing ? ` · ${missing} active student(s) have no email on file` : ''}`);
+}
+window.emailParents = emailParents;
+
+// Text every active parent — copies all phone numbers so the admin can paste them into a
+// new group text (in-app SMS sending would require a texting service like Twilio).
+async function textParents() {
+  const phones = [...new Set(activeStudents().map(guardianPhone).filter(Boolean))];
+  if (!phones.length) { toast('No parent phone numbers on file for active students', false); return; }
+  const missing = activeStudents().length - phones.length;
+  const text = phones.join(', ');
+  try {
+    await navigator.clipboard.writeText(text);
+    toast(`Copied ${phones.length} phone number${phones.length === 1 ? '' : 's'} — paste into a new group text${missing ? ` · ${missing} active student(s) have no phone on file` : ''}`);
+  } catch (e) {
+    // Clipboard blocked — fall back to a prompt the admin can copy from.
+    window.prompt('Copy these parent phone numbers for a group text:', text);
+  }
+}
+window.textParents = textParents;
 
 async function selectStudent(id) {
   SELECTED = id;
