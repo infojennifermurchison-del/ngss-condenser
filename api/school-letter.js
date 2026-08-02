@@ -49,12 +49,15 @@ export default async function handler(req, res) {
         <p style="color:#5A6473;font-size:12px">Murchison Consulting Group, LLC · Safe Schools, Safer Families Truancy Program<br>14150 Huffmeister Road, Suite 200, Cypress, TX 77429</p>
       </div></div>`;
 
+    const PROGRAM_EMAIL = 'truancyproject@bookmcg.com';
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${RESEND}` },
       body: JSON.stringify({
         from: FROM,
         to: [to],
+        cc: [PROGRAM_EMAIL],          // program keeps a copy of every letter sent
+        reply_to: PROGRAM_EMAIL,      // parent replies go to the program inbox
         subject: 'Your child’s school authorization letter — Attendance Matters',
         html,
         attachments: [{ filename: filename || 'school-authorization-letter.pdf', content: pdf_base64 }]
