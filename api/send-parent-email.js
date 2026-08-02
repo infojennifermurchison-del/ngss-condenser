@@ -36,7 +36,8 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
     if (!URL_ || !SERVICE || !RESEND || !FROM || !ANON) return res.status(500).json({ error: 'Missing environment variables.' });
 
-    // Verify the caller is a signed-in admin.
+    // Verify the caller is signed-in staff. Emailing ONE guardian is open to any mentor
+    // or admin; a BULK send (more than one recipient) is restricted to admins.
     const auth = req.headers.authorization || '';
     if (!auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Unauthorized.' });
     const ur = await fetch(`${URL_}/auth/v1/user`, { headers: { apikey: ANON, Authorization: auth } });
@@ -46,11 +47,14 @@ export default async function handler(req, res) {
       headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }
     });
     const prof = await pr.json();
-    if (!Array.isArray(prof) || prof[0]?.role !== 'admin') return res.status(403).json({ error: 'Admins only.' });
+    const role = Array.isArray(prof) && prof[0] ? prof[0].role : null;
+    if (!role) return res.status(403).json({ error: 'No staff profile for this account.' });
 
     const { subject, body, messages } = req.body || {};
     if (!body || !Array.isArray(messages) || !messages.length) return res.status(400).json({ error: 'Nothing to send.' });
     if (messages.length > 300) return res.status(400).json({ error: 'Too many recipients in one send.' });
+    // Only admins may send to more than one guardian at a time.
+    if (messages.length > 1 && role !== 'admin') return res.status(403).json({ error: 'Only an admin can email all parents at once.' });
 
     const html = wrapHtml(subject, body);
     let sent = 0; const failed = [];
