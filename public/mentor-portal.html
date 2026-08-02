@@ -1055,6 +1055,7 @@ function renderRosterTools() {
   el.innerHTML = `
     <button onclick="downloadRoster()" class="btn-ghost text-xs" title="Excel roster of all active students and parent contacts">⬇ Download roster</button>
     ${ME.role === 'admin' ? `<button onclick="emailParents()" class="btn-ghost text-xs" ${emails.length ? '' : 'disabled style="opacity:.5"'} title="Email every active parent through Attendance Matters">✉ Email parents${emails.length ? ' (' + emails.length + ')' : ''}</button>` : ''}
+    ${ME.role === 'admin' ? `<button onclick="schoolLettersAllActive()" class="btn-ghost text-xs" ${active.length ? '' : 'disabled style="opacity:.5"'} title="Generate the school pull-from-class letter for every active student">🏫 School letters (all active)</button>` : ''}
     <button onclick="textParents()" class="btn-ghost text-xs" ${phones.length ? '' : 'disabled style="opacity:.5"'} title="Copy every active parent's phone number for a group text">💬 Text parents${phones.length ? ' (' + phones.length + ')' : ''}</button>`;
 }
 
@@ -1214,6 +1215,7 @@ async function selectStudent(id) {
           ${s.assigned_mentor ? `<div class="text-xs text-gray-500 mt-1">Assigned mentor${s.assigned_mentor_2 ? 's' : ''}: ${esc([mentorName(s.assigned_mentor), mentorName(s.assigned_mentor_2)].filter(Boolean).join(' & '))}</div>` : ''}
           ${s.guardian_name ? `<div class="text-xs text-gray-500">Guardian: ${esc(s.guardian_name)} ${s.guardian_contact ? '· ' + esc(s.guardian_contact) : ''}</div>` : ''}
           ${guardianEmail(s) ? `<button onclick="emailGuardian('${s.id}')" class="btn-ghost mt-2 text-xs" title="Email this guardian; CCs the mentor and truancyproject@bookmcg.com">✉ Email guardian</button>` : ''}
+          ${ME.role === 'admin' && s.program_status === 'active' ? `<button onclick="schoolLetterForStudent('${s.id}')" class="btn-ghost mt-2 text-xs" title="Generate the school pull-from-class letter, save it to the file, and email the parent">🏫 School letter</button>` : ''}
         </div>
         <div class="text-right">
           <div class="text-2xl font-bold" style="color:var(--gold)">${totalHrs.toFixed(1)}</div>
@@ -1799,23 +1801,62 @@ async function sendSchoolLetter(student, mentorNameStr) {
     const stamp = new Date().toISOString().slice(0, 10);
     const filename = `school-authorization-letter-${stamp}.pdf`;
     await uploadStudentFile(student.id, filename, blob, 'application/pdf');
-    const guardianEmail = student.intake?.guardian?.email || '';
-    if (!guardianEmail) return { attached: true, emailed: false, reason: 'no guardian email on intake' };
+    const gEmail = guardianEmail(student);   // intake email, or the manual guardian_contact if it's an email
+    if (!gEmail) return { attached: true, emailed: false, reason: 'no guardian email on file' };
     const b64 = await blobToBase64(blob);
     const { data: { session } } = await sb.auth.getSession();
     const r = await fetch('/api/school-letter', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (session?.access_token || '') },
       body: JSON.stringify({
-        to: guardianEmail,
+        to: gEmail,
         first_name: student.first_name || '',
-        guardian_name: student.intake?.guardian?.name || '',
+        guardian_name: student.intake?.guardian?.name || student.guardian_name || '',
         filename, pdf_base64: b64
       })
     });
     return await r.json().catch(() => ({}));
   } catch (e) { console.error('sendSchoolLetter:', e); return { error: e.message }; }
 }
+
+// Generate the school "pull from class" letter for ONE existing active student (admin).
+async function schoolLetterForStudent(id) {
+  const s = STUDENTS.find(x => x.id === id);
+  if (!s) return;
+  if (s.program_status !== 'active') { toast('Approve the student for service first', false); return; }
+  const mentor = mentorName(s.assigned_mentor);
+  if (!mentor) { toast('Assign a mentor to this student first', false); return; }
+  if (DEMO) { toast('Runs in the live app', false); return; }
+  toast('Generating school letter…');
+  const res = await sendSchoolLetter(s, mentor);
+  if (res?.emailed) toast(`School letter emailed to ${s.first_name || 'the'}’s guardian`);
+  else if (res?.attached) toast('Saved to student file — no guardian email on file, send it manually', false);
+  else toast(res?.error || 'Could not generate the letter', false);
+  if (SELECTED === id) selectStudent(id);   // refresh the file list
+}
+window.schoolLetterForStudent = schoolLetterForStudent;
+
+// Generate the school letter for EVERY active student at once (admin). Emails parents who
+// have an email on file; saves a copy to every student's file either way.
+async function schoolLettersAllActive() {
+  if (DEMO) { toast('Runs in the live app', false); return; }
+  const active = activeStudents();
+  const withMentor = active.filter(s => s.assigned_mentor);
+  const noMentor = active.length - withMentor.length;
+  if (!withMentor.length) { toast('No active students with an assigned mentor', false); return; }
+  if (!confirm(`Generate the school pull-from-class letter for ${withMentor.length} active student(s)?\n\nParents with an email on file will be emailed a copy, and every letter is saved to the student's file.${noMentor ? `\n\n${noMentor} active student(s) have no assigned mentor and will be skipped.` : ''}`)) return;
+  let emailed = 0, savedOnly = 0, failed = 0;
+  for (let i = 0; i < withMentor.length; i++) {
+    const s = withMentor[i];
+    toast(`Generating letters… ${i + 1} of ${withMentor.length}`);
+    const res = await sendSchoolLetter(s, mentorName(s.assigned_mentor));
+    if (res?.emailed) emailed++;
+    else if (res?.attached) savedOnly++;
+    else failed++;
+  }
+  toast(`Done · ${emailed} emailed, ${savedOnly} saved to file only${failed ? `, ${failed} failed` : ''}${noMentor ? ` · ${noMentor} skipped (no mentor)` : ''}`, failed === 0);
+}
+window.schoolLettersAllActive = schoolLettersAllActive;
 
 // Build the "presenting concerns" input string straight from a student's intake.
 function intakeToInput(intake) {
