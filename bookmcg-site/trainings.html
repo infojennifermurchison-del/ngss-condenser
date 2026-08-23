@@ -93,8 +93,8 @@
   .cta-secondary:focus-visible{outline:3px solid var(--navy);outline-offset:2px;}
 
   /* ---------- Hero ---------- */
-  .hero{background:var(--white);padding:32px 0 8px;}
-  .hero-graphic{display:block;width:100%;max-width:1040px;margin:0 auto;border-radius:16px;box-shadow:var(--shadow-lg);}
+  .hero{background:var(--white);padding:0 0 8px;}
+  .hero-graphic{display:block;width:100%;margin:0;border-radius:0;box-shadow:none;}
   .hero-fallback{
     max-width:1040px;margin:0 auto;background:linear-gradient(160deg,var(--navy),var(--navy-2));
     color:#fff;border-radius:16px;padding:44px 34px;box-shadow:var(--shadow-lg);
@@ -236,7 +236,7 @@
   @media (min-width:760px){
     body{font-size:18px;}
     h2{font-size:2.1rem;}
-    .hero{padding:40px 0 8px;}
+    .hero{padding:0 0 8px;}
     .hf-title{font-size:2.4rem;}
     .ba-grid{grid-template-columns:1fr 1fr;}
     .calc-grid{grid-template-columns:1fr 1fr;align-items:stretch;}
@@ -266,12 +266,12 @@
 
 <!-- 1. HERO -->
 <header class="hero">
+  <h1 class="sr-only">Category 2 is 40 percent of your Texas Rising Star score, and one of the fastest ways to increase your reimbursement rate.</h1>
+  <img class="hero-graphic"
+       src="https://bookmcg.com/assets/hero-category2.png"
+       alt="Category 2 is 40 percent of your Texas Rising Star score. One of the fastest ways to increase your reimbursement rate. If you can coach your teachers on interactions. Repeats the fourth Saturday of every month at 9 a.m."
+       onerror="this.style.display='none';var f=document.getElementById('hero-fallback');if(f){f.hidden=false;}" />
   <div class="wrap">
-    <h1 class="sr-only">Category 2 is 40 percent of your Texas Rising Star score, and one of the fastest ways to increase your reimbursement rate.</h1>
-    <img class="hero-graphic"
-         src="https://bookmcg.com/assets/hero-category2.png"
-         alt="Category 2 is 40 percent of your Texas Rising Star score. One of the fastest ways to increase your reimbursement rate. If you can coach your teachers on interactions. Repeats the fourth Saturday of every month at 9 a.m."
-         onerror="this.style.display='none';var f=document.getElementById('hero-fallback');if(f){f.hidden=false;}" />
     <div id="hero-fallback" class="hero-fallback" hidden>
       <span class="kicker">Texas Rising Star · Category 2</span>
       <p class="hf-title">Category 2 is <span class="em">40 percent</span> of your Texas Rising Star score, and one of the fastest ways to increase your reimbursement rate.</p>
