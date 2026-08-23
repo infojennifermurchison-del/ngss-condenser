@@ -101,7 +101,24 @@
   .band{background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
   .eyebrow{font-family:var(--sans);font-size:.78rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:10px;}
   .h2-underline{position:relative;padding-bottom:14px;margin-bottom:20px;}
-  .h2-underline::after{content:"";position:absolute;left:0;bottom:0;width:64px;height:4px;background:var(--orange);border-radius:2px;}
+  .h2-underline::after{content:"";position:absolute;left:0;bottom:0;width:80px;height:5px;background:var(--orange);border-radius:3px;}
+
+  /* Before / after boxes */
+  .ba-grid{display:grid;gap:18px;grid-template-columns:1fr;margin-top:8px;}
+  .ba{border-radius:16px;padding:24px 24px 22px;border:1px solid var(--line);box-shadow:var(--shadow);}
+  .ba-head{display:flex;align-items:center;gap:10px;font-family:var(--sans);font-weight:700;font-size:1.08rem;margin-bottom:16px;}
+  .ba-chip{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;color:#fff;font-weight:700;flex:0 0 auto;}
+  .ba ul{list-style:none;margin:0;padding:0;display:grid;gap:13px;}
+  .ba li{position:relative;padding-left:28px;font-size:.99rem;line-height:1.5;}
+  .ba li::before{position:absolute;left:0;top:0;font-weight:700;font-size:1.05em;line-height:1.4;}
+  .ba.before{background:#FFF3E8;border-color:#F5C89C;border-left:7px solid var(--orange);}
+  .ba.before .ba-head{color:#A8500A;}
+  .ba.before .ba-chip{background:var(--orange);}
+  .ba.before li::before{content:"\00D7";color:#C25E00;}
+  .ba.after{background:#E9F6EF;border-color:#B4DDC5;border-left:7px solid var(--green);}
+  .ba.after .ba-head{color:#3F6B00;}
+  .ba.after .ba-chip{background:var(--green);}
+  .ba.after li::before{content:"\2713";color:#4c7a00;}
   .lede{font-size:1.1rem;}
 
   /* Calculator card */
@@ -161,7 +178,8 @@
   .tier .price{font-family:var(--serif);font-size:2.5rem;font-weight:700;color:var(--navy);line-height:1;margin:8px 0 6px;}
   .tier .note{color:var(--muted);font-size:.9rem;}
   .tier.best{border:2px solid var(--teal);box-shadow:var(--shadow-lg);}
-  .tier .ribbon{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--gold);color:#3d2c00;font-family:var(--sans);font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 13px;border-radius:999px;white-space:nowrap;}
+  .tier.best{border-top:5px solid var(--orange);}
+  .tier .ribbon{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--orange);color:var(--navy);font-family:var(--sans);font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 13px;border-radius:999px;white-space:nowrap;box-shadow:0 4px 10px rgba(246,134,0,.3);}
   .logi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:24px 0 0;}
   .logi p{margin:0;font-size:.96rem;}
   .price-cta{margin:26px 0 0;text-align:center;}
@@ -180,6 +198,7 @@
     h2{font-size:2.1rem;}
     .hero{padding:40px 0 8px;}
     .hf-title{font-size:2.4rem;}
+    .ba-grid{grid-template-columns:1fr 1fr;}
     .cat-grid{grid-template-columns:repeat(3,1fr);}
     .contrast{grid-template-columns:1fr 1fr;}
     .packet{grid-template-columns:1fr 1fr;}
@@ -278,6 +297,38 @@
       </div>
 
       <p>Category 2 is teacher and child interactions. It costs coaching. It is the heaviest weighted category in the rubric and the only one you can move with people you already employ, in classrooms you already have, starting the week after this session.</p>
+    </div>
+  </section>
+
+  <!-- 3b. WHAT CHANGES IN THE CLASSROOM (before / after) -->
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">See the difference</div>
+      <h2 class="h2-underline">What changes in the classroom</h2>
+      <p class="lede">Category 2 is not a form. It is what a teacher does in the small moments with a child. Here is what those moments look like now, and what they look like once you coach them on purpose.</p>
+
+      <div class="ba-grid">
+        <div class="ba before">
+          <div class="ba-head"><span class="ba-chip" aria-hidden="true">&times;</span> In classrooms today</div>
+          <ul>
+            <li>A child melts down and hears "You are okay, go sit down." The feeling is shut off instead of named.</li>
+            <li>Transitions are rushed and noisy, and the teachable moment slips by.</li>
+            <li>Teachers ask questions a child can answer with yes or no, and the talk stops there.</li>
+            <li>Praise stays vague. "Good job" instead of what the child actually did.</li>
+            <li>No one is watching the interaction closely enough to grow it, so it stays the same.</li>
+          </ul>
+        </div>
+        <div class="ba after">
+          <div class="ba-head"><span class="ba-chip" aria-hidden="true">&check;</span> After you coach the interactions</div>
+          <ul>
+            <li>A teacher kneels to eye level, names the feeling, and offers two clear choices.</li>
+            <li>Transitions become language rich routines the whole room can follow.</li>
+            <li>Teachers ask questions that stretch thinking and invite a real answer.</li>
+            <li>Feedback gets specific, tied to what the child did and the next step to try.</li>
+            <li>Every teacher is observed on one focus and visibly improves week to week.</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </section>
 
