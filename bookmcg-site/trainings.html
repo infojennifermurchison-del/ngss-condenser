@@ -34,6 +34,7 @@
     --gold:#DDA000;
     --green:#6FA300;
     --lemon:#FFD83D;
+    --sky:#2E96DB;
     --ink:#22303c;
     --muted:#586573;
     --line:#e4e9ee;
@@ -118,8 +119,8 @@
   .ba{position:relative;overflow:hidden;border-radius:16px;padding:24px 24px 22px;border:1px solid var(--line);box-shadow:var(--shadow);}
   .ba .ba-head,.ba ul{position:relative;z-index:1;}
   .ba::before{content:"";position:absolute;right:-28px;top:-28px;width:104px;height:104px;border-radius:50%;pointer-events:none;}
-  .ba.before::before{background:rgba(255,138,61,.16);}
-  .ba.after::before{background:rgba(111,163,0,.16);}
+  .ba.before::before{background:rgba(46,150,219,.18);}
+  .ba.after::before{background:rgba(255,138,61,.18);}
   .ba-head{display:flex;align-items:center;gap:10px;font-family:var(--sans);font-weight:700;font-size:1.08rem;margin-bottom:16px;}
   .ba-chip{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;color:#fff;font-weight:700;flex:0 0 auto;}
   .ba ul{list-style:none;margin:0;padding:0;display:grid;gap:13px;}
@@ -129,10 +130,10 @@
   .ba.before .ba-head{color:#A8500A;}
   .ba.before .ba-chip{background:var(--orange);}
   .ba.before li::before{content:"\00D7";color:#C25E00;}
-  .ba.after{background:#E9F6EF;border-color:#B4DDC5;border-left:7px solid var(--green);}
-  .ba.after .ba-head{color:#3F6B00;}
-  .ba.after .ba-chip{background:var(--green);}
-  .ba.after li::before{content:"\2713";color:#4c7a00;}
+  .ba.after{background:#E1F5F6;border-color:#B2E2E4;border-left:7px solid var(--teal);}
+  .ba.after .ba-head{color:#046b70;}
+  .ba.after .ba-chip{background:var(--teal);}
+  .ba.after li::before{content:"\2713";color:#037e84;}
   .lede{font-size:1.1rem;}
 
   /* Calculator + example: two boxes, gray statute centered under */
@@ -144,8 +145,8 @@
   .cbox::before,.cbox::after{content:"";position:absolute;top:20px;width:13px;height:13px;transform:rotate(45deg);border-radius:2px;pointer-events:none;}
   .cbox::before{right:20px;}
   .cbox::after{right:42px;opacity:.55;}
-  .cbox.teal::before,.cbox.teal::after{background:var(--teal);}
-  .cbox.orange::before,.cbox.orange::after{background:var(--orange);}
+  .cbox.teal::before,.cbox.teal::after{background:var(--sky);}
+  .cbox.orange::before,.cbox.orange::after{background:var(--teal);}
   .cbox .lede,.cbox .cta-secondary,.cbox .calc-note,.cbox .tag,.cbox p{position:relative;z-index:1;}
   .calc-note{font-size:.86rem;color:var(--muted);margin:12px 0 0;display:flex;align-items:center;gap:7px;}
   .statute-wrap{max-width:760px;margin:22px auto 0;}
@@ -163,9 +164,9 @@
   .cat .cost{color:var(--muted);font-size:.96rem;}
   .cat .flag{display:inline-block;margin-top:14px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px;}
   .cat.capital .flag{background:#fbe9d6;color:#9a5a00;}
-  .cat.coach{border:2px solid var(--green);box-shadow:0 14px 34px rgba(111,163,0,.16);}
-  .cat.coach .flag{background:#e8f2d6;color:#4c6f00;}
-  .cat.coach .lbl{color:var(--green);}
+  .cat.coach{border:2px solid var(--teal);box-shadow:0 14px 34px rgba(0,160,168,.16);}
+  .cat.coach .flag{background:#d9f2f3;color:#046b70;}
+  .cat.coach .lbl{color:var(--teal);}
 
   /* Mentor contrast */
   .contrast{display:grid;gap:18px;grid-template-columns:1fr;margin:8px 0 0;}
@@ -400,11 +401,11 @@
       <div class="leave-card">
         <p>A written, dated coaching cycle for the next quarter, built on your own classrooms, ready to run the next business day. Plus the working packet:</p>
         <ul class="packet">
-          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6FA300" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>Category 2 rubric reference</li>
-          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6FA300" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>Observation capture sheets</li>
-          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6FA300" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>The Coaching Ladder</li>
-          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6FA300" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>Coaching conversation template with a worked example</li>
-          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6FA300" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>The cycle planning template</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00A0A8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>Category 2 rubric reference</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00A0A8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>Observation capture sheets</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00A0A8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>The Coaching Ladder</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00A0A8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>Coaching conversation template with a worked example</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00A0A8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>The cycle planning template</li>
         </ul>
         <p class="closer">You will be able to walk into any room in your center, identify the single highest leverage behavior to grow, and run the conversation that grows it.</p>
       </div>
