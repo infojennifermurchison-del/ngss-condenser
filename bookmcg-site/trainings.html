@@ -21,135 +21,229 @@
 <style>
   :root{
     --navy:#0D3B66;
+    --navy-2:#0a2f52;
     --blue:#1D64A6;
     --teal:#00A0A8;
     --orange:#F68600;
+    --orange-d:#d97600;
     --gold:#DDA000;
     --green:#6FA300;
-    --ink:#1c1f22;
-    --muted:#4a5057;
-    --line:#d9dee3;
-    --panel:#f4f6f8;
+    --ink:#1b2430;
+    --muted:#5b6672;
+    --line:#e2e7ec;
+    --panel:#f5f7f9;
+    --panel-2:#eef2f5;
     --white:#ffffff;
     --font:"Trebuchet MS","Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
+    --shadow:0 10px 30px rgba(13,59,102,.08);
+    --shadow-lg:0 20px 50px rgba(13,59,102,.14);
   }
 
   *{box-sizing:border-box;}
-  html{-webkit-text-size-adjust:100%;}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
   body{
-    margin:0;
-    font-family:var(--font);
-    color:var(--ink);
-    background:var(--white);
-    line-height:1.55;
-    font-size:17px;
+    margin:0;font-family:var(--font);color:var(--ink);
+    background:var(--white);line-height:1.6;font-size:17px;
+    -webkit-font-smoothing:antialiased;
   }
 
-  h1,h2,h3{color:var(--navy);line-height:1.25;margin:0 0 .5em;font-weight:700;}
-  h1{font-size:1.35rem;}
-  h2{font-size:1.35rem;}
-  h3{font-size:1.1rem;}
+  h1,h2,h3{color:var(--navy);line-height:1.2;margin:0;font-weight:700;letter-spacing:-.01em;}
+  h1{font-size:1.55rem;}
+  h2{font-size:1.5rem;}
   p{margin:0 0 1rem;}
   a{color:var(--blue);}
   strong{color:var(--navy);}
 
-  .wrap{max-width:780px;margin:0 auto;padding:0 20px;}
+  .wrap{max-width:860px;margin:0 auto;padding:0 22px;}
+  .narrow{max-width:720px;}
 
-  /* Orange CTA (Register) */
+  /* ---------- Buttons ---------- */
   .cta{
-    display:inline-block;
-    background:var(--orange);
-    color:var(--navy);
-    font-weight:700;
-    font-size:1.1rem;
-    text-decoration:none;
-    padding:15px 34px;
-    border-radius:8px;
-    border:2px solid #d97600;
-    cursor:pointer;
-    text-align:center;
-    font-family:var(--font);
+    display:inline-flex;align-items:center;justify-content:center;gap:.5em;
+    background:var(--orange);color:var(--navy);font-weight:700;font-size:1.08rem;
+    text-decoration:none;padding:16px 40px;border-radius:10px;
+    border:0;box-shadow:0 6px 16px rgba(246,134,0,.32);
+    cursor:pointer;font-family:var(--font);transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
   }
-  .cta:hover,.cta:focus{background:#ff9412;}
+  .cta:hover,.cta:focus{background:#ff9412;transform:translateY(-1px);box-shadow:0 10px 22px rgba(246,134,0,.4);}
   .cta:focus-visible{outline:3px solid var(--white);outline-offset:3px;}
   .cta[disabled]{
-    background:#c9ccd0;color:#5c6167;border-color:#b4b8bd;
-    cursor:not-allowed;
+    background:#e6d7b6;color:#7a6a45;box-shadow:none;cursor:not-allowed;
+    border:1px dashed #cbb78a;
   }
+  .cta[disabled]::before{content:"";width:9px;height:9px;border-radius:50%;background:#b99a4e;}
 
-  /* Distinct secondary button (calculator) */
   .cta-secondary{
-    display:inline-block;
-    background:var(--white);
-    color:var(--navy);
-    font-weight:700;
-    font-size:1rem;
-    text-decoration:none;
-    padding:13px 26px;
-    border-radius:8px;
-    border:2px solid var(--teal);
-    text-align:center;
+    display:inline-flex;align-items:center;gap:.55em;
+    background:var(--white);color:var(--navy);font-weight:700;font-size:1rem;
+    text-decoration:none;padding:14px 26px;border-radius:10px;
+    border:2px solid var(--teal);box-shadow:var(--shadow);transition:background .12s ease, transform .12s ease;
   }
-  .cta-secondary:hover,.cta-secondary:focus{background:#e9fafb;}
+  .cta-secondary:hover,.cta-secondary:focus{background:#e9fafb;transform:translateY(-1px);}
   .cta-secondary:focus-visible{outline:3px solid var(--navy);outline-offset:2px;}
+  .cta-secondary svg{flex:0 0 auto;}
 
-  /* Hero */
-  .hero{background:var(--navy);color:var(--white);padding:26px 0 30px;}
-  .hero h1{color:var(--white);}
-  .logline{color:#cfe0f0;font-size:.95rem;margin:14px 0 20px;font-weight:700;}
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;overflow:hidden;color:var(--white);
+    background:radial-gradient(1200px 500px at 80% -10%, #17578f 0%, rgba(23,87,143,0) 60%), linear-gradient(160deg, var(--navy) 0%, var(--navy-2) 100%);
+    padding:30px 0 38px;
+  }
+  .hero .wrap{position:relative;z-index:2;}
+  .hero-watermark{
+    position:absolute;right:-30px;top:-28px;z-index:1;
+    font-size:12rem;font-weight:700;line-height:1;color:rgba(255,255,255,.05);
+    letter-spacing:-.04em;user-select:none;pointer-events:none;
+  }
+  .kicker{
+    display:inline-flex;align-items:center;gap:.5em;
+    font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    color:#bfe9ec;border:1px solid rgba(0,160,168,.55);background:rgba(0,160,168,.14);
+    padding:6px 12px;border-radius:999px;margin-bottom:18px;
+  }
+  .hero h1{color:var(--white);font-size:1.6rem;max-width:16ch;}
+  .hero h1 .em{color:#ffcf8a;}
+  .pills{list-style:none;display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:20px 0 24px;}
+  .pills li{
+    font-size:.82rem;font-weight:700;color:#e8f1fa;
+    background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
+    padding:7px 13px;border-radius:8px;
+  }
+  .hero .cta{width:100%;}
 
-  section{padding:34px 0;border-bottom:1px solid var(--line);}
-  section.alt{background:var(--panel);}
-  .lede{font-size:1.05rem;}
+  /* ---------- Section scaffolding ---------- */
+  section{padding:46px 0;}
+  .band{background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .eyebrow{
+    display:flex;align-items:center;gap:12px;margin-bottom:14px;
+    font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);
+  }
+  .eyebrow .num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:30px;height:30px;border-radius:8px;background:var(--teal);color:var(--white);
+    font-size:.85rem;letter-spacing:0;
+  }
+  .eyebrow .rule{flex:1;height:1px;background:var(--line);}
+  section h2{margin-bottom:14px;}
+  .lede{font-size:1.06rem;color:var(--ink);}
 
-  .calc-note{font-size:.85rem;color:var(--muted);margin-top:10px;}
-
-  /* Visible TODO block */
+  /* ---------- Calculator card ---------- */
+  .calc-card{
+    background:var(--white);border:1px solid var(--line);border-top:4px solid var(--teal);
+    border-radius:14px;padding:26px;box-shadow:var(--shadow-lg);
+  }
+  .calc-note{font-size:.86rem;color:var(--muted);margin:12px 0 0;display:flex;align-items:center;gap:7px;}
+  .statute{
+    margin:20px 0 0;padding:16px 18px;background:var(--panel-2);border-radius:10px;
+    color:var(--muted);font-size:.94rem;border-left:4px solid var(--blue);
+  }
   .todo-block{
-    background:rgba(221,160,0,0.15);
-    border:1px solid var(--gold);
-    border-left:6px solid var(--gold);
-    border-radius:6px;
-    padding:14px 16px;
-    color:#6b4e00;
-    font-weight:700;
-    margin:18px 0;
+    background:rgba(221,160,0,.14);border:1px solid rgba(221,160,0,.55);border-left:6px solid var(--gold);
+    border-radius:10px;padding:16px 18px;color:#6b4e00;font-weight:700;margin:20px 0 0;
   }
   .todo-block .tag{
-    display:inline-block;background:var(--gold);color:#3d2c00;
-    font-size:.72rem;letter-spacing:.06em;padding:2px 8px;border-radius:4px;
-    margin-right:8px;text-transform:uppercase;
+    display:inline-block;background:var(--gold);color:#3d2c00;font-size:.7rem;letter-spacing:.08em;
+    padding:3px 9px;border-radius:5px;margin-right:9px;text-transform:uppercase;vertical-align:middle;
   }
+  .payoff{margin:22px 0 0;font-weight:700;color:var(--navy);font-size:1.12rem;text-align:center;}
 
-  .statute{border-left:4px solid var(--teal);padding:4px 0 4px 14px;color:var(--muted);font-size:.95rem;}
-  .payoff{font-weight:700;color:var(--navy);}
+  /* ---------- Category comparison ---------- */
+  .cat-grid{display:grid;gap:14px;grid-template-columns:1fr;margin:6px 0 20px;}
+  .cat{
+    background:var(--white);border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;
+    box-shadow:var(--shadow);position:relative;
+  }
+  .cat .lbl{font-weight:700;color:var(--navy);font-size:1rem;margin-bottom:4px;}
+  .cat .cost{color:var(--muted);font-size:.95rem;}
+  .cat .flag{
+    display:inline-block;margin-top:12px;font-size:.72rem;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;padding:4px 10px;border-radius:999px;
+  }
+  .cat.capital .flag{background:#fbe9d6;color:#9a5a00;}
+  .cat.coach{border:2px solid var(--green);box-shadow:0 12px 30px rgba(111,163,0,.16);}
+  .cat.coach .flag{background:#e8f2d6;color:#4c6f00;}
+  .cat.coach .lbl{color:var(--green);}
 
-  /* Pricing */
-  .tiers{display:grid;gap:16px;grid-template-columns:1fr;margin:1.2rem 0;}
+  /* ---------- Mentor contrast ---------- */
+  .contrast{display:grid;gap:16px;grid-template-columns:1fr;margin:6px 0 0;}
+  .contrast .col{border-radius:12px;padding:20px;border:1px solid var(--line);background:var(--white);box-shadow:var(--shadow);}
+  .contrast .col h3{font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+  .contrast .mentor h3{color:var(--muted);}
+  .contrast .you{border:2px solid var(--teal);}
+  .contrast .you h3{color:var(--teal);}
+  .contrast p{margin:0;color:var(--ink);}
+
+  /* ---------- Packet checklist ---------- */
+  .leave-card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:var(--shadow);}
+  .packet{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:10px;grid-template-columns:1fr;}
+  .packet li{position:relative;padding-left:32px;font-size:.98rem;}
+  .packet li svg{position:absolute;left:0;top:2px;}
+  .closer{margin-top:20px;font-weight:700;color:var(--navy);}
+
+  /* ---------- Timeline stepper ---------- */
+  .steps{list-style:none;margin:8px 0 0;padding:0;counter-reset:step;display:grid;gap:0;}
+  .steps li{
+    position:relative;padding:0 0 22px 46px;counter-increment:step;
+  }
+  .steps li:last-child{padding-bottom:0;}
+  .steps li::before{
+    content:counter(step);position:absolute;left:0;top:0;
+    width:32px;height:32px;border-radius:50%;background:var(--navy);color:var(--white);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;z-index:2;
+  }
+  .steps li::after{
+    content:"";position:absolute;left:15px;top:32px;bottom:0;width:2px;background:var(--line);
+  }
+  .steps li:last-child::after{display:none;}
+  .steps .s-title{font-weight:700;color:var(--navy);}
+
+  /* ---------- Pricing ---------- */
+  .cost-lead{font-size:1.08rem;}
+  .tiers{display:grid;gap:16px;grid-template-columns:1fr;margin:22px 0 0;}
   .tier{
-    border:1px solid var(--line);border-radius:10px;padding:20px;background:var(--white);
+    background:var(--white);border:1px solid var(--line);border-radius:14px;padding:24px 22px;
+    box-shadow:var(--shadow);text-align:center;position:relative;
   }
-  .tier.feature{border:2px solid var(--teal);}
-  .tier .name{font-weight:700;color:var(--navy);margin-bottom:6px;}
-  .tier .price{font-size:1.9rem;font-weight:700;color:var(--navy);line-height:1;margin:2px 0 6px;}
+  .tier .name{font-weight:700;color:var(--navy);font-size:1.02rem;}
+  .tier .price{font-size:2.3rem;font-weight:700;color:var(--navy);line-height:1;margin:8px 0 6px;}
   .tier .note{color:var(--muted);font-size:.9rem;}
+  .tier.best{border:2px solid var(--teal);box-shadow:var(--shadow-lg);}
+  .tier .ribbon{
+    position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+    background:var(--gold);color:#3d2c00;font-size:.68rem;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;padding:5px 12px;border-radius:999px;white-space:nowrap;
+  }
+  .logi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:24px 0 0;}
+  .logi p{margin:0;font-size:.96rem;}
+  .price-cta{margin:26px 0 0;text-align:center;}
+  .price-cta .cta{width:100%;}
+  .refund{font-size:.8rem;color:var(--muted);line-height:1.55;margin:22px 0 0;}
 
-  .logi{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin:1.2rem 0;}
-  .logi p{margin:0;}
-  .refund{font-size:.82rem;color:var(--muted);line-height:1.5;margin-top:1.2rem;}
+  /* ---------- Trainer ---------- */
+  .trainer{display:flex;gap:18px;align-items:flex-start;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow);}
+  .avatar{
+    flex:0 0 auto;width:64px;height:64px;border-radius:50%;
+    background:linear-gradient(150deg,var(--teal),var(--navy));color:var(--white);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.3rem;letter-spacing:.02em;
+  }
+  .trainer .t-name{color:var(--navy);font-weight:700;}
+  .trainer p{margin:0;}
 
-  .cta-row{margin-top:22px;}
+  footer{padding:28px 0;text-align:center;color:var(--muted);font-size:.85rem;background:var(--panel);border-top:1px solid var(--line);}
 
-  .trainer-name{color:var(--navy);font-weight:700;}
-
-  footer{padding:24px 0;text-align:center;color:var(--muted);font-size:.85rem;}
-
-  @media (min-width:680px){
+  /* ---------- Responsive ---------- */
+  @media (min-width:700px){
     body{font-size:18px;}
-    h1{font-size:2rem;}
-    h2{font-size:1.7rem;}
-    .hero{padding:44px 0 48px;}
-    .tiers{grid-template-columns:repeat(3,1fr);}
+    h1,.hero h1{font-size:2.35rem;}
+    h2{font-size:1.9rem;}
+    .hero{padding:52px 0 58px;}
+    .hero-watermark{font-size:20rem;right:-10px;top:-40px;}
+    .hero .cta{width:auto;}
+    .cat-grid{grid-template-columns:repeat(3,1fr);}
+    .contrast{grid-template-columns:1fr 1fr;}
+    .packet{grid-template-columns:1fr 1fr;}
+    .tiers{grid-template-columns:repeat(3,1fr);align-items:stretch;}
+    .price-cta .cta{width:auto;}
   }
 </style>
 </head>
@@ -169,9 +263,16 @@
 
 <!-- 1. HERO -->
 <header class="hero">
+  <div class="hero-watermark" aria-hidden="true">40%</div>
   <div class="wrap">
-    <h1>Your Category 2 score is 40 percent of your Texas Rising Star rating. It is also the only heavily weighted category you can move without spending capital.</h1>
-    <p class="logline">Saturday, September 26, 2026 | 9:00 a.m. to 5:30 p.m. Central | Live virtual | 7 clock hours</p>
+    <span class="kicker">Texas Rising Star · Category 2</span>
+    <h1>Your Category 2 score is <span class="em">40 percent</span> of your Texas Rising Star rating. It is also the only heavily weighted category you can move without spending capital.</h1>
+    <ul class="pills">
+      <li>Saturday, September 26, 2026</li>
+      <li>9:00 a.m. to 5:30 p.m. Central</li>
+      <li>Live virtual</li>
+      <li>7 clock hours</li>
+    </ul>
     <button type="button" class="cta" data-register disabled>Registration link pending</button>
   </div>
 </header>
@@ -180,28 +281,54 @@
 
   <!-- 2. RUN YOUR OWN NUMBERS FIRST -->
   <section>
-    <div class="wrap">
-      <h2>Run your own numbers first</h2>
-      <p>Before you decide whether this is worth a Saturday, find out what it is worth to your center. The Texas Workforce Commission publishes a Texas Rising Star Revenue Calculator. Enter your board, your ages, your scholarship enrollment, and your current level, and it will tell you what the next star level pays you.</p>
+    <div class="wrap narrow">
+      <div class="eyebrow"><span class="num">01</span> Run your own numbers first <span class="rule"></span></div>
+      <div class="calc-card">
+        <p class="lede">Before you decide whether this is worth a Saturday, find out what it is worth to your center. The Texas Workforce Commission publishes a Texas Rising Star Revenue Calculator. Enter your board, your ages, your scholarship enrollment, and your current level, and it will tell you what the next star level pays you.</p>
 
-      <a class="cta-secondary" href="https://www.childcare.texas.gov/sites/default/files/texas-rising-star/documents/statewide-revenue-calculator-for-trs_bcy26.xlsx" target="_blank" rel="noopener">Open the state revenue calculator</a>
-      <p class="calc-note">This downloads a spreadsheet from the State of Texas.</p>
+        <a class="cta-secondary" href="https://www.childcare.texas.gov/sites/default/files/texas-rising-star/documents/statewide-revenue-calculator-for-trs_bcy26.xlsx" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00A0A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          Open the state revenue calculator
+        </a>
+        <p class="calc-note">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5b6672" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+          This downloads a spreadsheet from the State of Texas.
+        </p>
 
-      <p class="statute">State law sets the floor. A certified provider's minimum rate must exceed the maximum non certified rate for the same category of care by at least 5 percent at 2 star, 7 percent at 3 star, and 9 percent at 4 star, under Texas Government Code 2308.315.</p>
+        <p class="statute">State law sets the floor. A certified provider's minimum rate must exceed the maximum non certified rate for the same category of care by at least 5 percent at 2 star, 7 percent at 3 star, and 9 percent at 4 star, under Texas Government Code 2308.315.</p>
 
-      <div class="todo-block">
-        <span class="tag">TODO</span>Replace with the actual Gulf Coast annual dollar delta for a representative center, pulled from the calculator.
+        <div class="todo-block">
+          <span class="tag">TODO</span>Replace with the actual Gulf Coast annual dollar delta for a representative center, pulled from the calculator.
+        </div>
       </div>
-
       <p class="payoff">That number is the reason for this session. Everything below is how you get there.</p>
     </div>
   </section>
 
   <!-- 3. WHY CATEGORY 2 -->
-  <section class="alt">
+  <section class="band">
     <div class="wrap">
-      <h2>Why Category 2 and not the others</h2>
-      <p>Look at what it costs to move each category. Category 1 means hiring or credentialing staff. Category 4 means furniture, materials, and facility work. Both require capital, and if you had capital sitting there you would have spent it already.</p>
+      <div class="eyebrow"><span class="num">02</span> Why Category 2 and not the others <span class="rule"></span></div>
+      <p class="lede">Look at what it costs to move each category. Category 1 means hiring or credentialing staff. Category 4 means furniture, materials, and facility work. Both require capital, and if you had capital sitting there you would have spent it already.</p>
+
+      <div class="cat-grid">
+        <div class="cat capital">
+          <div class="lbl">Category 1</div>
+          <div class="cost">Hiring or credentialing staff.</div>
+          <span class="flag">Requires capital</span>
+        </div>
+        <div class="cat coach">
+          <div class="lbl">Category 2</div>
+          <div class="cost">Teacher and child interactions. It costs coaching.</div>
+          <span class="flag">People you already employ</span>
+        </div>
+        <div class="cat capital">
+          <div class="lbl">Category 4</div>
+          <div class="cost">Furniture, materials, and facility work.</div>
+          <span class="flag">Requires capital</span>
+        </div>
+      </div>
+
       <p>Category 2 is teacher and child interactions. It costs coaching. It is the heaviest weighted category in the rubric and the only one you can move with people you already employ, in classrooms you already have, starting the week after this session.</p>
     </div>
   </section>
@@ -209,36 +336,64 @@
   <!-- 4. WHY PAY WHEN A FREE MENTOR EXISTS -->
   <section>
     <div class="wrap">
-      <h2>You already have a mentor. Here is why you are paying me.</h2>
-      <p>Your board assigns you a mentor at no cost and offers free professional development, and you should use both.</p>
-      <p>What a mentor does is tell you where you are not meeting the standard. What no one teaches you is how to walk into your own classroom on Tuesday, watch a teacher for fifteen minutes, name the one behavior that matters most, and run a conversation that changes what she does on Wednesday. That is a different skill and nobody hands it to you.</p>
-      <p>This session teaches that skill and gives you the tools to keep running it after the day ends.</p>
+      <div class="eyebrow"><span class="num">03</span> You already have a mentor <span class="rule"></span></div>
+      <h2>Here is why you are paying me.</h2>
+      <p class="lede">Your board assigns you a mentor at no cost and offers free professional development, and you should use both.</p>
+
+      <div class="contrast">
+        <div class="col mentor">
+          <h3>What a mentor does</h3>
+          <p>Tells you where you are not meeting the standard.</p>
+        </div>
+        <div class="col you">
+          <h3>What no one teaches you</h3>
+          <p>How to walk into your own classroom on Tuesday, watch a teacher for fifteen minutes, name the one behavior that matters most, and run a conversation that changes what she does on Wednesday. That is a different skill and nobody hands it to you.</p>
+        </div>
+      </div>
+
+      <p style="margin-top:20px;">This session teaches that skill and gives you the tools to keep running it after the day ends.</p>
     </div>
   </section>
 
   <!-- 5. WHAT YOU LEAVE WITH -->
-  <section class="alt">
-    <div class="wrap">
-      <h2>What you leave with</h2>
-      <p>A written, dated coaching cycle for the next quarter, built on your own classrooms, ready to run the next business day. Plus the working packet: the Category 2 rubric reference, observation capture sheets, the Coaching Ladder, a coaching conversation template with a worked example, and the cycle planning template.</p>
-      <p>You will be able to walk into any room in your center, identify the single highest leverage behavior to grow, and run the conversation that grows it.</p>
+  <section class="band">
+    <div class="wrap narrow">
+      <div class="eyebrow"><span class="num">04</span> What you leave with <span class="rule"></span></div>
+      <div class="leave-card">
+        <p>A written, dated coaching cycle for the next quarter, built on your own classrooms, ready to run the next business day. Plus the working packet:</p>
+        <ul class="packet">
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6FA300" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>Category 2 rubric reference</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6FA300" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>Observation capture sheets</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6FA300" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>The Coaching Ladder</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6FA300" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>Coaching conversation template with a worked example</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6FA300" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>The cycle planning template</li>
+        </ul>
+        <p class="closer">You will be able to walk into any room in your center, identify the single highest leverage behavior to grow, and run the conversation that grows it.</p>
+      </div>
     </div>
   </section>
 
   <!-- 6. THE HONEST TIMELINE -->
   <section>
-    <div class="wrap">
-      <h2>The honest timeline</h2>
-      <p>This is not a rate increase in October. The chain is: you coach the interactions, your Category 2 score moves at your next assessment, your star level follows, and your rate follows that. Certification work can run up to 24 months from entry level, so where you land depends on where you already sit in your assessment cycle.</p>
+    <div class="wrap narrow">
+      <div class="eyebrow"><span class="num">05</span> The honest timeline <span class="rule"></span></div>
+      <p class="lede">This is not a rate increase in October. The chain runs in order:</p>
+      <ol class="steps">
+        <li><span class="s-title">You coach the interactions.</span></li>
+        <li><span class="s-title">Your Category 2 score moves</span> at your next assessment.</li>
+        <li><span class="s-title">Your star level follows.</span></li>
+        <li><span class="s-title">Your rate follows that.</span></li>
+      </ol>
+      <p style="margin-top:20px;">Certification work can run up to 24 months from entry level, so where you land depends on where you already sit in your assessment cycle.</p>
       <p>Come knowing that. What this session buys you is the ability to start moving the score now instead of after the next assessment tells you what you already suspected.</p>
     </div>
   </section>
 
   <!-- 7. THE REAL COST -->
-  <section class="alt">
+  <section class="band">
     <div class="wrap">
-      <h2>The real cost</h2>
-      <p>$149 is the ticket. The rest of the cost is your Saturday and roughly one observation cycle per quarter afterward, which is what the plan you build is scaled to. If you cannot protect that time, this will not work and you should keep your money.</p>
+      <div class="eyebrow"><span class="num">06</span> The real cost <span class="rule"></span></div>
+      <p class="cost-lead"><strong>$149 is the ticket.</strong> The rest of the cost is your Saturday and roughly one observation cycle per quarter afterward, which is what the plan you build is scaled to. If you cannot protect that time, this will not work and you should keep your money.</p>
 
       <div class="tiers">
         <div class="tier">
@@ -246,7 +401,8 @@
           <div class="price">$99</div>
           <div class="note">Through September 12</div>
         </div>
-        <div class="tier feature">
+        <div class="tier best">
+          <span class="ribbon">Standard</span>
           <div class="name">Standard</div>
           <div class="price">$149</div>
           <div class="note">One seat</div>
@@ -262,7 +418,7 @@
         <p>Twenty five seats. Clock hours are issued for live attendance. Break and lunch are not counted toward training hours. Purchase orders and invoices available, email <a href="mailto:jennifer@bookmcg.com">jennifer@bookmcg.com</a>.</p>
       </div>
 
-      <div class="cta-row">
+      <div class="price-cta">
         <button type="button" class="cta" data-register disabled>Registration link pending</button>
       </div>
 
@@ -272,9 +428,12 @@
 
   <!-- 8. TRAINER -->
   <section>
-    <div class="wrap">
-      <h2>About the trainer</h2>
-      <p><span class="trainer-name">Jennifer Murchison, M.Ed.</span>, founder of Murchison Consulting Group and a TECPDS registered trainer, Trainer ID 254864. Twenty three years in education leadership including service as a Chief Academic Officer and campus leader. M.Ed. in Educational Leadership, Houston Christian University.</p>
+    <div class="wrap narrow">
+      <div class="eyebrow"><span class="num">07</span> About the trainer <span class="rule"></span></div>
+      <div class="trainer">
+        <div class="avatar" aria-hidden="true">JM</div>
+        <p><span class="t-name">Jennifer Murchison, M.Ed.</span>, founder of Murchison Consulting Group and a TECPDS registered trainer, Trainer ID 254864. Twenty three years in education leadership including service as a Chief Academic Officer and campus leader. M.Ed. in Educational Leadership, Houston Christian University.</p>
+      </div>
     </div>
   </section>
 
