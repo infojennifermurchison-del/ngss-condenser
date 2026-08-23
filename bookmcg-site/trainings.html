@@ -105,15 +105,13 @@
 
   /* ---------- Section scaffolding ---------- */
   section{padding:52px 0;}
-  .band{background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  /* Bold lemon line at every section color break */
+  .band{background:var(--panel);border-top:7px solid var(--lemon);border-bottom:7px solid var(--lemon);}
+  .cta-band{border-top:7px solid var(--lemon);}
   .eyebrow{font-family:var(--sans);font-size:.78rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:10px;}
   .h2-underline{position:relative;padding-bottom:14px;margin-bottom:20px;}
   .h2-underline::after{content:"";position:absolute;left:0;bottom:0;width:80px;height:5px;background:var(--orange);border-radius:3px;}
 
-  /* Bold lemon separator between sections */
-  .sep{display:flex;align-items:center;justify-content:center;gap:14px;padding:6px 24px;}
-  .sep::before,.sep::after{content:"";height:6px;flex:0 1 96px;background:var(--lemon);border-radius:3px;}
-  .sep span{width:16px;height:16px;background:var(--lemon);border-radius:4px;transform:rotate(45deg);flex:0 0 auto;box-shadow:0 0 0 5px rgba(255,216,61,.25);}
 
   /* Before / after boxes */
   .ba-grid{display:grid;gap:18px;grid-template-columns:1fr;margin-top:8px;}
@@ -311,8 +309,6 @@
     </div>
   </section>
 
-  <div class="sep" aria-hidden="true"><span></span></div>
-
   <!-- 3. WHY CATEGORY 2 -->
   <section class="band">
     <div class="wrap">
@@ -341,8 +337,6 @@
       <p>Category 2 is teacher and child interactions. It costs coaching. It is the heaviest weighted category in the rubric and the only one you can move with people you already employ, in classrooms you already have, starting the week after this session.</p>
     </div>
   </section>
-
-  <div class="sep" aria-hidden="true"><span></span></div>
 
   <!-- 3b. WHAT CHANGES IN THE CLASSROOM (before / after) -->
   <section>
@@ -376,8 +370,6 @@
     </div>
   </section>
 
-  <div class="sep" aria-hidden="true"><span></span></div>
-
   <!-- 4. WHY PAY WHEN A FREE MENTOR EXISTS -->
   <section>
     <div class="wrap">
@@ -400,8 +392,6 @@
     </div>
   </section>
 
-  <div class="sep" aria-hidden="true"><span></span></div>
-
   <!-- 5. WHAT YOU LEAVE WITH -->
   <section class="band">
     <div class="wrap narrow">
@@ -421,8 +411,6 @@
     </div>
   </section>
 
-  <div class="sep" aria-hidden="true"><span></span></div>
-
   <!-- 6. THE HONEST TIMELINE -->
   <section>
     <div class="wrap narrow">
@@ -439,8 +427,6 @@
       <p>Come knowing that. What this session buys you is the ability to start moving the score now instead of after the next assessment tells you what you already suspected.</p>
     </div>
   </section>
-
-  <div class="sep" aria-hidden="true"><span></span></div>
 
   <!-- 7. THE REAL COST -->
   <section class="band">
@@ -479,8 +465,6 @@
       <p class="refund">Full refund on cancellations received in writing on or before September 19, 2026. After September 19, registrations are not refundable but may be transferred to a future session or to a substitute participant from the same center at no charge. Participants who do not attend are not eligible for a refund or a transfer. Clock hours are issued for live attendance only and cannot be earned by watching a recording. If Murchison Consulting Group cancels the session for any reason, all registrants receive a full refund. Purchase orders and invoiced registrations must be paid in full before the session date. To cancel, transfer, or request an invoice, email jennifer@bookmcg.com.</p>
     </div>
   </section>
-
-  <div class="sep" aria-hidden="true"><span></span></div>
 
   <!-- 8. TRAINER -->
   <section>
