@@ -90,6 +90,8 @@
     padding:30px 0 38px;
   }
   .hero .wrap{position:relative;z-index:2;}
+  .hero-grid{display:block;}
+  .hero-photo{display:none;}
   .hero-watermark{
     position:absolute;right:-30px;top:-28px;z-index:1;
     font-size:12rem;font-weight:700;line-height:1;color:rgba(255,255,255,.05);
@@ -222,9 +224,8 @@
   /* ---------- Trainer ---------- */
   .trainer{display:flex;gap:18px;align-items:flex-start;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow);}
   .avatar{
-    flex:0 0 auto;width:64px;height:64px;border-radius:50%;
-    background:linear-gradient(150deg,var(--teal),var(--navy));color:var(--white);
-    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.3rem;letter-spacing:.02em;
+    flex:0 0 auto;width:84px;height:84px;border-radius:50%;object-fit:cover;
+    border:3px solid var(--panel-2);box-shadow:var(--shadow);
   }
   .trainer .t-name{color:var(--navy);font-weight:700;}
   .trainer p{margin:0;}
@@ -239,6 +240,9 @@
     .hero{padding:52px 0 58px;}
     .hero-watermark{font-size:20rem;right:-10px;top:-40px;}
     .hero .cta{width:auto;}
+    .hero-grid{display:grid;grid-template-columns:1.35fr .9fr;gap:36px;align-items:center;}
+    .hero-photo{display:block;width:100%;max-width:320px;justify-self:end;border-radius:16px;
+      box-shadow:0 18px 44px rgba(0,0,0,.35);border:3px solid rgba(255,255,255,.14);}
     .cat-grid{grid-template-columns:repeat(3,1fr);}
     .contrast{grid-template-columns:1fr 1fr;}
     .packet{grid-template-columns:1fr 1fr;}
@@ -265,15 +269,20 @@
 <header class="hero">
   <div class="hero-watermark" aria-hidden="true">40%</div>
   <div class="wrap">
-    <span class="kicker">Texas Rising Star · Category 2</span>
-    <h1>Your Category 2 score is <span class="em">40 percent</span> of your Texas Rising Star rating. It is also the only heavily weighted category you can move without spending capital.</h1>
-    <ul class="pills">
-      <li>Saturday, September 26, 2026</li>
-      <li>9:00 a.m. to 5:30 p.m. Central</li>
-      <li>Live virtual</li>
-      <li>7 clock hours</li>
-    </ul>
-    <button type="button" class="cta" data-register disabled>Registration link pending</button>
+    <div class="hero-grid">
+      <div class="hero-text">
+        <span class="kicker">Texas Rising Star · Category 2</span>
+        <h1>Your Category 2 score is <span class="em">40 percent</span> of your Texas Rising Star rating. It is also the only heavily weighted category you can move without spending capital.</h1>
+        <ul class="pills">
+          <li>Saturday, September 26, 2026</li>
+          <li>9:00 a.m. to 5:30 p.m. Central</li>
+          <li>Live virtual</li>
+          <li>7 clock hours</li>
+        </ul>
+        <button type="button" class="cta" data-register disabled>Registration link pending</button>
+      </div>
+      <img class="hero-photo" src="https://bookmcg.com/assets/jennifer-authoritative.png" alt="Jennifer Murchison, M.Ed., trainer" />
+    </div>
   </div>
 </header>
 
@@ -431,7 +440,7 @@
     <div class="wrap narrow">
       <div class="eyebrow"><span class="num">07</span> About the trainer <span class="rule"></span></div>
       <div class="trainer">
-        <div class="avatar" aria-hidden="true">JM</div>
+        <img class="avatar" src="https://bookmcg.com/assets/jennifer-approachable.png" alt="Jennifer Murchison, M.Ed." />
         <p><span class="t-name">Jennifer Murchison, M.Ed.</span>, founder of Murchison Consulting Group and a TECPDS registered trainer, Trainer ID 254864. Twenty three years in education leadership including service as a Chief Academic Officer and campus leader. M.Ed. in Educational Leadership, Houston Christian University.</p>
       </div>
     </div>
