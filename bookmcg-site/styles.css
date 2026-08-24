@@ -1,27 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap');
 /* ==========================================================================
    Murchison Consulting Group — bookmcg.com
    Shared stylesheet · Brand Guidelines v1.0
-   Palette: Charcoal / Dusty Mauve / Warm Gray  ·  Type: Palatino Linotype + Georgia
+   Palette: Navy / Teal / Orange (+ lemon, sky)  ·  Type: Poppins + Source Sans
    ========================================================================== */
 
 :root {
-  --charcoal: #2C2C2E;      /* primary — text, headlines, dominant M */
-  --charcoal-2: #3A3A3D;
-  --charcoal-3: #1E1E20;
-  --mauve: #A88B95;         /* signature accent — use sparingly */
-  --mauve-deep: #8E6F79;    /* accent on light backgrounds where more contrast helps */
-  --mauve-light: #C7ADB5;   /* accent on charcoal backgrounds */
-  --warm-gray: #8E8E93;     /* secondary text, descriptors */
-  --light-gray: #E5E5EA;    /* backgrounds / tints only — never text */
-  --tint: #F5F3F4;          /* very soft section tint */
+  --charcoal: #0D3B66;      /* navy — headings, dark sections, primary */
+  --charcoal-2: #123A6B;
+  --charcoal-3: #0A2F52;
+  --mauve: #00A0A8;         /* teal — signature accent */
+  --mauve-deep: #0E7A80;    /* dark teal — links, labels, check circles on light */
+  --mauve-light: #55C4E0;   /* sky/light teal — accents on navy backgrounds */
+  --warm-gray: #586573;     /* secondary text, descriptors */
+  --light-gray: #DCE4EC;    /* light neutral — footer text on navy, tints */
+  --tint: #F6F8FA;          /* very soft section tint */
   --white: #FFFFFF;
-  --rule: #E5E5EA;
+  --rule: #E4E9EE;
 
-  --serif: "Palatino Linotype", "Book Antiqua", Palatino, "URW Palladio L", P052, Georgia, serif;
-  --serif-alt: Georgia, "Times New Roman", serif;
+  --orange: #FF8A3D;        /* CTA buttons */
+  --orange-d: #F0731F;
+  --lemon: #FFD83D;
+  --sky: #2E96DB;
 
-  --shadow: 0 22px 55px rgba(44, 44, 46, 0.16);
-  --shadow-sm: 0 8px 24px rgba(44, 44, 46, 0.10);
+  --serif: "Poppins", "Segoe UI", Tahoma, Geneva, sans-serif;            /* headings */
+  --serif-alt: "Source Sans 3", "Segoe UI", Tahoma, Geneva, sans-serif;  /* body + labels */
+
+  --shadow: 0 22px 55px rgba(13, 59, 102, 0.16);
+  --shadow-sm: 0 10px 30px rgba(13, 59, 102, 0.10);
 }
 
 * { box-sizing: border-box; }
@@ -31,7 +37,7 @@ body {
   margin: 0;
   background: var(--white);
   color: var(--charcoal);
-  font-family: var(--serif);
+  font-family: var(--serif-alt);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -60,12 +66,12 @@ body {
 .brand img { width: 150px; height: auto; display: block; }
 .header-cta {
   font-family: var(--serif);
-  font-size: 15px; font-weight: 700; color: var(--white);
-  background: var(--charcoal); text-decoration: none;
+  font-size: 15px; font-weight: 700; color: var(--charcoal);
+  background: var(--orange); text-decoration: none;
   padding: 12px 22px; border-radius: 3px; white-space: nowrap;
   transition: background 0.18s, transform 0.18s;
 }
-.header-cta:hover { background: var(--mauve-deep); transform: translateY(-1px); }
+.header-cta:hover { background: var(--orange-d); transform: translateY(-1px); }
 
 /* ---------- Hero (homepage) ---------- */
 .hero { padding: 64px 0 44px; }
@@ -115,7 +121,7 @@ body {
 .door {
   position: relative; display: flex; flex-direction: column;
   text-decoration: none;
-  background: linear-gradient(158deg, #3A3A3D 0%, #2C2C2E 58%, #1E1E20 100%);
+  background: linear-gradient(158deg, #123A6B 0%, #0D3B66 58%, #0A2F52 100%);
   border-radius: 6px 6px 4px 4px;
   padding: 32px 24px 28px; min-height: 360px;
   color: var(--white);
@@ -126,14 +132,14 @@ body {
 }
 .door::before {
   content: ""; position: absolute; inset: 15px 15px 60px 15px;
-  border: 1.5px solid rgba(168, 139, 149, 0.30); border-radius: 4px;
+  border: 1.5px solid rgba(0, 160, 168, 0.30); border-radius: 4px;
   pointer-events: none;
 }
 .door::after {
   content: ""; position: absolute; right: 21px; top: 50%; transform: translateY(-50%);
   width: 10px; height: 10px; border-radius: 50%;
   background: var(--mauve);
-  box-shadow: 0 0 0 4px rgba(168, 139, 149, 0.22), 0 2px 6px rgba(0,0,0,0.35);
+  box-shadow: 0 0 0 4px rgba(0, 160, 168, 0.22), 0 2px 6px rgba(0,0,0,0.35);
   transition: transform 0.3s;
 }
 .door:hover, .door:focus-visible {
@@ -213,7 +219,7 @@ body {
 
 /* ---------- CTA card ---------- */
 .cta-card {
-  background: linear-gradient(158deg, #3A3A3D 0%, #2C2C2E 62%, #1E1E20 100%);
+  background: linear-gradient(158deg, #123A6B 0%, #0D3B66 62%, #0A2F52 100%);
   color: var(--white); border-radius: 8px; padding: 46px 38px; text-align: center;
   margin: 30px 0 22px; box-shadow: var(--shadow); position: relative; overflow: hidden;
 }
@@ -229,7 +235,7 @@ body {
 .btn-book {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   font-family: var(--serif); font-size: 17px; font-weight: 700;
-  color: var(--charcoal); background: var(--white); text-decoration: none;
+  color: var(--charcoal); background: var(--orange); text-decoration: none;
   padding: 17px 38px; border-radius: 4px; box-shadow: 0 10px 26px rgba(0,0,0,0.28);
   transition: transform 0.16s, box-shadow 0.16s, background 0.16s;
 }
@@ -275,11 +281,11 @@ body {
 .btn-hero {
   display: inline-flex; align-items: center; gap: 10px; margin-top: 28px;
   font-family: var(--serif); font-size: 17px; font-weight: 700;
-  color: var(--white); background: var(--charcoal); text-decoration: none;
+  color: var(--charcoal); background: var(--orange); text-decoration: none;
   padding: 16px 30px; border-radius: 4px; box-shadow: var(--shadow-sm);
   transition: background 0.18s, transform 0.18s;
 }
-.btn-hero:hover { background: var(--mauve-deep); transform: translateY(-2px); }
+.btn-hero:hover { background: var(--orange-d); transform: translateY(-2px); }
 .btn-hero .q { font-family: var(--serif-alt); font-style: italic; font-weight: 400; opacity: 0.85; }
 
 /* Section intro (centered heading blocks on light) */
@@ -359,7 +365,7 @@ body {
 /* Door qualifier — "Choose this door if..." */
 .door-qualifier {
   margin-top: 14px; padding-top: 13px;
-  border-top: 1px solid rgba(199, 173, 181, 0.28);
+  border-top: 1px solid rgba(85, 196, 224, 0.28);
   font-size: 13px; line-height: 1.45; color: rgba(255,255,255,0.74);
 }
 .dq-label {
@@ -407,7 +413,7 @@ body {
    ========================================================================== */
 .masthead {
   display: block; text-decoration: none;
-  background: linear-gradient(180deg, #FFFFFF 0%, #FAF8F8 100%);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F6F8FA 100%);
   border-bottom: 1px solid var(--rule);
 }
 .masthead-inner {
