@@ -449,3 +449,22 @@ body {
 .doors .door:nth-child(2) { background: linear-gradient(158deg, #0C8A90 0%, #0A757A 58%, #075457 100%); }   /* Curriculum — teal */
 .doors .door:nth-child(3) { background: linear-gradient(158deg, #2A72B4 0%, #1D64A6 58%, #164E80 100%); }   /* Consulting — blue */
 .doors .door:nth-child(4) { background: linear-gradient(158deg, #C86B22 0%, #A85618 58%, #874212 100%); }   /* Compliance — burnt orange */
+
+/* ==========================================================================
+   Funnel Audit callout (Consulting page) — added v4
+   ========================================================================== */
+.audit-cta {
+  background: linear-gradient(158deg, #123A6B 0%, #0D3B66 60%, #0A2F52 100%);
+  color: #fff; border-radius: 8px; padding: 40px 34px; text-align: center;
+  box-shadow: var(--shadow-sm); margin: 6px 0;
+}
+.audit-cta .eyebrow { display:block; margin-bottom: 10px; }
+.audit-cta h3 { font-family: var(--serif); color: #fff; font-size: 26px; font-weight: 700; margin: 0 0 10px; letter-spacing: -0.01em; }
+.audit-cta p { color: rgba(255,255,255,0.82); max-width: 560px; margin: 0 auto 24px; font-size: 16px; line-height: 1.55; }
+.audit-cta .btn-audit {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--orange); color: var(--charcoal);
+  font-family: var(--serif); font-weight: 700; font-size: 15px; text-decoration: none;
+  padding: 15px 32px; border-radius: 6px; transition: background 0.18s, transform 0.18s;
+}
+.audit-cta .btn-audit:hover { background: var(--orange-d); transform: translateY(-2px); }

@@ -4,7 +4,6 @@
   "trailingSlash": false,
   "redirects": [
     { "source": "/home", "destination": "/", "permanent": false },
-    { "source": "/audit", "destination": "/", "permanent": false },
     { "source": "/capability-statement-generator", "destination": "/", "permanent": false },
     { "source": "/student-support", "destination": "https://go.bookmcg.com/student-support", "permanent": false },
     { "source": "/student-support/:path*", "destination": "https://go.bookmcg.com/student-support/:path*", "permanent": false },

@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Funnel Audit — Murchison Consulting Group</title>
+  <meta name="description" content="A free interactive audit of your business funnel. Enter your metrics and get a specific diagnosis of which phase of the RISE Framework you're stuck in, plus a prioritized roadmap to fix it.">
+
+  <!-- ============================================================
+       CONFIG: GHL webhook + booking link are set in the script below.
+       Served at bookmcg.com/audit and linked from the Consulting page.
+       ============================================================ -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* Murchison brand palette */
+      --color-purple: #0D3B66;        /* navy — primary accent */
+      --color-purple-deep: #0A2F52;   /* deep navy */
+      --color-teal: #00A0A8;          /* teal */
+      --color-teal-deep: #075457;     /* deep teal */
+      --color-gold: #FF8A3D;          /* orange — accents & booking CTA */
+      --color-cream: #F1F5F8;         /* soft panel tint */
+      --color-ivory: #FFFFFF;         /* page / on-dark text */
+      --color-ink: #0D3B66;           /* navy — dark sections, headings */
+      --color-ink-soft: #33414F;      /* body text */
+      --color-muted: #5B6673;         /* secondary text */
+      --color-line: #E4E9EE;
+      --color-success: #0E8A8F;       /* teal — Healthy */
+      --color-warning: #D97706;       /* amber — Developing */
+      --color-danger: #DC2626;        /* red — Broken */
+
+      --font-display: 'Poppins', 'Segoe UI', Tahoma, sans-serif;
+      --font-body: 'Source Sans 3', -apple-system, system-ui, sans-serif;
+      --radius: 8px;
+      --transition: 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--color-ivory);
+      color: var(--color-ink);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+
+    /* ===== HEADER ===== */
+    .audit-header {
+      background: linear-gradient(135deg, var(--color-ink) 0%, var(--color-purple-deep) 100%);
+      color: var(--color-ivory);
+      padding: 64px 0 80px;
+      text-align: center;
+    }
+    .audit-header .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--color-gold);
+      margin-bottom: 20px;
+      display: block;
+    }
+    .audit-header h1 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(36px, 5vw, 56px);
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      margin-bottom: 20px;
+    }
+    .audit-header h1 em {
+      font-style: italic;
+      font-weight: 600;
+      color: var(--color-gold);
+    }
+    .audit-header p {
+      font-size: 18px;
+      color: rgba(255,255,255,0.85);
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.55;
+    }
+    .time-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.1);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      margin-top: 24px;
+      color: rgba(255,255,255,0.85);
+    }
+
+    /* ===== FORM ===== */
+    main { padding: 48px 0 96px; }
+    .audit-section {
+      background: white;
+      border: 1px solid var(--color-line);
+      padding: 40px;
+      margin-bottom: 24px;
+      border-radius: var(--radius);
+      position: relative;
+      overflow: hidden;
+    }
+    .audit-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--color-teal), var(--color-gold));
+    }
+    .stage-num {
+      display: inline-block;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--color-teal);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .stage-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 28px;
+      color: var(--color-ink);
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+    .stage-description {
+      font-size: 15px;
+      color: var(--color-muted);
+      margin-bottom: 28px;
+      line-height: 1.55;
+    }
+
+    .field-group {
+      margin-bottom: 24px;
+    }
+    .field-group:last-child { margin-bottom: 0; }
+    .field-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin-bottom: 6px;
+    }
+    .field-help {
+      font-size: 13px;
+      color: var(--color-muted);
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .field-input,
+    .field-select,
+    .field-textarea {
+      width: 100%;
+      padding: 12px 14px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--color-ink);
+      background: white;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius);
+      outline: none;
+      transition: var(--transition);
+    }
+    .field-input:focus,
+    .field-select:focus,
+    .field-textarea:focus {
+      border-color: var(--color-teal);
+      box-shadow: 0 0 0 3px rgba(0, 160, 168, 0.12);
+    }
+    .field-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .unknown-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--color-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .unknown-check input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--color-teal);
+      cursor: pointer;
+    }
+    .field-input:disabled {
+      background: #F1F4F7;
+      color: var(--color-muted);
+      cursor: not-allowed;
+    }
+
+    /* ===== STAGE ICON (subtle corner decoration) ===== */
+    .stage-icon {
+      position: absolute;
+      top: 32px;
+      right: 32px;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-cream);
+      border-radius: 50%;
+      color: var(--color-teal);
+    }
+
+    /* ===== SUBMIT BUTTON ===== */
+    .submit-wrap {
+      text-align: center;
+      padding: 48px 0 24px;
+    }
+    .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 40px;
+      background: var(--color-ink);
+      color: var(--color-ivory);
+      border: 1px solid var(--color-ink);
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-submit:hover {
+      background: var(--color-purple-deep);
+      border-color: var(--color-purple-deep);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px -8px rgba(13, 59, 102, 0.45);
+    }
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ===== EMAIL GATE MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(13, 59, 102, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.active {
+      display: flex;
+      animation: fadeIn 300ms ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal {
+      background: white;
+      max-width: 520px;
+      width: 100%;
+      padding: 48px 40px;
+      border-radius: var(--radius);
+      position: relative;
+      animation: slideUp 400ms cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-teaser {
+      background: var(--color-cream);
+      padding: 20px 24px;
+      margin: -48px -40px 28px;
+      border-bottom: 3px solid var(--color-gold);
+    }
+    .modal-teaser-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-teal);
+      margin-bottom: 8px;
+    }
+    .modal-teaser-text {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--color-ink);
+      line-height: 1.3;
+    }
+    .modal-teaser-text strong {
+      color: var(--color-teal);
+      font-weight: 700;
+    }
+    .modal h3 {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .modal p {
+      font-size: 15px;
+      color: var(--color-ink-soft);
+      margin-bottom: 24px;
+      line-height: 1.55;
+    }
+    .modal-form input[type="email"],
+    .modal-form input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-family: var(--font-body);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      outline: none;
+      transition: var(--transition);
+    }
+    .modal-form input:focus {
+      border-color: var(--color-teal);
+      box-shadow: 0 0 0 3px rgba(0, 160, 168, 0.12);
+    }
+    .modal-form button {
+      width: 100%;
+      padding: 16px;
+      background: var(--color-gold);
+      color: var(--color-ink);
+      border: none;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 8px;
+    }
+    .modal-form button:hover {
+      background: #F0731F;
+    }
+    .modal-privacy {
+      font-size: 12px;
+      color: var(--color-muted);
+      text-align: center;
+      margin-top: 16px;
+      font-style: italic;
+    }
+
+    /* ===== RESULTS ===== */
+    .results-wrap {
+      display: none;
+    }
+    .results-wrap.active { display: block; }
+
+    .results-hero {
+      background: linear-gradient(135deg, var(--color-purple-deep) 0%, var(--color-teal-deep) 100%);
+      color: white;
+      padding: 72px 0;
+      text-align: center;
+      margin-bottom: 0;
+    }
+    .results-hero-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--color-gold);
+      margin-bottom: 16px;
+    }
+    .results-phase-name {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(48px, 8vw, 84px);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .results-phase-tag {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 20px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.9);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.4;
+    }
+
+    .results-body {
+      padding: 64px 0 80px;
+    }
+
+    .results-section {
+      background: white;
+      border: 1px solid var(--color-line);
+      padding: 40px;
+      margin-bottom: 24px;
+      border-radius: var(--radius);
+    }
+    .results-section h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 28px;
+      color: var(--color-ink);
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+    }
+    .results-section p {
+      font-size: 16px;
+      color: var(--color-ink-soft);
+      line-height: 1.65;
+      margin-bottom: 16px;
+    }
+
+    /* SCORECARD */
+    .scorecard {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .score-card {
+      padding: 20px 16px;
+      border-radius: var(--radius);
+      text-align: center;
+      border: 2px solid;
+    }
+    .score-card.healthy {
+      background: rgba(0, 160, 168, 0.10);
+      border-color: var(--color-success);
+      color: var(--color-success);
+    }
+    .score-card.developing {
+      background: rgba(217, 119, 6, 0.08);
+      border-color: var(--color-warning);
+      color: var(--color-warning);
+    }
+    .score-card.broken {
+      background: rgba(220, 38, 38, 0.08);
+      border-color: var(--color-danger);
+      color: var(--color-danger);
+    }
+    .score-card.unknown {
+      background: var(--color-cream);
+      border-color: var(--color-muted);
+      color: var(--color-muted);
+    }
+    .score-card-stage {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      opacity: 0.85;
+    }
+    .score-card-status {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+    }
+
+    /* GAPS LIST */
+    .gap-item {
+      display: flex;
+      gap: 16px;
+      padding: 20px 0;
+      border-top: 1px solid var(--color-line);
+      align-items: flex-start;
+    }
+    .gap-item:first-child { border-top: none; padding-top: 0; }
+    .gap-icon {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .gap-icon.broken {
+      background: rgba(220, 38, 38, 0.12);
+      color: var(--color-danger);
+    }
+    .gap-icon.developing {
+      background: rgba(217, 119, 6, 0.12);
+      color: var(--color-warning);
+    }
+    .gap-icon.unknown {
+      background: var(--color-cream);
+      color: var(--color-muted);
+    }
+    .gap-content h4 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 17px;
+      color: var(--color-ink);
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+    .gap-content p {
+      font-size: 15px !important;
+      color: var(--color-ink-soft);
+      line-height: 1.55;
+      margin-bottom: 0 !important;
+    }
+
+    /* ROADMAP */
+    .roadmap-item {
+      display: flex;
+      gap: 20px;
+      padding: 24px 0;
+      border-top: 1px solid var(--color-line);
+      align-items: flex-start;
+    }
+    .roadmap-item:first-child { border-top: none; padding-top: 0; }
+    .roadmap-num {
+      flex-shrink: 0;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 36px;
+      color: var(--color-gold);
+      line-height: 1;
+      min-width: 48px;
+    }
+    .roadmap-content h4 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 19px;
+      color: var(--color-ink);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .roadmap-content p {
+      font-size: 15px !important;
+      margin-bottom: 0 !important;
+    }
+
+    /* METRICS PREP BOX */
+    .metrics-prep {
+      background: var(--color-cream);
+      border-left: 3px solid var(--color-gold);
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      border-radius: var(--radius);
+    }
+    .metrics-prep-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--color-ink);
+      margin-bottom: 10px;
+    }
+    .metrics-prep ul {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 0;
+    }
+    .metrics-prep li {
+      padding: 6px 0 6px 24px;
+      position: relative;
+      font-size: 14px;
+      color: var(--color-ink-soft);
+    }
+    .metrics-prep li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: var(--color-gold);
+      font-weight: 700;
+    }
+
+    /* FINAL CTA */
+    .results-cta {
+      background: var(--color-ink);
+      color: white;
+      padding: 56px 40px;
+      text-align: center;
+      border-radius: var(--radius);
+    }
+    .results-cta h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(28px, 3.5vw, 40px);
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      color: white;
+    }
+    .results-cta h2 em {
+      font-style: italic;
+      color: var(--color-gold);
+      font-weight: 600;
+    }
+    .results-cta p {
+      color: rgba(255,255,255,0.8);
+      font-size: 16px;
+      max-width: 520px;
+      margin: 0 auto 32px;
+    }
+    .btn-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 40px;
+      background: var(--color-gold);
+      color: var(--color-ink);
+      border: 1px solid var(--color-gold);
+      text-decoration: none;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      transition: var(--transition);
+    }
+    .btn-cta:hover {
+      background: white;
+      color: var(--color-ink);
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 13px;
+      color: var(--color-muted);
+      margin-top: 40px;
+      font-style: italic;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.5;
+    }
+
+    /* MOBILE */
+    @media (max-width: 720px) {
+      .audit-header { padding: 48px 0 56px; }
+      .audit-section { padding: 28px 20px; }
+      .stage-icon { display: none; }
+      .field-row { grid-template-columns: 1fr; }
+      .scorecard { grid-template-columns: repeat(2, 1fr); }
+      .modal { padding: 32px 24px; }
+      .modal-teaser { margin: -32px -24px 20px; padding: 16px 20px; }
+      .results-section { padding: 28px 20px; }
+      .results-cta { padding: 40px 24px; }
+      .roadmap-num { font-size: 28px; min-width: 36px; }
+      .roadmap-item { gap: 14px; padding: 20px 0; }
+      .metrics-prep { padding: 20px 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ AUDIT FORM VIEW ============ -->
+  <div id="audit-view">
+
+    <header class="audit-header">
+      <div class="container">
+        <span class="eyebrow">Murchison Consulting Group · Free Tool</span>
+        <h1>The <em>Funnel Auditor</em></h1>
+        <p>Enter your business metrics below. In 5 minutes, you'll know exactly which phase of the RISE Framework you're stuck in, where your funnel is leaking, and the prioritized moves to fix it.</p>
+        <div class="time-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          5 minutes · 100% free · No pitch
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <form id="audit-form">
+
+          <!-- ===== BUSINESS BASICS ===== -->
+          <section class="audit-section">
+            <div class="stage-num">Section 0 · Your Business</div>
+            <h2 class="stage-title">Start with the basics.</h2>
+            <p class="stage-description">Before we audit your funnel, tell us about your business and what you're trying to build.</p>
+
+            <div class="field-group">
+              <label class="field-label" for="icp">Ideal Client Profile</label>
+              <div class="field-help">Describe who you serve in one clear sentence. (Example: "Black women small business owners in their first three years who are posting daily but can't close sales.")</div>
+              <textarea class="field-textarea" id="icp" name="icp" required placeholder="I help ___ who ___ so that they can ___"></textarea>
+            </div>
+
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label" for="monthly-revenue-target">Needed Monthly Revenue</label>
+                <div class="field-help">What does your business need to make each month?</div>
+                <input class="field-input" type="number" id="monthly-revenue-target" name="monthly-revenue-target" min="0" step="100" required placeholder="$10,000">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="primary-platform">Primary Platform</label>
+                <div class="field-help">Where do you show up most to attract clients?</div>
+                <select class="field-select" id="primary-platform" name="primary-platform" required>
+                  <option value="">Select one...</option>
+                  <option value="tiktok">TikTok</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="facebook">Facebook</option>
+                  <option value="linkedin">LinkedIn</option>
+                  <option value="youtube">YouTube</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="business-type">What kind of business do you run?</label>
+              <div class="field-help">This changes how we measure your Stage 3 and Stage 4 conversion data.</div>
+              <select class="field-select" id="business-type" name="business-type" required>
+                <option value="">Select one...</option>
+                <option value="service">Service-based — I sell my time, expertise, coaching, or done-for-you services</option>
+                <option value="product">Product-based — I sell physical or digital products people buy</option>
+                <option value="both">Both — I sell services AND products (we'll audit your primary revenue stream)</option>
+              </select>
+            </div>
+
+            <div class="field-group" id="primary-stream-group" style="display:none;">
+              <label class="field-label" for="primary-stream">Which is your PRIMARY revenue stream?</label>
+              <div class="field-help">We'll audit this stream fully. On your Clarity Call, we can audit the second stream together.</div>
+              <select class="field-select" id="primary-stream" name="primary-stream">
+                <option value="">Select one...</option>
+                <option value="service">Services (coaching, consulting, done-for-you)</option>
+                <option value="product">Products (physical or digital)</option>
+              </select>
+            </div>
+          </section>
+
+          <!-- ===== STAGE 1: AWARENESS ===== -->
+          <section class="audit-section">
+            <div class="stage-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6m11-11h-6M7 12H1"/></svg>
+            </div>
+            <div class="stage-num">Stage 1 · Awareness</div>
+            <h2 class="stage-title">Are enough of the right people seeing you?</h2>
+            <p class="stage-description">This is the top of your funnel. If Awareness is broken, nothing else matters — nobody will ever see the rest.</p>
+
+            <div class="field-group">
+              <label class="field-label" for="monthly-views">Monthly Views / Impressions</label>
+              <div class="field-help">Total views across your primary platform in the last 30 days. Find this in TikTok Studio, Instagram Insights, or your platform's analytics.</div>
+              <input class="field-input" type="number" id="monthly-views" name="monthly-views" min="0" placeholder="e.g., 15000">
+              <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="monthly-views"> I don't know this yet</label>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="engagement-rate">Engagement Rate (%)</label>
+              <div class="field-help">Total engagements (likes + comments + shares + saves) divided by views, times 100. Most platforms show this directly in analytics.</div>
+              <input class="field-input" type="number" id="engagement-rate" name="engagement-rate" min="0" max="100" step="0.1" placeholder="e.g., 2.8">
+              <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="engagement-rate"> I don't know this yet</label>
+            </div>
+          </section>
+
+          <!-- ===== STAGE 2: INTEREST ===== -->
+          <section class="audit-section">
+            <div class="stage-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+            </div>
+            <div class="stage-num">Stage 2 · Interest</div>
+            <h2 class="stage-title">Is your content making them want more?</h2>
+            <p class="stage-description">People see you — but do they click through, download, or take a next step? This is where most content creators lose 90% of their audience without knowing it.</p>
+
+            <div class="field-group">
+              <label class="field-label" for="ctr">Click-Through Rate to Link-in-Bio (%)</label>
+              <div class="field-help">Of the people who view your content, what percent click through to your link-in-bio or website? Most platforms show this in analytics.</div>
+              <input class="field-input" type="number" id="ctr" name="ctr" min="0" max="100" step="0.1" placeholder="e.g., 1.5">
+              <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="ctr"> I don't know this yet</label>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="downloads">Monthly Lead Magnet Downloads / Email Signups</label>
+              <div class="field-help">How many people joined your email list in the last 30 days via freebie, newsletter signup, or other opt-in?</div>
+              <input class="field-input" type="number" id="downloads" name="downloads" min="0" placeholder="e.g., 35">
+              <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="downloads"> I don't know this yet</label>
+            </div>
+          </section>
+
+          <!-- ===== STAGE 3: DECISION ===== -->
+          <section class="audit-section">
+            <div class="stage-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            </div>
+            <div class="stage-num">Stage 3 · Decision</div>
+            <h2 class="stage-title">Are they taking the next step?</h2>
+            <p class="stage-description">People are on your site, product page, or booking page. Are they actually taking action? This is where positioning, pricing, and trust get tested.</p>
+
+            <div class="field-group">
+              <label class="field-label" for="website-visitors">Monthly Website / Store Visitors</label>
+              <div class="field-help">How many unique people visit your website, store, or booking page each month?</div>
+              <input class="field-input" type="number" id="website-visitors" name="website-visitors" min="0" placeholder="e.g., 500">
+              <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="website-visitors"> I don't know this yet</label>
+            </div>
+
+            <!-- SERVICE VARIANT (default) -->
+            <div class="field-group service-variant">
+              <label class="field-label" for="booking-rate">Discovery Call Booking Rate (%)</label>
+              <div class="field-help">Of your website visitors, what percent actually book a discovery call? (Booked calls ÷ total visitors × 100)</div>
+              <input class="field-input" type="number" id="booking-rate" name="booking-rate" min="0" max="100" step="0.1" placeholder="e.g., 2.0">
+              <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="booking-rate"> I don't know this yet</label>
+            </div>
+
+            <!-- PRODUCT VARIANT -->
+            <div class="field-group product-variant" style="display:none;">
+              <label class="field-label" for="atc-rate">Add-to-Cart Rate (%)</label>
+              <div class="field-help">Of your store visitors, what percent add an item to cart? (Add-to-carts ÷ total visitors × 100) Available in Shopify analytics or Google Analytics.</div>
+              <input class="field-input" type="number" id="atc-rate" name="atc-rate" min="0" max="100" step="0.1" placeholder="e.g., 7.0">
+              <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="atc-rate"> I don't know this yet</label>
+            </div>
+          </section>
+
+          <!-- ===== STAGE 4: ACTION ===== -->
+          <section class="audit-section">
+            <div class="stage-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            </div>
+            <div class="stage-num">Stage 4 · Action</div>
+            <h2 class="stage-title">Are they buying?</h2>
+            <p class="stage-description">This is where strategy meets revenue. Your sales metrics tell us whether your offer, pricing, and sales process are working.</p>
+
+            <div class="field-group">
+              <label class="field-label" for="monthly-revenue-actual">Current Monthly Revenue ($)</label>
+              <div class="field-help">Your actual revenue from the last 30 days — everything combined (products, services, coaching, etc.).</div>
+              <input class="field-input" type="number" id="monthly-revenue-actual" name="monthly-revenue-actual" min="0" step="1" placeholder="e.g., 3500">
+              <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="monthly-revenue-actual"> I don't know this yet</label>
+            </div>
+
+            <!-- SERVICE VARIANT (default) -->
+            <div class="field-group service-variant">
+              <label class="field-label" for="close-rate">Discovery Call Close Rate (%)</label>
+              <div class="field-help">Of every 10 discovery calls you had in the last 90 days, how many turned into paying clients? (If you had 10 calls and closed 2, that's 20%.)</div>
+              <input class="field-input" type="number" id="close-rate" name="close-rate" min="0" max="100" step="0.1" placeholder="e.g., 25">
+              <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="close-rate"> I don't know this yet</label>
+            </div>
+
+            <!-- PRODUCT VARIANT -->
+            <div class="field-group product-variant" style="display:none;">
+              <label class="field-label" for="checkout-rate">Checkout Completion Rate (%)</label>
+              <div class="field-help">Of the people who add to cart, what percent actually complete checkout and pay? (Completed orders ÷ add-to-carts × 100) The inverse of cart abandonment — available in Shopify or your payment processor.</div>
+              <input class="field-input" type="number" id="checkout-rate" name="checkout-rate" min="0" max="100" step="0.1" placeholder="e.g., 55">
+              <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="checkout-rate"> I don't know this yet</label>
+            </div>
+
+            <div class="field-group product-variant" style="display:none;">
+              <label class="field-label" for="aov">Average Order Value ($)</label>
+              <div class="field-help">The average dollar amount per completed order in the last 30 days. (Total revenue ÷ number of orders)</div>
+              <input class="field-input" type="number" id="aov" name="aov" min="0" step="1" placeholder="e.g., 65">
+              <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="aov"> I don't know this yet</label>
+            </div>
+          </section>
+
+          <!-- ===== STAGE 5: ADVOCACY ===== -->
+          <section class="audit-section">
+            <div class="stage-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            </div>
+            <div class="stage-num">Stage 5 · Advocacy</div>
+            <h2 class="stage-title">Are they coming back and bringing others?</h2>
+            <p class="stage-description">Happy clients fuel predictable growth through repeat purchases, referrals, and reviews. If Stage 5 is empty, you're stuck in a perpetual cold-lead machine.</p>
+
+            <div class="field-group">
+              <label class="field-label" for="repeat-rate">Repeat Customer Rate (%)</label>
+              <div class="field-help">Of customers who bought in the last 6 months, what percent came back to buy again?</div>
+              <input class="field-input" type="number" id="repeat-rate" name="repeat-rate" min="0" max="100" step="0.1" placeholder="e.g., 15">
+              <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="repeat-rate"> I don't know this yet</label>
+            </div>
+
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label" for="reviews">Reviews in Last 90 Days</label>
+                <div class="field-help">Total written or video reviews.</div>
+                <input class="field-input" type="number" id="reviews" name="reviews" min="0" placeholder="e.g., 5">
+                <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="reviews"> I don't know this yet</label>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="referrals">Referrals in Last 90 Days</label>
+                <div class="field-help">New clients who came from a referral.</div>
+                <input class="field-input" type="number" id="referrals" name="referrals" min="0" placeholder="e.g., 2">
+                <label class="unknown-check"><input type="checkbox" class="dont-know" data-target="referrals"> I don't know this yet</label>
+              </div>
+            </div>
+          </section>
+
+          <div class="submit-wrap">
+            <button type="submit" class="btn-submit" id="run-audit-btn">
+              Run My Funnel Audit
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ============ EMAIL GATE MODAL ============ -->
+  <div class="modal-overlay" id="email-modal">
+    <div class="modal">
+      <div class="modal-teaser">
+        <div class="modal-teaser-label">Your Diagnosis</div>
+        <div class="modal-teaser-text">You're in the <strong id="teaser-phase">—</strong> phase. <span id="teaser-gaps">We found gaps to fix.</span></div>
+      </div>
+      <h3>See your full audit.</h3>
+      <p>Enter your email to unlock your detailed scorecard, specific gaps, and prioritized 90-day roadmap. We'll also send you weekly tactical strategies for Black women entrepreneurs scaling past six figures.</p>
+      <form class="modal-form" id="email-gate-form">
+        <input type="text" id="first-name" name="first-name" placeholder="First name" required>
+        <input type="email" id="email" name="email" placeholder="your@email.com" required>
+        <button type="submit">Unlock My Full Audit</button>
+      </form>
+      <p class="modal-privacy">No spam. Unsubscribe anytime.</p>
+    </div>
+  </div>
+
+  <!-- ============ RESULTS VIEW ============ -->
+  <div class="results-wrap" id="results-view">
+    <section class="results-hero">
+      <div class="container">
+        <div class="results-hero-label">Your RISE Phase Diagnosis</div>
+        <div class="results-phase-name" id="phase-name">—</div>
+        <div class="results-phase-tag" id="phase-tag">—</div>
+      </div>
+    </section>
+
+    <section class="results-body">
+      <div class="container">
+
+        <!-- SCORECARD -->
+        <div class="results-section">
+          <h2>Your Funnel Scorecard</h2>
+          <p id="scorecard-intro">Here's how each stage of your funnel is performing against 2026 industry benchmarks.</p>
+          <div class="scorecard" id="scorecard"></div>
+        </div>
+
+        <!-- METRICS PREP (shown only when REACH due to unknowns) -->
+        <div class="metrics-prep" id="metrics-prep" style="display:none;">
+          <div class="metrics-prep-title">⚠ Important Preparation for Your Clarity Call</div>
+          <p style="font-size: 14px; color: var(--color-ink-soft); line-height: 1.55; margin: 0;">You indicated you don't know several of your key metrics yet. That's actually the single most important finding from this audit — you cannot fix what you cannot measure. On our call, <strong>please be at a computer (not a phone)</strong> with access to:</p>
+          <ul>
+            <li>Your social media analytics (TikTok Studio, Instagram Insights, etc.)</li>
+            <li>Your website analytics (Google Analytics, Webador stats, Shopify, etc.)</li>
+            <li>Your email platform (open rates, click rates)</li>
+            <li>Your sales platform (Stripe, Shopify, PayPal, etc.)</li>
+          </ul>
+          <p style="font-size: 14px; color: var(--color-ink-soft); line-height: 1.55; margin: 12px 0 0;">I'll walk you through how to pull each number in real time. You'll leave the call knowing your actual baseline — and we can't diagnose your business deeper until we see those numbers together.</p>
+        </div>
+
+        <!-- GAPS -->
+        <div class="results-section">
+          <h2>The Specific Gaps We Found</h2>
+          <p>These are the leaks in your funnel, in order of impact.</p>
+          <div id="gaps-list"></div>
+        </div>
+
+        <!-- ROADMAP -->
+        <div class="results-section">
+          <h2>Your Prioritized Roadmap</h2>
+          <p>Don't try to fix everything at once. Work these in order — each builds on the last.</p>
+          <div id="roadmap-list"></div>
+        </div>
+
+        <!-- FINAL CTA -->
+        <div class="results-cta">
+          <h2>Want me to walk you through this <em>on a call?</em></h2>
+          <p>Book a RISE Clarity Call and we'll diagnose your specific gaps together, live. 30 minutes. $67 — credited to your first month if you enroll in the 1:1 program.</p>
+          <a href="https://calendar.app.google/FccyzQU8TWx7HfYv8" class="btn-cta" id="book-call-cta">
+            Book a RISE Clarity Call — $67
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+        <p class="footer-note">These benchmarks are universal 2026 industry averages drawn from Socialinsider, Buffer, and coaching-industry data. Your specific niche may vary — book a Clarity Call to get benchmarks specific to your industry.</p>
+
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ============================================================
+    //  CONFIGURATION
+    // ============================================================
+    const GHL_WEBHOOK_URL = "https://services.leadconnectorhq.com/hooks/XoVf2eRwvuDDguFuYdbc/webhook-trigger/09cc6316-0013-4b83-9729-d1bcd5c87994";
+    const CALENDAR_URL = "https://calendar.app.google/FccyzQU8TWx7HfYv8";
+
+    // ============================================================
+    //  BENCHMARKS (2026)
+    // ============================================================
+    const BENCHMARKS = {
+      engagementRate: {
+        tiktok:    { healthy: 3.7, developing: 1.5 },
+        instagram: { healthy: 0.5, developing: 0.2 },
+        facebook:  { healthy: 0.15, developing: 0.08 },
+        linkedin:  { healthy: 2.0, developing: 1.0 },
+        youtube:   { healthy: 5.0, developing: 2.0 },
+        other:     { healthy: 2.0, developing: 1.0 }
+      },
+      monthlyViews:    { healthy: 10000, developing: 2000 },
+      ctr:             { healthy: 2.0, developing: 1.0 },
+      downloads:       { healthy: 50, developing: 10 },
+      // Service-based
+      bookingRate:     { healthy: 3.0, developing: 1.0 },  // discovery call booking from website
+      closeRate:       { healthy: 30, developing: 15 },     // close rate from discovery calls
+      // Product-based
+      atcRate:         { healthy: 10, developing: 5 },      // add-to-cart rate
+      checkoutRate:    { healthy: 70, developing: 50 },     // % of ATC that complete checkout
+      // Advocacy (same for both)
+      repeatRate:      { healthy: 20, developing: 5 },
+      reviews:         { healthy: 10, developing: 3 },
+      referrals:       { healthy: 3, developing: 1 }
+    };
+
+    const PHASE_INFO = {
+      REACH: {
+        tag: "You have the expertise and the offer — but not enough of the right people know you exist yet, or you can't measure whether they do."
+      },
+      IMPACT: {
+        tag: "People see you and click through — but the conversion gap between engagement and income is where your revenue is leaking."
+      },
+      SCALE: {
+        tag: "Your funnel works, but you're the bottleneck. Without systems, your growth is capped by your own energy."
+      },
+      EXPAND: {
+        tag: "Your core business runs. Now it's time to engineer your second revenue stream and build your legacy ladder."
+      }
+    };
+
+    // ============================================================
+    //  HELPERS
+    // ============================================================
+
+    // ============================================================
+    //  BUSINESS TYPE TOGGLE
+    // ============================================================
+    const businessTypeSelect = document.getElementById('business-type');
+    const primaryStreamGroup = document.getElementById('primary-stream-group');
+    const primaryStreamSelect = document.getElementById('primary-stream');
+
+    function updateBusinessTypeView() {
+      const type = businessTypeSelect.value;
+
+      // Show/hide primary stream selector for "both"
+      if (type === 'both') {
+        primaryStreamGroup.style.display = 'block';
+        primaryStreamSelect.setAttribute('required', 'required');
+      } else {
+        primaryStreamGroup.style.display = 'none';
+        primaryStreamSelect.removeAttribute('required');
+      }
+
+      // Determine effective type for variant display
+      let effectiveType = type;
+      if (type === 'both' && primaryStreamSelect.value) {
+        effectiveType = primaryStreamSelect.value;
+      }
+
+      // Show/hide service vs product variant fields
+      const serviceFields = document.querySelectorAll('.service-variant');
+      const productFields = document.querySelectorAll('.product-variant');
+
+      if (effectiveType === 'service') {
+        serviceFields.forEach(f => f.style.display = 'block');
+        productFields.forEach(f => { f.style.display = 'none'; });
+      } else if (effectiveType === 'product') {
+        serviceFields.forEach(f => { f.style.display = 'none'; });
+        productFields.forEach(f => f.style.display = 'block');
+      } else {
+        // Default / both without selection — show service variant as default
+        serviceFields.forEach(f => f.style.display = 'block');
+        productFields.forEach(f => { f.style.display = 'none'; });
+      }
+    }
+
+    businessTypeSelect.addEventListener('change', updateBusinessTypeView);
+    primaryStreamSelect.addEventListener('change', updateBusinessTypeView);
+
+    // "I don't know" checkbox behavior
+    document.querySelectorAll('.dont-know').forEach(cb => {
+      cb.addEventListener('change', e => {
+        const targetId = e.target.dataset.target;
+        const input = document.getElementById(targetId);
+        if (e.target.checked) {
+          input.disabled = true;
+          input.value = '';
+          input.removeAttribute('required');
+        } else {
+          input.disabled = false;
+        }
+      });
+    });
+
+    function rate(value, benchmark) {
+      if (value === null || value === undefined || isNaN(value)) return 'unknown';
+      if (value >= benchmark.healthy) return 'healthy';
+      if (value >= benchmark.developing) return 'developing';
+      return 'broken';
+    }
+
+    function getFieldValue(id) {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const cb = document.querySelector(`.dont-know[data-target="${id}"]`);
+      if (cb && cb.checked) return null;
+      const v = parseFloat(el.value);
+      return isNaN(v) ? null : v;
+    }
+
+    function getTextValue(id) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : '';
+    }
+
+    // ============================================================
+    //  AUDIT LOGIC
+    // ============================================================
+    function runAudit() {
+      const platform = getTextValue('primary-platform') || 'other';
+      const engagementBenchmark = BENCHMARKS.engagementRate[platform] || BENCHMARKS.engagementRate.other;
+
+      // Determine effective business type
+      const businessType = getTextValue('business-type');
+      const primaryStream = getTextValue('primary-stream');
+      let effectiveType = businessType;
+      if (businessType === 'both') effectiveType = primaryStream || 'service';
+
+      const data = {
+        icp: getTextValue('icp'),
+        revenueTarget: getFieldValue('monthly-revenue-target'),
+        platform: platform,
+        businessType: businessType,
+        effectiveType: effectiveType,
+        views: getFieldValue('monthly-views'),
+        engagement: getFieldValue('engagement-rate'),
+        ctr: getFieldValue('ctr'),
+        downloads: getFieldValue('downloads'),
+        websiteVisitors: getFieldValue('website-visitors'),
+        // Service fields
+        bookingRate: getFieldValue('booking-rate'),
+        closeRate: getFieldValue('close-rate'),
+        // Product fields
+        atcRate: getFieldValue('atc-rate'),
+        checkoutRate: getFieldValue('checkout-rate'),
+        aov: getFieldValue('aov'),
+        revenueActual: getFieldValue('monthly-revenue-actual'),
+        repeatRate: getFieldValue('repeat-rate'),
+        reviews: getFieldValue('reviews'),
+        referrals: getFieldValue('referrals')
+      };
+
+      // Stage-level scoring — different based on business type
+      const stageScores = {
+        awareness: {
+          views: rate(data.views, BENCHMARKS.monthlyViews),
+          engagement: rate(data.engagement, engagementBenchmark)
+        },
+        interest: {
+          ctr: rate(data.ctr, BENCHMARKS.ctr),
+          downloads: rate(data.downloads, BENCHMARKS.downloads)
+        },
+        decision: effectiveType === 'product' ? {
+          atcRate: rate(data.atcRate, BENCHMARKS.atcRate)
+        } : {
+          bookingRate: rate(data.bookingRate, BENCHMARKS.bookingRate)
+        },
+        action: effectiveType === 'product' ? {
+          checkoutRate: rate(data.checkoutRate, BENCHMARKS.checkoutRate),
+          revenueGap: (data.revenueActual !== null && data.revenueTarget !== null) ?
+            (data.revenueActual >= data.revenueTarget ? 'healthy' :
+             data.revenueActual >= data.revenueTarget * 0.5 ? 'developing' : 'broken') : 'unknown'
+        } : {
+          closeRate: rate(data.closeRate, BENCHMARKS.closeRate),
+          revenueGap: (data.revenueActual !== null && data.revenueTarget !== null) ?
+            (data.revenueActual >= data.revenueTarget ? 'healthy' :
+             data.revenueActual >= data.revenueTarget * 0.5 ? 'developing' : 'broken') : 'unknown'
+        },
+        advocacy: {
+          repeatRate: rate(data.repeatRate, BENCHMARKS.repeatRate),
+          reviews: rate(data.reviews, BENCHMARKS.reviews),
+          referrals: rate(data.referrals, BENCHMARKS.referrals)
+        }
+      };
+
+      // Aggregate stage status (worst sub-metric wins, unknown is treated as broken for phase-determination)
+      function aggregateStage(stageObj) {
+        const values = Object.values(stageObj);
+        if (values.some(v => v === 'broken' || v === 'unknown')) return values.some(v => v === 'unknown') && !values.some(v => v === 'broken') ? 'unknown' : 'broken';
+        if (values.some(v => v === 'developing')) return 'developing';
+        return 'healthy';
+      }
+
+      const stageStatus = {
+        awareness: aggregateStage(stageScores.awareness),
+        interest:  aggregateStage(stageScores.interest),
+        decision:  aggregateStage(stageScores.decision),
+        action:    aggregateStage(stageScores.action),
+        advocacy:  aggregateStage(stageScores.advocacy)
+      };
+
+      // RISE PHASE LOGIC
+      // Rule: any "unknown" AT ALL in any stage sends them to REACH
+      const hasAnyUnknown = Object.values(stageStatus).includes('unknown');
+
+      let phase;
+      if (hasAnyUnknown || stageStatus.awareness === 'broken') {
+        phase = 'REACH';
+      } else if (stageStatus.interest === 'broken' || stageStatus.interest === 'developing') {
+        phase = 'REACH';
+      } else if (stageStatus.decision === 'broken' || stageStatus.action === 'broken') {
+        phase = 'IMPACT';
+      } else if (stageStatus.decision === 'developing' || stageStatus.action === 'developing') {
+        phase = 'IMPACT';
+      } else if (stageStatus.advocacy === 'broken' || stageStatus.advocacy === 'developing') {
+        phase = 'SCALE';
+      } else {
+        phase = 'EXPAND';
+      }
+
+      return { data, stageScores, stageStatus, phase, hasAnyUnknown };
+    }
+
+    // ============================================================
+    //  GAP MESSAGES — What to tell them about each issue
+    // ============================================================
+    function buildGaps(result) {
+      const gaps = [];
+      const s = result.stageStatus;
+      const sc = result.stageScores;
+      const d = result.data;
+
+      // Awareness
+      if (sc.awareness.views === 'unknown') {
+        gaps.push({ stage: 'Awareness', level: 'unknown', title: "You don't know your monthly views yet.",
+          body: "This is a Stage 1 problem — you cannot grow what you cannot measure. Step one is instrumenting your content platform so you see your views in real time." });
+      } else if (sc.awareness.views === 'broken') {
+        gaps.push({ stage: 'Awareness', level: 'broken', title: "Your reach is critically low.",
+          body: `You're getting ${d.views.toLocaleString()} monthly views — below the 2,000 threshold where consistent visibility compounds. You're invisible before you're even in the game. Visibility has to be your #1 priority before anything downstream can work.` });
+      } else if (sc.awareness.views === 'developing') {
+        gaps.push({ stage: 'Awareness', level: 'developing', title: "Your reach is growing but not compounding yet.",
+          body: `At ${d.views.toLocaleString()} monthly views, you're in the messy middle. You're visible but not yet achieving the consistent algorithmic boost that comes after you cross 10K views/month.` });
+      }
+
+      if (sc.awareness.engagement === 'unknown') {
+        gaps.push({ stage: 'Awareness', level: 'unknown', title: "Your engagement rate is unmeasured.",
+          body: "You can't tell whether content is resonating. Start tracking this weekly — it's the single best signal for content-market fit." });
+      } else if (sc.awareness.engagement === 'broken' || sc.awareness.engagement === 'developing') {
+        gaps.push({ stage: 'Awareness', level: sc.awareness.engagement, title: `Your engagement rate is ${sc.awareness.engagement === 'broken' ? 'below industry floor' : 'underperforming'}.`,
+          body: `At ${d.engagement}%, you're posting to an algorithm that isn't rewarding your content. This usually means your hook, your first 3 seconds, or your target audience are misaligned — not that you need to post more.` });
+      }
+
+      // Interest
+      if (sc.interest.ctr === 'unknown') {
+        gaps.push({ stage: 'Interest', level: 'unknown', title: "You don't know your CTR.",
+          body: "People may love your content and still never click. Without CTR data, you can't tell whether your CTAs are working." });
+      } else if (sc.interest.ctr === 'broken' || sc.interest.ctr === 'developing') {
+        gaps.push({ stage: 'Interest', level: sc.interest.ctr, title: `Your click-through rate is ${sc.interest.ctr === 'broken' ? 'critically low' : 'underperforming'}.`,
+          body: `A ${d.ctr}% CTR means your content is ${sc.interest.ctr === 'broken' ? 'not directing people to action at all' : 'interesting but not actionable'}. The fix is almost always a clearer, more specific CTA — "link in bio" is not a CTA.` });
+      }
+
+      if (sc.interest.downloads === 'unknown') {
+        gaps.push({ stage: 'Interest', level: 'unknown', title: "Lead magnet downloads unmeasured.",
+          body: "You need to know how many people are opting in each month. This is the single most important top-of-funnel metric." });
+      } else if (sc.interest.downloads === 'broken') {
+        gaps.push({ stage: 'Interest', level: 'broken', title: "Your email list isn't growing.",
+          body: `${d.downloads} downloads/month means you're not building an owned audience. When the algorithm changes, you'll have nothing to fall back on. Either you don't have a lead magnet, or your lead magnet isn't solving a real problem.` });
+      }
+
+      // Decision (service vs product)
+      if (result.data.effectiveType === 'product') {
+        if (sc.decision.atcRate === 'unknown') {
+          gaps.push({ stage: 'Decision', level: 'unknown', title: "Your add-to-cart rate is unmeasured.",
+            body: "Store visitors without ATC data tells you nothing. Shopify, WooCommerce, and most e-commerce platforms track this by default — go turn it on." });
+        } else if (sc.decision.atcRate === 'broken' || sc.decision.atcRate === 'developing') {
+          gaps.push({ stage: 'Decision', level: sc.decision.atcRate, title: `Your add-to-cart rate is ${sc.decision.atcRate === 'broken' ? 'critically low' : 'underperforming'}.`,
+            body: `A ${d.atcRate}% ATC rate means visitors land on your product pages but don't commit. This is almost always a product-page problem: weak photography, unclear benefits, missing social proof, or prices that don't match what the visitor expected.` });
+        }
+      } else {
+        if (sc.decision.bookingRate === 'unknown') {
+          gaps.push({ stage: 'Decision', level: 'unknown', title: "Your booking rate is unmeasured.",
+            body: "Website traffic without booking-rate data tells you nothing. Install basic analytics or use your booking tool's built-in conversion tracking." });
+        } else if (sc.decision.bookingRate === 'broken' || sc.decision.bookingRate === 'developing') {
+          gaps.push({ stage: 'Decision', level: sc.decision.bookingRate, title: `Your website isn't converting visitors to discovery calls.`,
+            body: `At ${d.bookingRate}%, your website is working against you. This is usually a trust-and-clarity problem: too many options, weak social proof, or a CTA that doesn't match what the visitor came for.` });
+        }
+      }
+
+      // Action (service vs product)
+      if (result.data.effectiveType === 'product') {
+        if (sc.action.checkoutRate === 'unknown') {
+          gaps.push({ stage: 'Action', level: 'unknown', title: "You don't track your checkout completion rate.",
+            body: "If you don't know how many add-to-carts become paid orders, you can't fix cart abandonment — which is where product businesses leak the most revenue." });
+        } else if (sc.action.checkoutRate === 'broken' || sc.action.checkoutRate === 'developing') {
+          gaps.push({ stage: 'Action', level: sc.action.checkoutRate, title: `Your checkout completion rate is ${sc.action.checkoutRate === 'broken' ? 'critically low' : 'underperforming'}.`,
+            body: `A ${d.checkoutRate}% completion rate means ${100 - d.checkoutRate}% of your add-to-carts are abandoning at checkout. That's revenue you already earned and are losing. Usually the fix is: unexpected shipping costs, a required account creation step, or checkout friction that can be removed.` });
+        }
+      } else {
+        if (sc.action.closeRate === 'unknown') {
+          gaps.push({ stage: 'Action', level: 'unknown', title: "You don't track your close rate.",
+            body: "Discovery calls without close-rate data means you're guessing at whether your sales process works. Start tracking: call count, closed count, reason for not closing." });
+        } else if (sc.action.closeRate === 'broken' || sc.action.closeRate === 'developing') {
+          gaps.push({ stage: 'Action', level: sc.action.closeRate, title: `Your discovery call close rate is ${sc.action.closeRate === 'broken' ? 'below industry' : 'underperforming'}.`,
+            body: `A ${d.closeRate}% close rate means either you're attracting unqualified prospects, your pricing isn't right for your audience, or your sales conversation needs restructuring. All fixable — but diagnostic precision matters here.` });
+        }
+      }
+
+      if (sc.action.revenueGap === 'broken') {
+        const gap = (d.revenueTarget || 0) - (d.revenueActual || 0);
+        gaps.push({ stage: 'Action', level: 'broken', title: "You're significantly below your revenue target.",
+          body: `You need $${d.revenueTarget?.toLocaleString() || '—'}/month to sustain the business and you're currently at $${d.revenueActual?.toLocaleString() || '—'}. That's a $${gap.toLocaleString()} monthly gap. Fixing this requires more than more hustle — it requires funnel math.` });
+      }
+
+      // Advocacy
+      if (sc.advocacy.repeatRate === 'unknown' && sc.advocacy.reviews === 'unknown' && sc.advocacy.referrals === 'unknown') {
+        gaps.push({ stage: 'Advocacy', level: 'unknown', title: "You have no visibility into client retention.",
+          body: "You may have happy customers, but you can't tell because you're not measuring. Stage 5 is where most solopreneurs leave 30–50% of potential revenue on the table." });
+      } else {
+        if (sc.advocacy.repeatRate === 'broken') gaps.push({ stage: 'Advocacy', level: 'broken', title: "Low repeat purchase rate.",
+          body: `${d.repeatRate}% of customers coming back means your offer may deliver value once — but you have no value ladder for ongoing work.` });
+        if (sc.advocacy.reviews === 'broken') gaps.push({ stage: 'Advocacy', level: 'broken', title: "Not enough recent reviews.",
+          body: `${d.reviews} reviews in 90 days suggests you're not systematically asking clients for them. Reviews are the highest-converting social proof you can have.` });
+        if (sc.advocacy.referrals === 'broken') gaps.push({ stage: 'Advocacy', level: 'broken', title: "Zero or near-zero referrals.",
+          body: `${d.referrals} referrals in 90 days means either clients don't know who to send you OR you don't have a structured referral ask.` });
+      }
+
+      return gaps.slice(0, 6); // Show top 6 gaps
+    }
+
+    // ============================================================
+    //  ROADMAP — Phase-specific prioritized actions
+    // ============================================================
+    function buildRoadmap(result) {
+      const phase = result.phase;
+      const hasUnknowns = result.hasAnyUnknown;
+
+      if (hasUnknowns) {
+        return [
+          { title: "Instrument your entire funnel this week.", body: "Set up analytics on every platform you use. Bookmark each dashboard. Block 30 minutes every Friday to review. You cannot build a business on invisible data." },
+          { title: "Track the 5 most important numbers weekly.", body: "Monthly views, CTR, email signups, discovery calls booked, discovery calls closed. Write them in the same place every Friday. Patterns will emerge within 4 weeks." },
+          { title: "Book a RISE Clarity Call.", body: "Come prepared — at a computer, with your analytics open. We'll establish your real baseline together and build your measurement system in 30 minutes." }
+        ];
+      }
+
+      if (phase === 'REACH') {
+        return [
+          { title: "Niche harder, post more intentionally.", body: "Pick ONE audience and ONE problem. Rewrite your bio and your next 10 pieces of content to address only that one audience and only that one problem." },
+          { title: "Build a magnetic lead magnet.", body: "A resource that solves one painful problem in under 10 minutes. Lead-magnet downloads are your #1 top-of-funnel KPI — not followers." },
+          { title: "Pitch to appear on 3 podcasts or collaborations.", body: "You need borrowed audiences to compound organic growth. Make a shortlist of 20 podcasts/accounts in your adjacent niche. Pitch 5 per week." }
+        ];
+      }
+
+      if (phase === 'IMPACT') {
+        if (result.data.effectiveType === 'product') {
+          return [
+            { title: "Audit your product page for checkout friction.", body: "Remove required account creation. Display shipping costs BEFORE checkout starts. Add trust badges and return policies above the fold. Abandoned carts usually die at surprise moments — remove every surprise." },
+            { title: "Set up an abandoned cart email sequence.", body: "A 3-email sequence triggered 1 hour, 24 hours, and 72 hours after cart abandonment recovers 10–15% of lost revenue on average. If you don't have this, you're leaving money on the table daily." },
+            { title: "Rewrite your product descriptions to sell, not describe.", body: "Every product page should name the customer, their pain, and the transformation — not just list features. A bundle drop without a transformation story is just a product dump." }
+          ];
+        }
+        return [
+          { title: "Fix your CTAs across every piece of content.", body: "Replace every generic \"link in bio\" with a specific, directive invitation tied to a specific next step. Every CTA should name one audience and one outcome." },
+          { title: "Rebuild your discovery call script.", body: "Your close rate tells us the sales conversation isn't converting the right prospects. Map objections, rewrite open/close, and roleplay it twice before the next call." },
+          { title: "Set up one automated nurture sequence.", body: "Not 15. One. A 5-email sequence that runs when someone downloads your lead magnet, guides them to the next natural step, and includes one clear ask." }
+        ];
+      }
+
+      if (phase === 'SCALE') {
+        return [
+          { title: "Document your top 3 repeatable tasks as SOPs.", body: "Identify the 3 things you do every week that only you currently know how to do. Write them as SOPs. Record loom videos. Prepare them for delegation." },
+          { title: "Build a referral system.", body: "Create a 2-line ask, a 1-page referral partner kit, and a trigger in your client process that requests a referral at the peak win moment (usually 30 days after a big result)." },
+          { title: "Hire one contractor or AI agent.", body: "The single most leveraged action at this phase. Start with something bounded (social scheduling, email inbox triage, content repurposing) and delegate it completely." }
+        ];
+      }
+
+      // EXPAND
+      return [
+        { title: "Map your value ladder end-to-end.", body: "Identify the entry point, mid-tier offer, premium offer, and recurring revenue stream. Gaps in the ladder = left-on-the-table revenue." },
+        { title: "Validate your second revenue stream.", body: "Don't launch — validate. Pre-sell a beta version to 5 existing clients before you build anything. If they won't pay today, you don't have a product; you have an idea." },
+        { title: "Build a 3-year strategic blueprint.", body: "At Expansion, the risk isn't doing nothing — it's doing too many things poorly. A blueprint filters opportunities and prevents strategic drift." }
+      ];
+    }
+
+    // ============================================================
+    //  RENDER RESULTS
+    // ============================================================
+    function renderResults(result) {
+      const phase = result.phase;
+      document.getElementById('phase-name').textContent = phase;
+      document.getElementById('phase-tag').textContent = PHASE_INFO[phase].tag;
+
+      // Show metrics prep box if any unknowns
+      if (result.hasAnyUnknown) {
+        document.getElementById('metrics-prep').style.display = 'block';
+      }
+
+      // Scorecard
+      const stages = [
+        { key: 'awareness', label: 'Awareness' },
+        { key: 'interest', label: 'Interest' },
+        { key: 'decision', label: 'Decision' },
+        { key: 'action', label: 'Action' },
+        { key: 'advocacy', label: 'Advocacy' }
+      ];
+      const scoreHtml = stages.map(s => {
+        const status = result.stageStatus[s.key];
+        const statusLabel = status === 'healthy' ? 'Healthy' : status === 'developing' ? 'Developing' : status === 'broken' ? 'Broken' : 'Unknown';
+        return `<div class="score-card ${status}">
+          <div class="score-card-stage">${s.label}</div>
+          <div class="score-card-status">${statusLabel}</div>
+        </div>`;
+      }).join('');
+      document.getElementById('scorecard').innerHTML = scoreHtml;
+
+      // Gaps
+      const gaps = buildGaps(result);
+      const gapsHtml = gaps.length > 0 ? gaps.map((gap, i) => {
+        const iconClass = gap.level === 'unknown' ? 'unknown' : gap.level;
+        const iconChar = gap.level === 'unknown' ? '?' : gap.level === 'broken' ? '!' : '•';
+        return `<div class="gap-item">
+          <div class="gap-icon ${iconClass}">${iconChar}</div>
+          <div class="gap-content">
+            <h4>${gap.title}</h4>
+            <p>${gap.body}</p>
+          </div>
+        </div>`;
+      }).join('') : '<p>Nothing broken found. You\'re in rare territory — this is what Phase Expansion looks like.</p>';
+      document.getElementById('gaps-list').innerHTML = gapsHtml;
+
+      // Roadmap
+      const roadmap = buildRoadmap(result);
+      const roadmapHtml = roadmap.map((item, i) => `
+        <div class="roadmap-item">
+          <div class="roadmap-num">${String(i+1).padStart(2,'0')}</div>
+          <div class="roadmap-content">
+            <h4>${item.title}</h4>
+            <p>${item.body}</p>
+          </div>
+        </div>`).join('');
+      document.getElementById('roadmap-list').innerHTML = roadmapHtml;
+
+      // Set booking link
+      document.getElementById('book-call-cta').href = CALENDAR_URL;
+
+      // Swap views
+      document.getElementById('audit-view').style.display = 'none';
+      document.getElementById('results-view').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ============================================================
+    //  FORM SUBMISSION FLOW
+    // ============================================================
+    let currentResult = null;
+
+    document.getElementById('audit-form').addEventListener('submit', e => {
+      e.preventDefault();
+
+      currentResult = runAudit();
+
+      // Fill in teaser
+      document.getElementById('teaser-phase').textContent = currentResult.phase;
+      const gapCount = buildGaps(currentResult).length;
+      document.getElementById('teaser-gaps').textContent = gapCount > 0
+        ? `We found ${gapCount} specific gap${gapCount === 1 ? '' : 's'} to fix.`
+        : 'Your funnel looks strong.';
+
+      // Show email gate
+      document.getElementById('email-modal').classList.add('active');
+    });
+
+    document.getElementById('email-gate-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const firstName = document.getElementById('first-name').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      // Send to GHL webhook (if configured)
+      if (GHL_WEBHOOK_URL && GHL_WEBHOOK_URL !== "GHL_WEBHOOK_URL_HERE") {
+        try {
+          await fetch(GHL_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              first_name: firstName,
+              email: email,
+              phase: currentResult.phase,
+              has_unknowns: currentResult.hasAnyUnknown,
+              icp: currentResult.data.icp,
+              platform: currentResult.data.platform,
+              business_type: currentResult.data.businessType,
+              effective_type: currentResult.data.effectiveType,
+              revenue_target: currentResult.data.revenueTarget,
+              revenue_actual: currentResult.data.revenueActual,
+              monthly_views: currentResult.data.views,
+              engagement_rate: currentResult.data.engagement,
+              ctr: currentResult.data.ctr,
+              downloads: currentResult.data.downloads,
+              website_visitors: currentResult.data.websiteVisitors,
+              booking_rate: currentResult.data.bookingRate,
+              close_rate: currentResult.data.closeRate,
+              atc_rate: currentResult.data.atcRate,
+              checkout_rate: currentResult.data.checkoutRate,
+              aov: currentResult.data.aov,
+              repeat_rate: currentResult.data.repeatRate,
+              reviews: currentResult.data.reviews,
+              referrals: currentResult.data.referrals,
+              stage_status: currentResult.stageStatus,
+              tag: 'Funnel Auditor — ' + currentResult.phase + ' — ' + (currentResult.data.effectiveType || 'service'),
+              source: 'Funnel Auditor',
+              submitted_at: new Date().toISOString()
+            })
+          });
+        } catch (err) {
+          console.warn('Webhook failed but proceeding with results:', err);
+        }
+      }
+
+      // Close modal, show results
+      document.getElementById('email-modal').classList.remove('active');
+      renderResults(currentResult);
+    });
+  </script>
+
+</body>
+</html>
