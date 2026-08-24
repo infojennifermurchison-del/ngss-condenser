@@ -132,14 +132,14 @@ body {
 }
 .door::before {
   content: ""; position: absolute; inset: 15px 15px 60px 15px;
-  border: 1.5px solid rgba(0, 160, 168, 0.30); border-radius: 4px;
+  border: 1.5px solid rgba(255, 255, 255, 0.20); border-radius: 4px;
   pointer-events: none;
 }
 .door::after {
   content: ""; position: absolute; right: 21px; top: 50%; transform: translateY(-50%);
   width: 10px; height: 10px; border-radius: 50%;
-  background: var(--mauve);
-  box-shadow: 0 0 0 4px rgba(0, 160, 168, 0.22), 0 2px 6px rgba(0,0,0,0.35);
+  background: #F2C94C;
+  box-shadow: 0 0 0 4px rgba(242, 201, 76, 0.30), 0 2px 6px rgba(0,0,0,0.35);
   transition: transform 0.3s;
 }
 .door:hover, .door:focus-visible {
@@ -151,7 +151,7 @@ body {
 .door-number {
   font-family: var(--serif-alt);
   font-size: 11px; letter-spacing: 0.26em; font-weight: 700;
-  color: var(--mauve-light); margin-bottom: 18px;
+  color: rgba(255,255,255,0.90); margin-bottom: 18px;
 }
 .door-icon { margin-bottom: 16px; color: rgba(255,255,255,0.92); }
 .door h3 {
@@ -165,7 +165,7 @@ body {
   margin-top: auto; padding-top: 20px;
   font-family: var(--serif-alt);
   font-size: 12px; font-weight: 700; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--mauve-light);
+  text-transform: uppercase; color: rgba(255,255,255,0.90);
   display: inline-flex; align-items: center; gap: 7px;
 }
 .door:hover .open-link .arr { transform: translateX(4px); }
@@ -275,7 +275,12 @@ body {
 .nav-links { display: flex; align-items: center; gap: 26px; }
 .nav-links a.nav-link { font-family: var(--serif); font-size: 16px; color: var(--charcoal); text-decoration: none; }
 .nav-links a.nav-link:hover { color: var(--mauve-deep); }
-@media (max-width: 640px) { .nav-links a.nav-link { display: none; } }
+@media (max-width: 640px) {
+  .site-header .wrap { flex-direction: column; gap: 12px; justify-content: center; }
+  .nav-links { flex-wrap: wrap; justify-content: center; gap: 12px 18px; width: 100%; }
+  .nav-links a.nav-link { font-size: 15px; }
+  .nav-links .header-cta { flex-basis: 100%; text-align: center; }
+}
 
 /* Hero primary CTA (qualifying question button) */
 .btn-hero {
@@ -371,14 +376,14 @@ body {
 .dq-label {
   display: block; font-family: var(--serif-alt);
   font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--mauve-light); font-weight: 700; margin-bottom: 5px;
+  color: rgba(255,255,255,0.85); font-weight: 700; margin-bottom: 5px;
 }
 
 /* The Four C's — door word, service name, definition */
 .door h3 { font-size: 28px; margin: 0 0 5px; }
 .door .door-sub {
   font-family: var(--serif-alt); font-size: 12.5px; letter-spacing: 0.03em;
-  line-height: 1.35; color: var(--mauve-light); margin: 0 0 12px;
+  line-height: 1.35; color: rgba(255,255,255,0.78); margin: 0 0 12px;
 }
 .door .door-def {
   font-size: 14.5px; line-height: 1.5; color: rgba(255,255,255,0.82); margin: 0;
@@ -438,3 +443,9 @@ body {
   .masthead-text { border-top: none; padding-top: 0; }
   .masthead-cs { font-size: 14px; }
 }
+
+/* Four C's — one color per door (knobs stay brass) */
+.doors .door:nth-child(1) { background: linear-gradient(158deg, #154A82 0%, #0D3B66 58%, #0A2F52 100%); }   /* Capture — navy */
+.doors .door:nth-child(2) { background: linear-gradient(158deg, #0C8A90 0%, #0A757A 58%, #075457 100%); }   /* Curriculum — teal */
+.doors .door:nth-child(3) { background: linear-gradient(158deg, #2A72B4 0%, #1D64A6 58%, #164E80 100%); }   /* Consulting — blue */
+.doors .door:nth-child(4) { background: linear-gradient(158deg, #C86B22 0%, #A85618 58%, #874212 100%); }   /* Compliance — burnt orange */
