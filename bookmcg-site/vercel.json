@@ -6,8 +6,6 @@
     { "source": "/home", "destination": "/", "permanent": false },
     { "source": "/capability-statement-generator", "destination": "/", "permanent": false },
     { "source": "/student-support", "destination": "https://go.bookmcg.com/student-support", "permanent": false },
-    { "source": "/student-support/:path*", "destination": "https://go.bookmcg.com/student-support/:path*", "permanent": false },
-    { "source": "/truancy-project", "destination": "https://go.bookmcg.com/truancy-project", "permanent": false },
-    { "source": "/truancy-project/:path*", "destination": "https://go.bookmcg.com/truancy-project/:path*", "permanent": false }
+    { "source": "/student-support/:path*", "destination": "https://go.bookmcg.com/student-support/:path*", "permanent": false }
   ]
 }
