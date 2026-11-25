@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tutorials and Skills Training | Murchison Consulting Group</title>
+<meta name="description" content="Tutorials and Skills Training from Murchison Consulting Group. Targeted, individual support that closes real gaps. Choose your pathway." />
+<link rel="icon" type="image/png" href="assets/mcg-monogram.png" />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  /* Page-scoped helpers for /tutorials. Reuse brand variables from styles.css. */
+  .paths { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 10px; }
+  @media (max-width: 720px) { .paths { grid-template-columns: 1fr; } }
+  .path-card {
+    position: relative; display: flex; flex-direction: column; text-decoration: none;
+    background: linear-gradient(158deg, #123A6B 0%, #0D3B66 60%, #0A2F52 100%);
+    color: #fff; border-radius: 8px; padding: 30px 28px 26px; min-height: 230px;
+    box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid rgba(255,255,255,0.05);
+    transition: transform 0.16s, box-shadow 0.16s;
+  }
+  .path-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: var(--mauve); }
+  .path-card:hover, .path-card:focus-visible { transform: translateY(-3px); box-shadow: var(--shadow); outline: none; }
+  .path-card .pc-eyebrow { font-family: var(--serif-alt); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mauve-light); font-weight: 700; }
+  .path-card h2 { font-family: var(--serif); font-size: 24px; color: #fff; margin: 12px 0 0; font-weight: 700; line-height: 1.15; }
+  .path-card p { font-size: 15.5px; color: rgba(255,255,255,0.82); margin: 12px 0 0; line-height: 1.55; flex: 1; }
+  .path-card .pc-open { margin-top: 22px; font-family: var(--serif-alt); font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; display: inline-flex; align-items: center; gap: 8px; }
+  .path-card:hover .pc-open .arr { transform: translateX(4px); }
+  .path-card .pc-open .arr { transition: transform 0.2s; }
+</style>
+</head>
+<body>
+
+<a class="masthead" href="index.html" aria-label="Murchison Consulting Group, home">
+  <div class="masthead-inner">
+    <img class="masthead-logo" src="assets/mcg-logo-transparent.png" alt="Murchison Consulting Group" />
+    <div class="masthead-text">
+      <div class="masthead-title">Four Capabilities. One Stronger Organization.</div>
+      <div class="masthead-cs">Consulting <span class="dot">·</span> Curriculum <span class="dot">·</span> Compliance <span class="dot">·</span> Capture</div>
+      <div class="masthead-desc">Education and management consulting for nonprofit and private sector organizations.</div>
+    </div>
+    <img class="masthead-photo" src="assets/jennifer-authoritative.png" alt="Jennifer E. Murchison, M.Ed." />
+  </div>
+</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <nav class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="index.html#doors">Services</a>
+      <a class="nav-link" href="trainings.html">Trainings</a>
+      <a class="nav-link" href="tutorials.html">Tutorials and Skills Training</a>
+      <a class="nav-link" href="about.html">About</a>
+      <a class="header-cta" href="tutorials/reading">Book an Assessment &rarr;</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="service-hero">
+    <div class="wrap-narrow">
+      <div class="eyebrow">Tutorials and Skills Training</div>
+      <h1>Choose your pathway.</h1>
+      <p class="lede">
+        Targeted, individual support that closes real gaps. Pick the pathway
+        that fits your learner.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap-narrow">
+      <div class="paths">
+        <a class="path-card" href="tutorials/reading">
+          <span class="pc-eyebrow">Tutoring</span>
+          <h2>Reading</h2>
+          <p>Individual and small group reading tutoring for kindergarten through grade 4, virtual and in person in northwest Houston.</p>
+          <span class="pc-open">Open this pathway <span class="arr">&rarr;</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-brand">
+      <img src="assets/mcg-logo-reverse.png" alt="Murchison Consulting Group" />
+      <span class="foot-tag">Building leader and operator capacity in regulated, outcome measured environments.</span>
+    </div>
+    <nav class="footer-links">
+      <a href="grant-govcon.html">Capture</a>
+      <a href="training.html">Curriculum</a>
+      <a href="technical-writing.html">Consulting</a>
+      <a href="business-consulting.html">Compliance</a>
+      <a href="tutorials.html">Tutorials and Skills Training</a>
+      <a href="about.html">About</a>
+    </nav>
+    <div class="footer-legal">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms &amp; Conditions</a>
+      <a href="mailto:jennifer@bookmcg.com">jennifer@bookmcg.com</a>
+      <a href="tel:+18326846697">832.684.6697</a>
+    </div>
+    <div class="copy">&copy; <span id="year"></span> Murchison Consulting Group, LLC · 14150 Huffmeister Road, Suite 200, Cypress, TX 77429</div>
+  </div>
+</footer>
+
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
